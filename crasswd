@@ -1,0 +1,3 @@
+#!/bin/sh
+# crasswd: the password manager you should never use
+echo "-crash: $0: command not found"
