@@ -1,0 +1,49 @@
+#!/bin/sh
+# do you know this problem?
+# you punch ur keyboard like a crackhead
+# and you always type 'cim' instead of 'vim'
+# you are actually a l33t haxx0r but you dont know how to create a alias?
+# then do not ever install this tool
+# it will only make this worse :pinkrat:
+
+if [ $# -eq 0 ]
+then
+    echo "try vim..."
+    exit 34
+    # exit with code 34 because it has reasons
+    # totally not a secret number i am hiding in public
+    # so even if the goverment will pwn my encrypted drives
+    # all my data is not here
+fi
+
+# do i even have to care about spaces and crap when its a arg?
+file=$1
+
+if [ -f "$file" ]
+then
+    echo " - $file"
+    cat "$file"
+else
+    # you might be wondering why there is touch?
+    # if there is a echo redirect afterwords?
+    # so it could be less code?
+    # and thus also less comments?
+    # but do I want that? or am I using this as some sort of entropy
+    # totally not btw
+    #
+    #    ^
+    #    |
+    #
+    # reverse psychology? <- tripple reverse?
+    touch "$file"
+    echo "input: "
+    read content
+    echo "$content" >> "$file"
+    echo "saved to '$file'."
+fi
+
+
+# you know software is good when there is more comments than code
+# zeugt von quality documentation
+#   ^
+#    \_____ german lol
