@@ -1,0 +1,3 @@
+#!/bin/sh
+# cran - like man but crap
+echo "cranpage $1 not found"
