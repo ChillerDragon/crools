@@ -1,0 +1,9 @@
+#!/bin/sh
+# its like bash but its crap
+if [ "$1" == "ls" ]
+then
+    echo "foo bar baz"
+else
+    echo "redirect to stderr failed"
+fi
+
