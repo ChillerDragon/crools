@@ -1,5 +1,0 @@
-#!/bin/sh
-# cran - like man but crap
-# probably a better alternative:
-# https://github.com/sinclairtarget/um
-echo "cranpage $1 not found"
