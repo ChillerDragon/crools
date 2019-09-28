@@ -1,0 +1,5 @@
+#!/bin/bash
+# wrapper for um man page tool
+# for easier copy paste
+# http://github.com/sinclairtarget/um
+cat <(um $1)
