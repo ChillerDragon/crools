@@ -1,0 +1,21 @@
+#!/bin/bash
+# buffer pstd - creates paste from buffer and updates buffer to url
+# dependencys:
+# install pstd and xsel
+# https://github.com/fstd/pstd
+# sudo apt install xsel
+# wrapper to create paste of stdin
+# i might leak stuff accidentally to a paste service that does never delet stuff loooool
+buffer=$(xsel -b)
+echo "$buffer"
+echo "do you want this to be published online for ever? [y/N]"
+read -r -n 1 yn
+echo ""
+if [[ ! "$yn" =~ [yY] ]]
+then
+    echo "abort buffer paste."
+    exit
+fi
+paste=$(echo $buffer | pstd)
+echo "$paste"
+echo "$paste" | xsel -ib
