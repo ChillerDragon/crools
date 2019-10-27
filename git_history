@@ -1,0 +1,25 @@
+#!/bin/bash
+# this tools is very ressource heavy
+# slow and ugly
+# I really recommend using the built in git command:
+# git log -Ssearch
+# If you can avoid using a regex pattern
+
+if [ $# -eq 0 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]
+then
+    echo "usage: $0 <pattern>"
+    echo "description: searches <pattern> in the current git history"
+    echo "note: you can use a simple git cmd to search for 'foo'"
+    echo "      git log -Sfoo"
+    exit 0
+fi
+
+pattern=$1
+
+echo "searching for pattern '$pattern' ..."
+git rev-list --all | (
+    while read revision; do
+        git grep "$pattern" $revision
+    done
+)
+
