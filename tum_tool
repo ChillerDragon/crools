@@ -4,6 +4,8 @@
 pgdp_path=~/Desktop/uni/pgdp
 eclipse_logfile=/tmp/uni_eclipse.log
 version="0.0.1"
+
+figlet "TUM homework"
 cd "$pgdp_path"
 
 function err()
@@ -11,7 +13,6 @@ function err()
     echo "[-] $1"
 }
 
-figlet "TUM homework"
 if [ "$1" == "--help" ]
 then
     echo "usage: $0 [clone url]"
@@ -32,6 +33,12 @@ then
 fi
 echo "latest homework is '$hw'"
 cd "$hw"
+echo " -- global git ---"
+git config --global user.name
+git config --global user.email
+echo " -- current git ---"
+git config user.name
+git config user.email
 echo ""
 echo ""
 echo ""
