@@ -48,6 +48,7 @@ echo "cd $pgdp_path/$hw" | xsel -ib
 echo ""
 echo ""
 echo ""
+firefox "https://artemis.ase.in.tum.de/#/overview/37/exercises" &
 if pgrep -x "eclipse" > /dev/null
 then
     echo "eclipse running already..."
