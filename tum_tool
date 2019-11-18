@@ -7,6 +7,7 @@ version="0.0.1"
 
 figlet "TUM homework"
 cd "$pgdp_path"
+ex="invalid_exercises"
 
 function err()
 {
@@ -23,16 +24,20 @@ fi
 if [ "$#" -gt 0 ]
 then
     git clone "$1"
+    ex="${1##*/}" # get only repo name from url
+    ex="${ex%.*}" # chop of .git
+    echo "navigating to exercises '$ex'"
+else
+    ex=$(ls -d pgdp* | grep "h" | sort | tail -n1)
+    if [ ! -d "$ex" ]
+    then
+        err "invalid path '$ex'"
+        exit 1
+    fi
+    echo "latest homework is '$ex'"
 fi
 
-hw=$(ls -d pgdp* | grep "h" | sort | tail -n1)
-if [ ! -d "$hw" ]
-then
-    err "invalid path '$hw'"
-    exit 1
-fi
-echo "latest homework is '$hw'"
-cd "$hw"
+cd "$ex"
 echo " -- global git ---"
 git config --global user.name
 git config --global user.email
@@ -43,8 +48,8 @@ echo ""
 echo ""
 echo ""
 # print homework path and copy to clipboard
-echo "cd $pgdp_path/$hw"
-echo "cd $pgdp_path/$hw" | xsel -ib
+echo "cd $pgdp_path/$ex"
+echo "cd $pgdp_path/$ex" | xsel -ib
 echo ""
 echo ""
 echo ""
