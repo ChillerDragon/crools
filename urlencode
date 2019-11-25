@@ -1,0 +1,4 @@
+#!/bin/bash
+# full credits go to
+# https://stackoverflow.com/a/38021063
+printf "$*" | urlencodepipe
