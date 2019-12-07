@@ -35,6 +35,7 @@ then
     echo "abort buffer paste."
     exit
 fi
-paste=$(echo $buffer | cstd)
+echo "$buffer" > /tmp/bstd.tmp
+paste=$(cstd /tmp/bstd.tmp)
 echo "$paste"
 os_copy $paste
