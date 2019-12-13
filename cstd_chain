@@ -65,7 +65,7 @@ function sleep_s() {
 }
 
 function wstd() {
-    bstd || { echo "ERROR: bstd failed!"; exit 1; }
+    bstd -yes || { echo "ERROR: bstd failed!"; exit 1; }
     printf "Wait for rate limit (10s) "
     sleep_s 10
 }
