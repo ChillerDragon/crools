@@ -27,15 +27,19 @@ fi
 
 buffer=$(os_paste)
 echo "$buffer"
-echo "do you want this to be published online for ever? [y/N]"
-read -r -n 1 yn
-echo ""
-if [[ ! "$yn" =~ [yY] ]]
+if [[ "$1" != "-yes" ]]
 then
-    echo "abort buffer paste."
-    exit
+    echo "do you want this to be published online for ever? [y/N]"
+    read -r -n 1 yn
+    echo ""
+    if [[ ! "$yn" =~ [yY] ]]
+    then
+        echo "abort buffer paste."
+        exit
+    fi
 fi
 echo "$buffer" > /tmp/bstd.tmp
 paste=$(cstd /tmp/bstd.tmp)
 echo "$paste"
 os_copy $paste
+
