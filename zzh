@@ -34,7 +34,7 @@ then
     echo "usage: $(basename $0) [--edit]"
     echo "quick select ssh connections"
     exit 0
-elif [ "$1" == "--edit" ]
+elif [ "$1" == "--edit" ] || [ "$1" == "-e" ]
 then
     edit_cnf
     exit 0
