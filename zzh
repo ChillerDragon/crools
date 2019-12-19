@@ -69,6 +69,7 @@ do
     if [[ " ${options[@]} " =~ " ${opt} " ]]
     then
         eval "$opt"
+        exit 0
     else
         echo "invalid option $REPLY"
     fi
