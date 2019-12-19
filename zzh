@@ -1,0 +1,76 @@
+#!/bin/bash
+# zzh - quick select of your fav ssh connections
+conf_dir=~/.config/crools
+conf=~/.config/crools/zzh.cnf
+function edit_cnf() {
+    if [ ! -f $conf ]
+    then
+        echo "Error: could not edit config (not found)."
+        exit 1
+    fi
+    crools_find_editor $conf || { echo "Error: failed to edit config"; exit 1; }
+}
+function check_conf() {
+    if [ ! -f $conf ]
+    then
+        echo "config file not found!"
+        echo "Do you want to create one? [y/N]"
+        read -r -n 1 yn
+        echo ""
+        if [[ ! "$yn" =~ [yY] ]]
+        then
+            return
+        fi
+        mkdir -p $conf_dir
+        echo "# zzh - config" > $conf
+        echo "# store your fav ssh commands here" >> $conf
+        echo "ssh crools@localhost" >> $conf
+        echo "ssh chillerdragon@149.202.127.134" >> $conf
+        edit_cnf
+    fi
+}
+if [ "$1" == "--help" ]
+then
+    echo "usage: $(basename $0) [--edit]"
+    echo "quick select ssh connections"
+    exit 0
+elif [ "$1" == "--edit" ]
+then
+    edit_cnf
+    exit 0
+fi
+
+check_conf
+if [ ! -f $conf ]
+then
+    echo "Error: config missing"
+    exit 1
+fi
+
+options=()
+lines=0
+while IFS= read -r line
+do
+    if [ "${line:0:1}" == "#" ]
+    then
+        continue
+    fi
+    options+=("$line")
+    lines=$((lines+1))
+done < $conf
+if [ $lines -eq 1 ]
+then
+    eval "${options[0]}"
+fi
+
+PS3='Select ssh connection: '
+select opt in "${options[@]}"
+do
+    if [[ " ${options[@]} " =~ " ${opt} " ]]
+    then
+        eval "$opt"
+    else
+        echo "invalid option $REPLY"
+    fi
+done
+
