@@ -1,0 +1,22 @@
+#!/bin/bash
+# tool to generate CMakeLists.txt for teeworlds
+# only datasrc directory tho
+
+if [ "$#" -ne "1" ]
+then
+    echo "Usage: $(basename "$0") <datasrc path>"
+    exit 1
+fi
+datasrc_path=$1
+
+find "$datasrc_path" -type f \( \
+    -name "*.json" -o \
+    -name "*.png" -o \
+    -name "*.wv" -o \
+    -name "*.txt" -o \
+    -name "*.ttf" -o \
+    -name "*.map" \) -print0 | while IFS= read -r -d '' f
+do
+    echo "  ${f/$datasrc_path/}"
+done | LC_ALL=C sort | xsel -ib
+
