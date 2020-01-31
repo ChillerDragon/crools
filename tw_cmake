@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# tw_cmake - https://github.com/ChillerDragon/crools/blob/master/tw_cmake
+#
+# tool to generate CMakeLists.txt for teeworlds
+# only datasrc directory tho
+# it looks at the datasrc directory inserts the sorted list
+# in CMakeLists.txt
+#
+# USAGE
+# navigate to the root of the teeworlds repository
+# and then execute:
+# tw_cmake .
+
+if [ "$#" -ne "1" ]
+then
+    echo "Usage: $(basename "$0") <teeworlds path>"
+    exit 1
+fi
+twpath="$1"
+cmakelist="$twpath/"CMakeLists.txt
+datasrc_path="$twpath/datasrc"
+
+if [ ! -d "$datasrc_path" ]
+then
+    echo "Error: '$datasrc_path' path not found."
+    exit 1
+elif [ ! -f "$cmakelist" ]
+then
+    echo "Error: '$cmakelist' file not found."
+    exit 1
+fi
+
+files=$(find "$datasrc_path" -type f \( \
+    -name "*.json" -o \
+    -name "*.png" -o \
+    -name "*.wv" -o \
+    -name "*.txt" -o \
+    -name "*.ttf" -o \
+    -name "*.map" \) -print0 | while IFS= read -r -d '' f
+do
+    echo "  ${f/$datasrc_path\//}"
+done | LC_ALL=C sort)
+
+pad="########################################################################"
+empty=$(sed '/set(EXPECTED_DATA/,/)/d' "$cmakelist" | \
+    tr '\n' '\f' | \
+    sed -e "s/# DATA\\f$pad/# DATA\\f$pad\\fXXX START\\fXXX END/" | \
+    tr '\f' '\n')
+{
+    echo "$empty" | sed -n -e '/XXX START/,$!p'
+    echo ""
+    echo "set(EXPECTED_DATA"
+    echo "$files"
+    printf ")"
+    echo "$empty" | sed -n -e '1,/XXX END/!p'
+} > "$cmakelist"
+

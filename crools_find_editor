@@ -1,0 +1,23 @@
+#!/bin/bash
+ed=nano # TODO: add better fallback here
+if [ "$EDITOR" != "" ]
+then
+    ed=$EDITOR
+fi
+
+if [ -x "$(command -v vim)" ]; then
+    ed=vim
+elif [ -x "$(command -v vi)" ]; then
+    ed=vi
+elif [ -x "$(command -v nano)" ]; then
+    ed=nano
+elif [ -x "$(command -v emacs)" ]; then
+    ed=emacs # yikes
+elif [ -x "$(command -v ne)" ]; then
+    ed=ne # idk what this even is
+elif [ -x "$(command -v cat)" ]; then
+    ed=cat # onbgy is the biggest troll
+fi
+
+$ed "$@"
+

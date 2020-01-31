@@ -1,0 +1,91 @@
+#!/bin/bash
+# crools as always super crappy code that aims to achieve weird goals
+# buuut still ends up in my path and is used a lot xd
+# THIS TIME:
+# a url chainer for bstd
+# might add support for cstd and pstd in the future
+#
+# DEPENDENCYS:
+# you need bstd installed in path
+# which needs cstd installed in path
+# which needs a cstd server up and running
+#
+# WHAT IT DOES:
+# it creates given amount of redirects
+# to a cstd paste url with a paste of the current copy buffer
+#
+# USE CASE:
+# idk? xd maybe to annoy people with the good old box in a box joke
+# decide how many links inside links they have to click to reach the final paste
+#
+# or maybe i will integrate that as a stability test for the cstd server one day
+set -e
+
+function os_copy() {
+if [ "$(uname)" == "Darwin" ]
+then
+    echo "$1" | pbcopy
+else
+    echo "$1" | xsel -ib
+fi
+}
+
+function os_paste() {
+if [ "$(uname)" == "Darwin" ]
+then
+    pbpaste
+else
+    xsel -b
+fi
+}
+
+function is_installed() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+function install_status() {
+    if is_installed $1
+    then
+        echo "'$1' is installed."
+        return 0;
+    fi
+    return 1;
+}
+
+function sleep_s() {
+    local secs=$1
+    local i=0
+    secs=$((secs))
+    for ((i=0;i<secs;i++))
+    do
+        sleep 1
+        printf '.'
+    done
+    printf " done.\n"
+}
+
+function wstd() {
+    bstd -yes || { echo "ERROR: bstd failed!"; exit 1; }
+    printf "Wait for rate limit (10s) "
+    sleep_s 10
+}
+
+function url_wrap() {
+    url=$(os_paste)
+    a_url="<html><a href=\"$url\">$url</a></html>"
+    os_copy "$a_url"
+    wstd 2
+}
+
+install_status bstd || exit 1
+install_status cstd || exit 1
+install_status pstd || exit 1
+
+read -p "Iterations: " iterations
+iterations=$((iterations))
+wstd 1
+for ((i=0;i<iterations;i++))
+do
+    url_wrap
+done
+
