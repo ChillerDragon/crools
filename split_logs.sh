@@ -10,13 +10,23 @@ BASENAME=sample_srv_
 
 mkdir -p /tmp/tw_split || exit 1
 
-if [ "$#" != "1" ]
+if [ "$#" == "1" ]
 then
+    LOGFILE="$1"
+elif [ "$#" == "2" ]
+then
+    LOGFILE="$1"
+    MAX_LINES="$2"
+    if [[ ! $MAX_LINES =~ ^[0-9]*$ ]]
+    then
+        echo "Error: MAX_LINES has to be numeric!"
+        echo "       '$MAX_LINES' is not a number!"
+        exit 1
+    fi
+else
     echo "usage: $(basename "$0") <tw logfile> [MAX_LINES]"
     exit 1
 fi
-
-LOGFILE="$1"
 
 if [ ! -f "$LOGFILE" ]
 then
