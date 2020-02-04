@@ -26,4 +26,10 @@ else
     exit 1
 fi
 
-firefox $url &
+if [ "$(uname)" == "Darwin" ]
+then
+    open -a Safari $url
+else
+    firefox $url &
+fi
+
