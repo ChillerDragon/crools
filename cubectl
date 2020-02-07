@@ -1,0 +1,48 @@
+#!/bin/bash
+# cubectl - the kubectl wrapper
+# spawns a "interactive shell" and lets you choose a config
+# put all your configs in ~/.kube/configs/
+
+conf_dir=~/.kube/configs
+
+function load_configs() {
+    if [ ! -d $conf_dir ]
+    then
+        echo "Error: configs directory missing"
+        return 1
+    fi
+
+    options=()
+    lines=0
+    for file in "$conf_dir"/*
+    do
+        options+=("$file")
+        lines=$((lines+1))
+    done
+    if [ $lines -eq 1 ]
+    then
+        export KUBECONFIG="$conf_dir/$file"
+        return 0
+    fi
+
+    PS3='Select kubectl config: '
+    select opt in "${options[@]}"
+    do
+        if [[ " ${options[@]} " =~ " ${opt} " ]]
+        then
+            export KUBECONFIG="$conf_dir/$file"
+            return 1
+        else
+            echo "invalid option $REPLY"
+        fi
+    done
+}
+
+load_configs
+
+while true
+do
+    read -rp "kubectl> " cmd
+    kubectl $cmd
+done
+
