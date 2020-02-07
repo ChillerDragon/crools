@@ -30,7 +30,7 @@ function load_configs() {
     do
         if [[ " ${options[@]} " =~ " ${opt} " ]]
         then
-            export KUBECONFIG="$conf_dir/$file"
+            export KUBECONFIG="$opt"
             return 1
         else
             echo "invalid option $REPLY"
@@ -43,6 +43,13 @@ load_configs
 while true
 do
     read -rp "kubectl> " cmd
+    if [ "$cmd" == "" ]
+    then
+        continue
+    elif [ "$cmd" == "exit" ] || [ "$cmd" == "quit" ] || [ "$cmd" == "q" ]
+    then
+        exit 0
+    fi
     kubectl $cmd
 done
 
