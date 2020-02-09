@@ -1,0 +1,204 @@
+#!/bin/bash
+# build - script that assumes build commands
+#
+# are you tired of switching between build commands?
+# was this code base using make? cmake? ./configure?
+# or was it even a bam project?
+#
+# build - is the solution that uses machine learning
+# blockchain and AI to improve. Using big data and deep learning
+# to predict install/build commands of source bases
+# boosted by quantom computing technology running in the cloud
+# it will then adapt to any enviroment*
+#
+# *any being all the hardcodet use cases LOLOL
+
+bam=bam
+
+if [ "$1" == "--help" ] || [ "$2" == "-h" ]
+then
+    echo "usage: $(basename "$0")"
+    echo "trys to detect how to build current directory"
+    echo "and then performs a build"
+    echo "examples:"
+    echo "if there is a CMakeLists.txt it will create"
+    echo "a build directory and run 'cmake ..' there"
+    exit
+fi
+
+function err() {
+    echo "[!] $1"
+}
+
+function log() {
+    echo "[*] $1"
+}
+
+function get_cores() {
+    #TODO: support macOS
+    nproc
+}
+
+function install_apt() {
+    if [ "$#" != "1" ]
+    then
+        err "Error: install_dep invalid amount of arguments given"
+        err "       expected 1 got $#"
+        exit 1
+    fi
+    local dep="$1"
+    local cmd="$1"
+    if [ "$#" -gt "1" ] && [ "$2" != "" ]
+    then
+        cmd="$2"
+    fi
+    if [ -x "$(command -v "$cmd")" ]
+    then
+        return
+    fi
+    if [ ! -x "$(command -v apt)" ]
+    then
+        err "Error: package manager apt not found"
+        err "       you have to install '$dep' manually"
+        exit 1
+    fi
+
+    if [ "$UID" == "0" ]
+    then
+        apt install "$dep" || exit 1
+    else
+        if [ -x "$(command -v sudo)" ]
+        then
+            sudo apt install "$dep" || exit 1
+        else
+            err "Install sudo or switch to root user"
+            exit 1
+        fi
+    fi
+    if [ -x "$(command -v "$cmd")" ]
+    then
+        log "Successfully installed dependency '$dep'"
+    else
+        err "Failed to install dependency '$dep'"
+        err "please install it manually"
+        exit 1
+    fi
+}
+
+function install_dep() {
+    install_apt "$1" "$2"
+}
+
+function get_cpp() {
+    if [ ! -x "$(command -v gcc)" ]
+    then
+        install_dep build-essential gcc
+    fi
+    if [ ! -x "$(command -v make)" ]
+    then
+        install_dep make
+    fi
+    if [ ! -x "$(command -v cmake)" ]
+    then
+        install_dep cmake
+    fi
+}
+
+function get_bam() {
+    if [ -x "$(command -v bam)" ]
+    then
+        bam=bam
+        return
+    elif [ -x "$(command -v bam4)" ]
+    then
+        bam=bam4
+        return
+    elif [ -f ../bam/bam ]
+    then
+        bam=../bam/bam
+    elif [ -f ../bam4/bam ]
+    then
+        bam=../bam4/bam
+    elif [ -f /tmp/bam/bam ]
+    then
+        bam=/tmp/bam/bam
+    else
+        get_git
+        cwd="$(pwd)"
+        cd /tmp || exit 1
+        git clone https://github.com/matricks/bam || exit 1
+        cd bam || exit 1
+        ./make_unix.sh || exit 1
+        bam=/tmp/bam/bam
+        cd "$cwd" || exit 1
+    fi
+}
+
+function get_https_remote() {
+    if [ ! -d .git/ ]
+    then
+        return
+    fi
+    remote="$(git remote get-url "$(git remote | head -n1)")"
+    if [[ $remote =~ ^git@ ]]
+    then
+        nocolon=${remote/:/\/}
+        remote="https://${nocolon##*@}"
+    elif [[ $remote =~ ^https ]]
+    then
+        test
+    else
+        exit 1
+    fi
+    echo "$remote"
+}
+
+remote="$(get_https_remote)"
+
+if [ "$remote" == "https://github.com/radareorg/radare2" ] && grep -q sys/install.sh README.md
+then
+    get_cpp
+    echo "The recommended way to install or update radare2 from git for single-user systems:"
+    echo ""
+	echo "$ sys/install.sh"
+    echo ""
+    echo "If you don't have root, or just want to install it in your home use:"
+    echo ""
+	echo "$ sys/user.sh"
+    echo ""
+	echo "   1) sys/install.sh (recommended)"
+	echo "   2) sys/user.sh"
+	read -rp "Install type [1]: " install
+	until [[ -z "$install" || "$install" =~ ^[12]$ ]]; do
+		echo "$install: invalid selection."
+		read -rp "Install type [1]: " install
+	done
+	case "$install" in
+		1|"")
+            ./sys/install.sh
+		;;
+		2)
+            ./sys/user.sh
+		;;
+	esac
+elif [ -f CMakeLists.txt ]
+then
+    get_cpp
+    mkdir -p build || exit 1
+    cd build || exit 1
+    cmake .. || exit 1
+    make -j"$(get_cores)" || exit 1
+elif [ -f bam.lua ]
+then
+    get_cpp
+    get_bam
+    $bam
+elif [ -f configure ]
+then
+    get_cpp
+    ./configure
+    make
+else
+    echo "I am sorry, I have no clue how to build this."
+fi
+
