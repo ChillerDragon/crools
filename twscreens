@@ -1,0 +1,26 @@
+#!/bin/bash
+shopt -s expand_aliases
+source ~/.bash_aliases
+screendir=~/.teeworlds/screenshots
+if [ ! -d $screendir ]
+then
+    echo "Error: directory not found '$screendir'"
+    exit 1
+fi
+
+if alias start >/dev/null 2>&1
+then
+    start $screendir
+elif [ -x "$(command -v xdg-open)" ]
+then
+    xdg-open "$screendir"
+else
+    echo "Error: no file manager found."
+    cmd="cd $screendir"
+    echo "$cmd"
+    if [ -x "$(command -v xsel)" ]
+    then
+        echo "$cmd" | xsel -ib
+    fi
+fi
+
