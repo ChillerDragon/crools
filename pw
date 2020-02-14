@@ -1,0 +1,50 @@
+#!/bin/bash
+# worst pw manager it stores ur pw in cleartext
+conf_dir=~/.config/crools
+conf=~/.config/crools/pw.cnf
+function edit_cnf() {
+    if [ ! -f $conf ]
+    then
+        echo "Error: could not edit config (not found)."
+        exit 1
+    fi
+    mv "$conf" "$conf.tmp"
+    crools_find_editor "$conf.tmp" || { echo "Error: failed to edit config"; exit 1; }
+    base64 "$conf.tmp" > "$conf"
+    rm "$conf.tmp"
+}
+function check_conf() {
+    if [ ! -f $conf ]
+    then
+        echo "config file not found!"
+        echo "Do you want to create one? [y/N]"
+        read -r -n 1 yn
+        echo ""
+        if [[ ! "$yn" =~ [yY] ]]
+        then
+            return
+        fi
+        mkdir -p $conf_dir
+        echo "sample_string" > $conf
+        edit_cnf
+    fi
+}
+
+if [ "$1" == "--edit" ]
+then
+    edit_cnf
+    exit 0
+fi
+
+function os_copy_file() {
+    if [ "$(uname)" == "Darwin" ]
+    then
+        base64 -d "$1" | pbcopy
+    else
+        base64 -d "$1" | xsel -ib
+    fi
+}
+
+check_conf
+os_copy_file "$conf"
+
