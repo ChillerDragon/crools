@@ -1,0 +1,74 @@
+#!/bin/bash
+# not functional at all
+
+ssh='ssh root@localhost'
+
+read -rd '' slave << 'EOF'
+#!/bin/bash
+while true
+do
+    if [ -f /tmp/crapynergy-cmd ]
+    then
+        sleep 2
+        lines="$(wc -l < /tmp/crapynergy-cmd)"
+        echo "lines='$lines'"
+        printf "$ "
+        # if [ "$lines" == ""] || [ "$lines" -lt "2" ]
+        if [ true ]
+        then
+            cat /tmp/crapynergy-cmd
+        else
+            head -n1 /tmp/crapynergy-cmd
+            sed 1,1d /tmp/crapynergy-cmd | sed 's/^/> /'
+        fi
+        chmod +x /tmp/crapynergy-cmd
+        /tmp/crapynergy-cmd > /tmp/crapynergy-out
+        cat /tmp/crapynergy-out
+        if [ -f /tmp/crapynergy-cmd ]
+        then
+            rm /tmp/crapynergy-cmd
+        else
+            echo "oawodawd"
+        fi
+    fi
+    sleep 0.2
+done
+EOF
+
+read -rd '' master << 'EOF'
+if [ -f /tmp/crapynergy-cmd ]
+then
+    rm /tmp/crapynergy-cmd
+fi
+while true
+do
+    while true
+    do
+        if [ ! -f /tmp/crapynergy-cmd ]
+        then
+            if [ -f /tmp/crapynergy-out ]
+            then
+                cat /tmp/crapynergy-out
+            fi
+            printf '\n$ '
+            break
+        fi
+        sleep 0.1
+    done
+    read -r cmd
+    echo "$cmd" > /tmp/crapynergy-cmd
+done
+EOF
+
+$ssh <<ENDSSH
+pkill -f gnome-terminal
+export DISPLAY=:1
+echo "$slave" > /tmp/crapynergy-slave
+chmod +x /tmp/crapynergy-slave
+gnome-terminal -- /tmp/crapynergy-slave
+echo "$master" /tmp/crapynergy-master
+chmod +x /tmp/crapynergy-master
+ENDSSH
+
+$ssh
+
