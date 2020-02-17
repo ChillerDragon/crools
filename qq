@@ -1,0 +1,60 @@
+#!/bin/bash
+# qq - quick qommand
+
+conf_dir=~/.config/crools
+conf=~/.config/crools/qq.cnf
+
+read -rd '' sample << 'EOF'
+#!/bin/bash
+function os_paste() {
+    if [ "$(uname)" == "Darwin" ]
+    then
+        pbpaste
+    else
+        xsel -b
+    fi
+}
+clip="$(os_paste)"
+firefox "$clip"
+# ssh user@remote "firefox $clip"
+EOF
+
+function check_conf() {
+    if [ ! -f $conf ]
+    then
+        echo "config file not found!"
+        echo "Do you want to create one? [y/N]"
+        read -r -n 1 yn
+        echo ""
+        if [[ ! "$yn" =~ [yY] ]]
+        then
+            return
+        fi
+        mkdir -p "$conf_dir"
+        echo "$sample" > "$conf"
+        crools_find_editor "$conf" || { echo "Error: failed to edit config"; exit 1; }
+    fi
+}
+
+if [ "$1" == "--edit" ]
+then
+    crools_find_editor "$conf" || { echo "Error: failed to edit config"; exit 1; }
+    exit 0
+fi
+
+
+check_conf
+
+cat "$conf"
+echo "Do you want to execute this script? [y/N]"
+read -r -n 1 yn
+echo ""
+if [[ ! "$yn" =~ [yY] ]]
+then
+    echo "Aborting ..."
+    exit 0
+fi
+
+chmod +x "$conf"
+"$conf"
+
