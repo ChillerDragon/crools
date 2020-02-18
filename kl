@@ -1,0 +1,105 @@
+#!/bin/bash
+
+LOGPATH=/home/$USER/logger
+BIN=/home/$USER/Desktop/git/keylogger/linux/launch-keylogger.py
+if [ ! -f "$BIN" ]
+then
+    echo "[-] Error: keylogger launcher not found"
+    echo "$BIN"
+    exit 1
+fi
+mkdir -p "$LOGPATH" || exit 1
+cd "$LOGPATH" || exit 1
+
+function stop_kl() {
+    echo "[-] stopping ..."
+    screen -r keylogger -X quit
+    pkill -f keylogger.py
+}
+
+proc="$(ps aux | grep keylogger.py | grep -v grep)"
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]
+then
+    echo "usage: kl [swipe|status|stop|show|i]"
+    echo "  swipe       deletes all logs"
+    echo "  status      show if running or not"
+    echo "  show        shows latest log"
+    echo "  stop        stops it"
+    echo "  i           interact and join the screen session"
+    exit 0
+elif [ "$1" == "stop" ]
+then
+    stop_kl
+    exit 0
+elif [ "$1" == "show" ]
+then
+    if [ ! -d $LOGPATH ]
+    then
+        echo  "[-] LOGPATH not found '$LOGPATH'"
+        exit 1
+    fi
+    latest_log="$(ls "$LOGPATH" | tail -n1)"
+    latest_log="$LOGPATH/$latest_log"
+    if [ ! -f "$latest_log" ]
+    then
+        echo "[!] there are no logfiles yet."
+        exit 1
+    fi
+    num_logs="$(ls "$LOGPATH" | wc -l)"
+    echo "showing latest logfile out of $num_logs logs:"
+    echo "$latest_log"
+    less "$latest_log"
+    exit 0
+elif [ "$1" == "i" ]
+then
+    if [ "$proc" == "" ]
+    then
+        echo "[-] not running"
+    else
+        echo "[+] found:"
+        echo "$proc"
+        screen -r keylogger
+    fi
+    exit 0
+elif [ "$1" == "status" ]
+then
+    if [ "$proc" == "" ]
+    then
+        echo "[-] not running"
+    else
+        echo "[+] found:"
+        echo "$proc"
+    fi
+    exit 0
+elif [ "$1" == "swipe" ]
+then
+    num="$(ls ./*.log | wc -l)"
+    if [ "$num" == "0" ]
+    then
+        echo "logs empty already."
+        exit 0
+    fi
+    echo "Do you want to delete $num logs? [y/N]"
+    read -r -n 1 yn
+    echo ""
+    if [[ ! "$yn" =~ [yY] ]]
+    then
+        echo "Aborting ..."
+        exit 0
+    fi
+    rm ./*.log
+    exit 0
+elif [ "$#" -gt "0" ]
+then
+    echo "Invalid argument"
+    exit 1
+fi
+
+if [ "$proc" == "" ]
+then
+    echo "[+] starting ..."
+    screen -AmdS keylogger python3 "$BIN"
+else
+    stop_kl
+fi
+
