@@ -26,7 +26,10 @@ else
     exit 1
 fi
 
-if [ "$(uname)" == "Darwin" ]
+if [ "$BROWSER" != "" ]
+then
+    $BROWSER "$url" &
+elif [ "$(uname)" == "Darwin" ]
 then
     open -a Safari $url
 else
