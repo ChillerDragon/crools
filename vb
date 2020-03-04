@@ -5,11 +5,15 @@
 # yes only github no gitlab or bitbucket or what ever
 # well only tested on github might work with other hubs as well
 
-#           sub sub shell shiet!! 
-#                     \_____
-#                           \
-#                           V
-remote=$(git remote get-url $(git remote | head -n1))
+#             sub sub shell shiet!!
+#                       \_____
+#                             \
+#                             V
+remote="$(git remote get-url "$(git remote | grep origin | head -n1)")"
+if [ "$remote" == "" ]
+then
+    remote="$(git remote get-url "$(git remote | head -n1)")"
+fi
 url=$remote
 
 if [[ $remote =~ ^git@ ]]
@@ -31,8 +35,8 @@ then
     $BROWSER "$url" &
 elif [ "$(uname)" == "Darwin" ]
 then
-    open -a Safari $url
+    open -a Safari "$url"
 else
-    firefox $url &
+    firefox "$url" &
 fi
 
