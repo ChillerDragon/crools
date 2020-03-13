@@ -1,5 +1,5 @@
 #!/bin/bash
-# split.sh - by ChillerDragon
+# tw_split_logs - by ChillerDragon
 # splits teeworlds logfiles into smaller chunks
 # and adds proper timestamps to all of the files
 
