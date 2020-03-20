@@ -1,0 +1,28 @@
+#!/bin/bash
+# fear - by ChillerDragon
+# for all those folks who are to pariod to use clear
+# lmao like the worst tool ever made
+# but when i clear im hiding sketchy stuff
+# so i do not want to leak due to accidental scrolling
+# thats why i use the ctrl+shift+l shortcut or cmd+k
+# since thats better than clear
+# but meh when ur in some logging scenario like tmux or screen
+# it might still keep logs
+# so i decided to wipe the whole history
+# so the best way would be to detect current enviroment
+# if its tmux parse the tmux config and then get the history size
+# but i decided to spend my time writing this wall inseatd
+# and use the bash HISTSIZE variable which does not make a lot sense
+# oh and i also do not parse bashrc or load to avoid delay
+# so better go with a default which is big
+# but hey
+#
+# also performance is probably the worst
+# and i still keep the whole crools suite in my path :D
+size="${HISTSIZE:-1000}"
+for ((i=0;i<size;i++))
+do
+    echo ""
+done
+clear
+
