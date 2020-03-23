@@ -1,0 +1,87 @@
+#!/bin/bash
+# crapshot - take screenshot and scp it to your fav zzh remote
+#
+# DEPENDENCYS:
+# install maim
+# install xsel
+# make sure the first zzh host has permission
+# in /var/www/html/cs
+# on zzh host 1 do:
+# mkdir /var/www/html/cs
+# chown -R /var/www/html/cs zzh1:zzh1
+conf_dir=~/.config/crools
+conf=~/.config/crools/zzh.cnf
+function os_copy() {
+if [ "$(uname)" == "Darwin" ]
+then
+    echo "$1" | pbcopy
+else
+    echo "$1" | xsel -ib
+fi
+}
+function edit_cnf() {
+    if [ ! -f $conf ]
+    then
+        echo "Error: could not edit config (not found)."
+        exit 1
+    fi
+    crools_find_editor $conf || { echo "Error: failed to edit config"; exit 1; }
+}
+function check_conf() {
+    if [ ! -f $conf ]
+    then
+        echo "config file not found!"
+        echo "Do you want to create one? [y/N]"
+        read -r -n 1 yn
+        echo ""
+        if [[ ! "$yn" =~ [yY] ]]
+        then
+            return
+        fi
+        mkdir -p $conf_dir
+        echo "# zzh - config" > $conf
+        echo "# store your fav ssh commands here" >> $conf
+        echo "ssh crools@localhost" >> $conf
+        echo "ssh chillerdragon@149.202.127.134" >> $conf
+        edit_cnf
+    fi
+}
+if [ "$1" == "--help" ]
+then
+    echo "usage: $(basename $0) [--edit]"
+    echo "upload screenshots via scp"
+    exit 0
+elif [ "$1" == "--edit" ] || [ "$1" == "-e" ]
+then
+    edit_cnf
+    exit 0
+fi
+
+check_conf
+if [ ! -f $conf ]
+then
+    echo "Error: config missing"
+    exit 1
+fi
+
+while IFS= read -r line
+do
+    if [ "${line:0:1}" == "#" ]
+    then
+        continue
+    fi
+    remote="$(echo "$line" | cut -d' ' -f2)"
+    host="$(echo "$remote" | cut -d'@' -f2)"
+    ts="$(date +%s)"
+    picname="crapshot_$ts.png"
+    picpath="/tmp/$picname"
+    maim "$picpath"
+    cmd="scp $picpath $remote:/var/www/html/cs/$ts.png"
+    echo "$cmd"
+    eval "$cmd"
+    url="https://$host/cs/$ts.png"
+    echo "$url"
+    os_copy "$url"
+    exit 0
+done < $conf
+
