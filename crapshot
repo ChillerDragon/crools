@@ -84,10 +84,10 @@ do
         maim "$picpath"
     fi
     say crapshot
-    cmd="scp $picpath $remote:/var/www/html/cs/$ts.png"
+    cmd="scp $picpath $remote:/var/www/html/cs/.$ts.png"
     echo "$cmd"
     eval "$cmd"
-    url="https://$host/cs/$ts.png"
+    url="https://$host/cs/.$ts.png"
     echo "$url"
     os_copy "$url"
     exit 0
