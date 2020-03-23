@@ -49,8 +49,9 @@ function check_conf() {
 }
 if [ "$1" == "--help" ]
 then
-    echo "usage: $(basename $0) [--edit]"
-    echo "upload screenshots via scp"
+    echo "usage: $(basename "$0") [--edit|--select|--no-browser]"
+    echo "description: upload screenshots via scp"
+    echo "exmaple: $(basename "$0") -s --no-browser"
     exit 0
 elif [ "$1" == "--edit" ] || [ "$1" == "-e" ]
 then
@@ -78,6 +79,7 @@ do
     picpath="/tmp/$picname"
     if [ "$1" == "-s" ] || [ "$1" == "--select" ]
     then
+        shift
         say "select" &
         maim -s "$picpath"
     else
@@ -90,6 +92,19 @@ do
     url="https://$host/cs/.$ts.png"
     echo "$url"
     os_copy "$url"
+    if [ "$1" == "--no-browser" ]
+    then
+        exit 0
+    fi
+    if [ "$BROWSER" != "" ]
+    then
+        $BROWSER "$url" &
+    elif [ "$(uname)" == "Darwin" ]
+    then
+        open -a Safari "$url"
+    else
+        firefox "$url" &
+    fi
     exit 0
 done < $conf
 
