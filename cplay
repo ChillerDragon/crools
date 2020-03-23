@@ -1,0 +1,92 @@
+#!/bin/bash
+# cplay - ChillerDragon 2019
+# tool to launch a C playground enviroment
+# it uses vim and is optimized for my configuration
+# https://github.com/ChillerDragon/dotfiles/blob/master/vimrc
+
+version="v.0002"
+ts_file=$(date "+%Y-%m-%d_%H:%M:%S.c")
+filename=$ts_file
+filepath=/tmp/cplay
+
+mkdir -p "$filepath"
+local_dir=$(pwd)
+cd "$filepath" || { echo "Error: failed to cd into '$filepath'."; exit 1; }
+
+function do_local() {
+    filename=$1
+    if [ "$filename" == "" ]
+    then
+        filename=$ts_file
+    fi
+    # use absolute path for local case
+    filename="$filepath/$filename"
+    cd "$local_dir" || { echo "Error: failed to cd into '$local_dir'"; exit 1; }
+}
+
+if [ $# -gt 0 ]
+then
+    filename=$1
+    if [ "$1" == "--help" ]
+    then
+        echo "cplay $version"
+        echo "a C playground tool"
+        echo "usage: cplay [filename] [--local]"
+        echo ""
+        echo "if no filname provided it uses current timestamp as filename"
+        echo "files are saved under $filepath"
+        exit
+    elif [ "$1" == "--local" ]
+    then
+        do_local "$2"
+    elif [ "$2" == "--local" ]
+    then
+        do_local "$1"
+    elif [ "$1" == "--list" ]
+    then
+        for f in "$filepath"/*.c
+        do
+            if [ -f "$f" ]; then
+                echo "$f"
+            else
+                echo "There are no cplay files."
+            fi
+        done
+        exit 0
+    fi
+    if [[ "$filename" =~ ^- ]]
+    then
+        echo "Error: filenames starting with - are not allowed."
+        exit 1
+    fi
+fi
+
+if ! echo "$filename" | grep -q '\.c$'
+then
+    echo "file extension missing '$filename'"
+    filename="${filename}.c"
+fi
+echo "preparing file '$filename'"
+
+read -rd '' c_template << EOF
+/*
+    C playground by ChillerDragon
+    press <F4> to compile
+    File: $filename
+*/
+#include "stdio.h"
+
+int main()
+{
+    puts("hello world");
+    return 0;
+}
+EOF
+
+if [ ! -f "$filename" ]
+then
+    echo "$c_template" > "$filename"
+fi
+
+vim "$filename"
+
