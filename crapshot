@@ -71,7 +71,6 @@ do
     then
         continue
     fi
-    say crapshot
     remote="$(echo "$line" | cut -d' ' -f2)"
     host="$(echo "$remote" | cut -d'@' -f2)"
     ts="$(date +%s)"
@@ -79,10 +78,12 @@ do
     picpath="/tmp/$picname"
     if [ "$1" == "-s" ] || [ "$1" == "--select" ]
     then
+        say "select" &
         maim -s "$picpath"
     else
         maim "$picpath"
     fi
+    say crapshot
     cmd="scp $picpath $remote:/var/www/html/cs/$ts.png"
     echo "$cmd"
     eval "$cmd"
