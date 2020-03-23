@@ -4,6 +4,7 @@
 # DEPENDENCYS:
 # install maim
 # install xsel
+# install say
 # make sure the first zzh host has permission
 # in /var/www/html/cs
 # on zzh host 1 do:
@@ -70,12 +71,18 @@ do
     then
         continue
     fi
+    say crapshot
     remote="$(echo "$line" | cut -d' ' -f2)"
     host="$(echo "$remote" | cut -d'@' -f2)"
     ts="$(date +%s)"
     picname="crapshot_$ts.png"
     picpath="/tmp/$picname"
-    maim "$picpath"
+    if [ "$1" == "-s" ] || [ "$1" == "--select" ]
+    then
+        maim -s "$picpath"
+    else
+        maim "$picpath"
+    fi
     cmd="scp $picpath $remote:/var/www/html/cs/$ts.png"
     echo "$cmd"
     eval "$cmd"
