@@ -1,15 +1,18 @@
 #!/bin/bash
-# not written by me
-# full credits go to
+# credits go to
 # https://stackoverflow.com/a/38021063
 
-local LANG=C;
-local c;
-while IFS= read -r c;
-do
-    case $c in [a-zA-Z0-9.~_-]) printf "$c"; continue ;; esac
-    printf "$c" | od -An -tx1 | tr ' ' % | tr -d '\n'
-done <<EOF
+function main() {
+    local LANG=C;
+    local c;
+    while IFS= read -r c;
+    do
+        case $c in [a-zA-Z0-9.~_-]) printf "$c"; continue ;; esac
+        printf "$c" | od -An -tx1 | tr ' ' % | tr -d '\n'
+    done <<EOF
 $(fold -w1)
 EOF
-  echo
+    echo
+}
+
+main

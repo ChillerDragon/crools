@@ -1,4 +1,11 @@
 #!/bin/bash
-# full credits go to
+# credits go to
 # https://stackoverflow.com/a/38021063
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]
+then
+    echo "arg to piper"
+    echo "code:"
+    echo 'printf "$*" | urlencodepipe'
+    exit 0
+fi
 printf "$*" | urlencodepipe
