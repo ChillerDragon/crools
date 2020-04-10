@@ -1,0 +1,10 @@
+#!/bin/bash
+proc="$(ps aux | grep 'SCREEN.*crools_weechat_irc' | grep -v grep)"
+if [ "$proc" == "" ]
+then
+    echo "[*] starting weechat"
+    screen -AmdS crools_weechat_irc /usr/bin/weechat
+fi
+
+screen -r crools_weechat_irc
+
