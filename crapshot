@@ -12,6 +12,7 @@
 # chown -R /var/www/html/cs zzh1:zzh1
 conf_dir=~/.config/crools
 conf=~/.config/crools/zzh.cnf
+picdir=/var/www/html/cs
 histfile="$conf_dir/crapshot_history"
 histsize=5
 function os_copy() {
@@ -53,7 +54,7 @@ function check_conf() {
 }
 if [ "$1" == "--help" ]
 then
-    echo "usage: $(basename "$0") [--edit|--select|--no-browser|--file <filepath>]"
+    echo "usage: $(basename "$0") [--edit|--select|--no-browser|--list|--file <filepath>]"
     echo "description: upload screenshots via scp"
     echo "exmaple: $(basename "$0") -s --no-browser"
     exit 0
@@ -103,6 +104,13 @@ function delete_history() {
     done
 }
 
+function list_all() {
+    cmd="ssh $remote \"ls -a $picdir\""
+    echo "$cmd"
+    eval "$cmd"
+    exit 0
+}
+
 while IFS= read -r line
 do
     if [ "${line:0:1}" == "#" ]
@@ -120,6 +128,10 @@ done < $conf
 if [ "$1" == "--delete" ]
 then
     delete_history
+    exit 0
+elif [ "$1" == "--list" ]
+then
+    list_all
     exit 0
 elif [ "$1" == "--file" ]
 then
@@ -139,7 +151,7 @@ else
     maim "$picpath"
 fi
 say crapshot
-cmd="scp $picpath $remote:/var/www/html/cs/.$ts.png"
+cmd="scp $picpath $remote:$picdir/.$ts.png"
 echo "$cmd"
 eval "$cmd"
 add_history "/var/www/html/cs/.$ts.png"
