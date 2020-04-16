@@ -135,7 +135,9 @@ then
     exit 0
 elif [ "$1" == "--file" ]
 then
-    inputfile="$2"
+    shift
+    inputfile="$1"
+    shift
     if [ ! -f "$inputfile" ]
     then
         echo "Error file '$inputfile' not found."
