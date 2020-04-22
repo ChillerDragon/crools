@@ -152,6 +152,7 @@ then
 else
     maim "$picpath"
 fi
+os_copy "crapshot in progress"
 say crapshot
 cmd="scp $picpath $remote:$picdir/.$ts.png"
 echo "$cmd"
