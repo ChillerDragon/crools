@@ -109,7 +109,13 @@ function delete_history() {
 function list_all() {
     cmd="ssh $remote \"ls -a $picdir\""
     echo "$cmd"
-    eval "$cmd"
+    eval "$cmd" | while read -r line;
+    do
+        if [[ "$line" =~ .*\.png$ ]]
+        then
+            echo "https://$host/cs/$line"
+        fi
+    done
     exit 0
 }
 
