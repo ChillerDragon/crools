@@ -88,15 +88,35 @@ function delete_history() {
         echo "Error there is no history yet"
         exit 1
     fi
+    if [ "$(wc -l "$histfile" | cut -d' ' -f 1)" == "0" ]
+    then
+        echo "Error history is empty"
+        exit 1
+    fi
     PS3='Pick picture to be deleted (1=latest): '
-    select pic in $(tac "$histfile")
+    select pic in $(
+        tac "$histfile" | while read -r line;
+        do
+            if [[ "$line" =~ .*\.png$ ]]
+            then
+                echo "https://$host/cs/$line"
+            fi
+        done
+    )
     do
         if [ "$pic" == "" ]
         then
             echo "invalid option"
         else
+            if [[ "$pic" =~ $host/cs/(.*).png$ ]]
+            then
+                pic="${BASH_REMATCH[1]}.png"
+            else
+                echo "Error: failed to parse pic name '$pic'"
+                exit 1
+            fi
             echo "deleting '$pic' ..."
-            cmd="ssh $remote \"rm -f $pic\""
+            cmd="ssh $remote \"rm -f $picdir/$pic\""
             echo "$cmd"
             eval "$cmd"
             grep -v "$pic" "$histfile" > "$histfile".tmp
@@ -165,7 +185,7 @@ say crapshot
 cmd="scp $picpath $remote:$picdir/.$ts.png"
 echo "$cmd"
 eval "$cmd"
-add_history "/var/www/html/cs/.$ts.png"
+add_history ".$ts.png"
 url="https://$host/cs/.$ts.png"
 echo "$url"
 os_copy "$url"
