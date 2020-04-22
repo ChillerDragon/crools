@@ -1,6 +1,9 @@
 #!/bin/bash
 # crapshot - take screenshot and scp it to your fav zzh remote
 #
+# if super motivated create a recording tool out of this and create quick video snippets
+# ffmpeg -video_size $(xrandr | fgrep '*' | xargs | cut -d' ' -f1) -framerate 60 -f x11grab -i $DISPLAY -c:v libx264 -qp 0 -preset ultrafast ffmpeg.mp4
+#
 # make sure the first zzh host has permissions and opentube running
 conf_dir=~/.config/crools
 conf=~/.config/crools/zzh.cnf
