@@ -99,6 +99,8 @@ function delete_history() {
             cmd="ssh $remote \"rm -f $pic\""
             echo "$cmd"
             eval "$cmd"
+            grep -v "$pic" "$histfile" > "$histfile".tmp
+            mv "$histfile".tmp "$histfile"
             exit 0
         fi
     done
