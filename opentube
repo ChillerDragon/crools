@@ -1,0 +1,100 @@
+#!/bin/bash
+# crapshot - take screenshot and scp it to your fav zzh remote
+#
+# make sure the first zzh host has permissions and opentube running
+conf_dir=~/.config/crools
+conf=~/.config/crools/zzh.cnf
+viddir=/var/www/html/OpenTube/saved_videos
+
+function os_copy() {
+if [ "$(uname)" == "Darwin" ]
+then
+    echo "$1" | pbcopy
+else
+    echo "$1" | xsel -ib
+fi
+}
+function edit_cnf() {
+    if [ ! -f $conf ]
+    then
+        echo "Error: could not edit config (not found)."
+        exit 1
+    fi
+    crools_find_editor $conf || { echo "Error: failed to edit config"; exit 1; }
+}
+function check_conf() {
+    if [ ! -f $conf ]
+    then
+        echo "config file not found!"
+        echo "Do you want to create one? [y/N]"
+        read -r -n 1 yn
+        echo ""
+        if [[ ! "$yn" =~ [yY] ]]
+        then
+            return
+        fi
+        mkdir -p $conf_dir
+        {
+            echo "# zzh - config"
+            echo "# store your fav ssh commands here"
+            echo "ssh crools@localhost"
+            echo "ssh chillerdragon@149.202.127.134"
+        } > $conf
+        edit_cnf
+    fi
+}
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]
+then
+    echo "usage: $(basename "$0") <video>"
+    echo "description: upload videos to opentube"
+    exit 0
+fi
+
+check_conf
+if [ ! -f $conf ]
+then
+    echo "Error: config missing"
+    exit 1
+fi
+
+while IFS= read -r line
+do
+    if [ "${line:0:1}" == "#" ]
+    then
+        continue
+    fi
+    remote="$(echo "$line" | cut -d' ' -f2)"
+    host="$(echo "$remote" | cut -d'@' -f2)"
+    break
+done < $conf
+
+inputfile="$1"
+inputfile_base="$(basename "$inputfile")"
+if ! [[ "$inputfile" =~ ^[0-9A-Za-z\./_-]+$ ]]
+then
+    echo "Error video title has to be alpha numeric"
+    exit 1
+fi
+if [ ! -f "$inputfile" ]
+then
+    echo "Error file '$inputfile' not found."
+    exit 1
+fi
+if ! file "$inputfile" | grep -q 'ISO Media'
+then
+    echo "Error filetype has to be ISO Media"
+    exit 1
+fi
+url="https://$host/OpenTube/video.php?t=$inputfile_base"
+found="$(curl -o /dev/null -s -w "%{http_code}\\n" "$url")"
+if [ "$found" != "404" ]
+then
+    echo "Error video with this title already exists."
+    exit 1
+fi
+cmd="scp $inputfile $remote:$viddir/$inputfile_base"
+echo "$cmd"
+eval "$cmd"
+echo "$url"
+os_copy "$url"
+
