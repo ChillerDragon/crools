@@ -24,7 +24,7 @@ ssh foo@other-server.de
 ssh -t favuser@zillyhuhn.com "cd /var/www/html/OpenTube; bash"
 ssh otheruser@zillyhuhn.com
 ssh otheruser2@zillyhuhn.com
-ssh otheruser3@razerpro
+ssh otheruser@other-host.org
 ssh otheruser4@zillyhuhn.com
 ```
 
