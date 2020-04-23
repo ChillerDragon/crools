@@ -83,9 +83,9 @@ then
     echo "Error file '$inputfile' not found."
     exit 1
 fi
-if ! file "$inputfile" | grep -q 'ISO Media'
+if ! file "$inputfile" | grep -Eq ': (ISO Media|WebM)'
 then
-    echo "Error filetype has to be ISO Media"
+    echo "Error filetype has to be ISO Media or WebM"
     exit 1
 fi
 url="https://$host/OpenTube/video.php?t=$inputfile_base"
