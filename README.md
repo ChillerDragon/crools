@@ -92,7 +92,7 @@ It is tested on macOS and linux and works fine with github and gitlab.
 
 ### bstd, opentube, crapshot, kl
 
-wrappers around by paste tool based on pstd https://paste.zillyhuhn.com, cli uploader for my video site, selfhosted image service, launch openshot-qt form source and wrapper around by python keylogger.
+wrappers around by paste tool based on pstd https://paste.zillyhuhn.com, cli uploader for my video site, selfhosted image service, launch openshot-qt form source and wrapper around python keylogger.
 
 
 All these wrappers are great for me but depend on specific paths, cli dependencys and server setups.
