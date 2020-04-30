@@ -176,9 +176,19 @@ elif [ "$1" == "-s" ] || [ "$1" == "--select" ]
 then
     shift
     say "select" &
-    maim -s "$picpath"
+    if ! maim -s "$picpath"
+    then
+        say "abort"
+        echo "crapshot aborted."
+        exit 1
+    fi
 else
-    maim "$picpath"
+    if ! maim "$picpath"
+    then
+        say "failed"
+        echo "crapshot failed."
+        exit 1
+    fi
 fi
 os_copy "crapshot in progress"
 say crapshot
