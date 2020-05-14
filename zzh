@@ -2,6 +2,7 @@
 # zzh - quick select of your fav ssh connections
 conf_dir=~/.config/crools
 conf=~/.config/crools/zzh.cnf
+arg=""
 function edit_cnf() {
     if [ ! -f $conf ]
     then
@@ -29,15 +30,19 @@ function check_conf() {
         edit_cnf
     fi
 }
-if [ "$1" == "--help" ]
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
-    echo "usage: $(basename $0) [--edit]"
+    echo "usage: $(basename $0) [--edit|connection number]"
     echo "quick select ssh connections"
     exit 0
 elif [ "$1" == "--edit" ] || [ "$1" == "-e" ]
 then
     edit_cnf
     exit 0
+elif [[ "$1" =~ ^[1-9][0-9]*$ ]]
+then
+    arg="$1"
+    arg="$((arg-1))"
 fi
 
 check_conf
@@ -58,12 +63,27 @@ do
     options+=("$line")
     lines=$((lines+1))
 done < $conf
+
+# only one entry
 if [ $lines -eq 1 ]
 then
     eval "${options[0]}"
     exit 0
 fi
 
+# arg entry
+if [ "$arg" != "" ]
+then
+    if [ "${#options[@]}" -lt "$arg" ]
+    then
+        echo "Error: selected item $arg out of ${#options[@]}"
+        exit 1
+    fi
+    eval "${options[$arg]}"
+    exit 0
+fi
+
+# select entry
 PS3='Select ssh connection: '
 select opt in "${options[@]}"
 do
