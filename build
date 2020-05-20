@@ -198,6 +198,9 @@ then
     get_cpp
     ./configure
     make
+elif [ -f Cargo.lock ] && [ -f Cargo.toml ]
+then
+    cargo build
 else
     echo "I am sorry, I have no clue how to build this."
 fi
