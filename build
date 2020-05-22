@@ -201,6 +201,14 @@ then
 elif [ -f Cargo.lock ] && [ -f Cargo.toml ]
 then
     cargo build
+elif [ -f pom.xml ]
+then
+    if grep -q 'maven-assembly-plugin' pom.xml
+    then
+        mvn assembly:assembly
+    else
+        mvn compile && mvn package
+    fi
 else
     echo "I am sorry, I have no clue how to build this."
 fi
