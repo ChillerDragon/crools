@@ -1,0 +1,23 @@
+#!/bin/bash
+
+function git_save_pull() {
+    if [ "$(git status | tail -n1)" != "nothing to commit, working tree clean" ]
+    then
+        echo "WARNING: git pull failed! Is your crools working tree clean?"
+        return
+    fi
+	echo "[*] updating crools ..."
+    git pull
+}
+
+crools_dir="${0%/*}"
+if [ ! -d "$crools_dir" ]
+then
+    echo "Error: invalid crools dir"
+    echo "$crools_dir"
+    exit 1
+fi
+
+cd "$crools_dir" || exit 1
+git_save_pull
+
