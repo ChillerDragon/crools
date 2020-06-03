@@ -188,6 +188,7 @@ then
     cd build || exit 1
     cmake .. || exit 1
     make -j"$(get_cores)" || exit 1
+    exec "$SHELL"
 elif [ -f bam.lua ]
 then
     get_cpp
