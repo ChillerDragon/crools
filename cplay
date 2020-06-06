@@ -1,10 +1,10 @@
 #!/bin/bash
-# cplay - ChillerDragon 2019
+# cplay - ChillerDragon 2020
 # tool to launch a C playground enviroment
 # it uses vim and is optimized for my configuration
 # https://github.com/ChillerDragon/dotfiles/blob/master/vimrc
 
-version="v.0002"
+version="v.0003"
 ts_file=$(date "+%Y-%m-%d_%H:%M:%S.c")
 filename=$ts_file
 filepath=/tmp/cplay
@@ -14,7 +14,6 @@ local_dir=$(pwd)
 cd "$filepath" || { echo "Error: failed to cd into '$filepath'."; exit 1; }
 
 function do_local() {
-    filename=$1
     if [ "$filename" == "" ]
     then
         filename=$ts_file
@@ -24,47 +23,96 @@ function do_local() {
     cd "$local_dir" || { echo "Error: failed to cd into '$local_dir'"; exit 1; }
 }
 
-if [ $# -gt 0 ]
-then
-    filename=$1
-    if [ "$1" == "--help" ]
+function list_options() {
+    echo "Options:"
+    echo "  --local     do not change current working dir to /tmp/cplay"
+    echo "  --cpp       C++ instead of C"
+    echo "  --list      show recently edited files"
+}
+
+function parse_arg() {
+    local arg
+    arg="$1"
+    if [ "$arg" == "--help" ]
     then
         echo "cplay $version"
         echo "a C playground tool"
-        echo "usage: cplay [filename] [--local]"
+        echo "usage: cplay [OPTIONS..] [filename] [OPTIONS..]"
         echo ""
         echo "if no filname provided it uses current timestamp as filename"
         echo "files are saved under $filepath"
+        list_options
         exit
-    elif [ "$1" == "--local" ]
+    elif [ "$arg" == "--local" ]
     then
-        do_local "$2"
-    elif [ "$2" == "--local" ]
+        do_local
+    elif [ "$arg" == "--cpp" ]
     then
-        do_local "$1"
-    elif [ "$1" == "--list" ]
+        is_cpp=1
+    elif [ "$arg" == "--list" ]
     then
-        for f in "$filepath"/*.c
-        do
-            if [ -f "$f" ]; then
-                echo "$f"
-            else
-                echo "There are no cplay files."
-            fi
-        done
+        if [ "$is_cpp" == "1" ]
+        then
+            for f in "$filepath"/*.cpp
+            do
+                if [ -f "$f" ]; then
+                    echo "$f"
+                else
+                    echo "There are no cplay C++ files."
+                fi
+            done
+        else
+            for f in "$filepath"/*.c
+            do
+                if [ -f "$f" ]; then
+                    echo "$f"
+                else
+                    echo "There are no cplay C files."
+                fi
+            done
+        fi
         exit 0
-    fi
-    if [[ "$filename" =~ ^- ]]
-    then
-        echo "Error: filenames starting with - are not allowed."
+    else
+        echo "Error: invalid option '$arg'"
+        list_options
         exit 1
     fi
+}
+
+if [ $# -gt 0 ]
+then
+    # get filename first
+    for arg in "$@"
+    do
+        if ! [[ "$arg" =~ ^-- ]]
+        then
+            filename="$arg"
+        fi
+    done
+    # parse options second
+    for arg in "$@"
+    do
+        if [[ "$arg" =~ ^-- ]]
+        then
+            parse_arg "$arg"
+        fi
+    done
 fi
 
-if ! echo "$filename" | grep -q '\.c$'
+if [[ "$filename" =~ ^- ]]
+then
+    echo "Error: filenames starting with - are not allowed."
+    exit 1
+fi
+
+if ! echo "$filename" | grep -Eq '\.c(pp)?$'
 then
     echo "file extension missing '$filename'"
     filename="${filename}.c"
+fi
+if [ "$is_cpp" == "1" ] && ! echo "$filename" | grep -Eq '\.cpp$'
+then
+    filename="${filename}pp"
 fi
 echo "preparing file '$filename'"
 
