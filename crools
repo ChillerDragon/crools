@@ -19,5 +19,11 @@ then
 fi
 
 cd "$crools_dir" || exit 1
-git_save_pull
+
+if [ "$1" == "--dev" ]
+then
+    exec "$SHELL"
+else
+    git_save_pull
+fi
 
