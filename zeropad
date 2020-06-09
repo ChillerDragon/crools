@@ -1,0 +1,40 @@
+#!/bin/bash
+
+if [ "$#" == "0" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]
+then
+    echo "usage: $(basename "$0") <extension> [basename]"
+    echo "description: renames all files in current dir in ffmpeg rdy format"
+    echo "  img001.png img002.png img003.png ..."
+    echo "example: $(basename "$0") .png"
+    exit 0
+fi
+
+ext="$1"
+basename="${2:-img}"
+if ! [[ "$ext" =~ ^\. ]]
+then
+    ext=".$ext"
+fi
+
+echo "WARNING YOU ARE ABOUT TO RENAME ALL ./*.$ext"
+echo "THIS CAN NOT BE REVERTED"
+echo "FILES AFFECTED: $(find . -name "*$ext" | wc -l)"
+echo "do you want to continue? [y/N]"
+read -n 1 -rp "" inp
+echo ""
+if ! [[ $inp =~ ^[Yy]$ ]]
+then
+    echo "Aborting script..."
+    exit 1
+fi
+
+i=0;
+for img in ./*"$ext";
+do
+    num="$(printf "%03d" "$i")";
+    dst="$basename$num$ext";
+    printf "%s\\t\\t->\\t\\t%s\\n" "$img" "$dst"
+    mv "$img" "$dst"
+    i=$((i+1));
+done
+
