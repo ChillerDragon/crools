@@ -52,7 +52,7 @@ function check_conf() {
         edit_cnf
     fi
 }
-if [ "$1" == "--help" ]
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
     echo "usage: $(basename "$0") [--edit|--select|--no-browser|--list|--file <filepath>]"
     echo "description: upload screenshots via scp"
