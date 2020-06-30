@@ -19,7 +19,7 @@ url=$remote
 if [[ $remote =~ ^git@ ]]
 then
     echo "'$remote' is a ssh remote"
-    nocolon="${remote/:/\/}"
+    nocolon=${remote/:/\/}
     baseurl="${nocolon##*@}"
     site="${baseurl%%/*}"
     repo="${baseurl#*/}"
