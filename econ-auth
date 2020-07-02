@@ -1,0 +1,14 @@
+#!/usr/bin/expect
+# usage: econ-auth <host> <port> <pass>
+
+set timeout 20
+set password [lindex $argv 2];
+spawn nc [lindex $argv 0] [lindex $argv 1];
+expect "Enter password:"
+send "$password\n"
+
+# sleep 1
+# send "say admin connected via econ\n"
+
+interact
+
