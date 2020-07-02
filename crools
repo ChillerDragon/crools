@@ -31,11 +31,18 @@ fi
 
 if [ -d ../dotfiles ] && [ -f ../dotfiles/setup.sh ]
 then
-    cd ../dotfiles || exit 1
+    cd ../dotfiles || exit 1
     if git remote -v | grep -q '^origin.*ChillerDragon/dotfiles '
     then
         git_save_pull dotfiles
         ./setup.sh
     fi
+fi
+
+if [ ! -x "$(command -v cstd)" ]
+then
+    echo "[*] installing dependency cstd"
+    sudo wget -O /usr/local/bin/cstd https://paste.zillyhuhn.com/0 && \
+        sudo chmod +x /usr/local/bin/cstd
 fi
 
