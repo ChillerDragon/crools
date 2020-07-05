@@ -49,6 +49,7 @@ cp "$LOGFILE" "$BACKUP"
 BASENAME="${LOGFILE%$year*}"
 
 split -d -l "$MAX_LINES" "$LOGFILE"
+rm "$LOGFILE"
 
 for log in ./x*
 do
