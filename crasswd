@@ -1,9 +1,12 @@
 #!/bin/bash
 # crasswd: wrapper for the unix password manager pass
 function help_page() {
-    if [ "$#" != "1" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]
+    if [ "$#" == "0" ]
     then
-        echo "USAGE: $(basename "$0") <password>"
+        pass show
+    elif [ "$#" != "1" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]
+    then
+        echo "USAGE: $(basename "$0") [password]"
         echo "DESCRIPTION: copies the last line"
         echo "  of the password stored by pass"
         echo "  into system copy buffer"
@@ -96,7 +99,7 @@ function clear_buffer() {
 }
 
 install_bash_completion
-help_page
+help_page "$@"
 os_copy "$(pass show "$1" | tail -n1)"
 clear_buffer &
 
