@@ -1,3 +1,35 @@
-#!/bin/sh
-# crasswd: the password manager you should never use
-echo "-crash: $0: command not found"
+#!/bin/bash
+# crasswd: wrapper for the unix password manager pass
+if [ "$#" != "1" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]
+then
+    echo "usage: $(basename "$0") <password>"
+    echo "description: copies the last line"
+    echo "  of the password stored by pass"
+    echo "  into system copy buffer"
+    echo "  the buffer will clear after 45 sec"
+    echo "use case: multi line pass entrys"
+    echo "  starting with name/mail and ending"
+    echo "  with the password"
+    echo "example:"
+    echo "$(tput bold)$(basename "$0") path/to/pw$(tput sgr0)"
+    echo "executes 'pass show path/to/pw | tail -n1 | xsel -ib'"
+    exit 0
+fi
+
+function os_copy() {
+    if [ "$(uname)" == "Darwin" ]
+    then
+        echo "$1" | pbcopy
+    else
+        echo "$1" | xsel -ib
+    fi
+}
+
+function clear_buffer() {
+    sleep 45
+    os_copy ""
+}
+
+os_copy "$(pass show "$1" | tail -n1)"
+clear_buffer &
+
