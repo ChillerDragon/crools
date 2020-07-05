@@ -50,7 +50,7 @@ BASENAME="${LOGFILE%$year*}"
 
 split -d -l "$MAX_LINES" "$LOGFILE"
 
-for log in x*
+for log in ./x*
 do
     echo "logfile: $log"
     first_line="$(head -n1 "$log")"
