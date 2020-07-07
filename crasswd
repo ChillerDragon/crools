@@ -100,6 +100,6 @@ function clear_buffer() {
 
 install_bash_completion
 help_page "$@"
-os_copy "$(pass show "$1" | tail -n1)"
+os_copy "$(pass show "$1" | awk 'NF{p=$0}END{print p}')"
 clear_buffer &
 
