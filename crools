@@ -39,6 +39,16 @@ then
     fi
 fi
 
+function is_func() {
+    declare -f -F "$1" > /dev/null
+    return $?
+}
+
+if is_func pullpw
+then
+    pullpw
+fi
+
 if [ ! -x "$(command -v cstd)" ]
 then
     echo "[*] installing dependency cstd"
