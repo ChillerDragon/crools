@@ -40,10 +40,12 @@ function get_cores() {
 }
 
 function install_apt() {
-    if [ "$#" != "1" ]
+    if [ "$#" != "1" ] && [ "$#" != "2" ]
     then
         err "Error: install_dep invalid amount of arguments given"
-        err "       expected 1 got $#"
+        err "       expected 1 or 2got $#"
+        err "       usage: install_apt <package> [command]"
+        err "       example: install_apt build-essential gcc"
         exit 1
     fi
     local dep="$1"
@@ -204,6 +206,7 @@ then
     cargo build
 elif [ -f pom.xml ]
 then
+    install_dep maven mvn
     if grep -q 'maven-assembly-plugin' pom.xml
     then
         mvn assembly:assembly
