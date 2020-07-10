@@ -106,6 +106,16 @@ function get_cpp() {
     fi
 }
 
+function get_rust() {
+    if [ -x "$(command -v cargo)" ]
+    then
+        return
+    fi
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    echo ""
+    echo "[crools] restart shell to get rust in path"
+}
+
 function get_bam() {
     if [ -x "$(command -v bam)" ]
     then
@@ -203,6 +213,7 @@ then
     make
 elif [ -f Cargo.lock ] && [ -f Cargo.toml ]
 then
+    get_rust
     cargo build
 elif [ -f pom.xml ]
 then
