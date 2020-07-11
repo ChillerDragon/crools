@@ -11,6 +11,17 @@ function git_save_pull() {
 	echo "[*] updating $repo ..."
     git pull
 }
+function is_func() {
+    declare -f -F "$1" > /dev/null
+    return $?
+}
+function is_apple() {
+    if [[ "$OSTYPE" == "darwin"* ]]
+    then
+        return 0
+    fi
+    return 1
+}
 
 crools_dir="${0%/*}"
 if [ ! -d "$crools_dir" ]
@@ -39,11 +50,6 @@ then
     fi
 fi
 
-function is_func() {
-    declare -f -F "$1" > /dev/null
-    return $?
-}
-
 if is_func pullpw
 then
     pullpw
@@ -54,5 +60,28 @@ then
     echo "[*] installing dependency cstd"
     sudo wget -O /usr/local/bin/cstd https://paste.zillyhuhn.com/0 && \
         sudo chmod +x /usr/local/bin/cstd
+fi
+
+shellrc=~/.bashrc
+if is_apple
+then
+    shellrc=~/.bash_profile
+fi
+
+if ! echo "$PATH" | grep -q crools
+then
+    echo "[*] adding crools to path ..."
+    echo "export PATH=\"\$PATH:$crools_dir\"" >> "$shellrc"
+fi
+
+if ! is_func whereami && ! grep -q whereami "$shellrc"
+then
+    echo "[*] installing shell functions ..."
+    echo '
+whereami() {
+    echo "STY: $STY"
+    ps wwf -s $$
+}
+    ' >> "$shellrc"
 fi
 
