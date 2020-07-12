@@ -1,0 +1,175 @@
+#!/bin/bash
+# crackman - your favorite unorganized crack manager
+# its like a package manager but its crack
+
+MIRROR=https://zillyhuhn.com/crack
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_TMP_PATH="$HOME/.config/crools/crackman/tmp"
+
+function show_help() {
+    echo "usage: $(tput bold)crackman [install|upgrade|search|list] [ARGS...]$(tput sgr0)"
+    echo "install:       takes package names as arg"
+    echo "remove:        takes package names as arg"
+    echo "upgrade:       takes package names as arg"
+    echo "purge:         takes no args and deletes all packages"
+    echo "search-local:  takes a regex as arg"
+    echo "search-remote: takes a regex as arg"
+    echo "list-local:    takes no arguments and lists all packages"
+    echo "list-remote:   takes no arguments and lists all packages"
+    exit 0
+}
+
+function is_apple() {
+    if [[ "$OSTYPE" == "darwin"* ]]
+    then
+        return 0
+    fi
+    return 1
+}
+
+function err() {
+    echo "[!] $1"
+}
+
+function log() {
+    echo "[*] $1"
+}
+
+function cm_doctor() {
+    local shellrc
+    if [ ! -d "$CM_BIN_PATH" ]
+    then
+        mkdir -p "$CM_BIN_PATH" || exit 1
+    fi
+    if [ ! -d "$CM_TMP_PATH" ]
+    then
+        mkdir -p "$CM_TMP_PATH" || exit 1
+    fi
+    if ! echo "$PATH" | grep -q "$CM_BIN_PATH" 
+    then
+        shellrc=~/.bashrc
+        if is_apple
+        then
+            shellrc=~/.bash_profile
+        fi
+        if grep -q "$CM_BIN_PATH" "$shellrc"
+        then
+            err "PATH error restart your shell"
+            exit 1
+        else
+            echo "export PATH=\"\$PATH:$CM_BIN_PATH\"" >> "$shellrc"
+        fi
+    fi
+    if [ ! -x "$(command -v wget)" ]
+    then
+        err "missing depedency wget"
+        exit 1
+    fi
+}
+
+function cm_check_pack() {
+    local pack=$1
+    if [[ ! "$pack" =~ ^[0-9a-zA-Z_-]*$ ]]
+    then
+        err "invalid package name '$pack'"
+        exit 1
+    fi
+	wget -O "$CM_TMP_PATH/LISTING" "$MIRROR/LISTING"
+    if ! grep -q "^$pack " "$CM_TMP_PATH/LISTING"
+    then
+        err "no such package '$pack'"
+        exit 1
+    fi
+}
+
+function cm_install() {
+    local pack=$1
+    cm_doctor
+    cm_check_pack "$pack"
+    if [ "$1" == "" ]
+    then
+        err "install requires a package name"
+        exit 1
+    fi
+    if [ -f "$CM_BIN_PATH/$pack" ]
+    then
+        log "'$pack' is installed already"
+        exit 0
+    fi
+    if wget -O "$CM_BIN_PATH/$pack" "$MIRROR/$pack"
+    then
+        chmod +x "$CM_BIN_PATH/$pack" || exit 1
+        log "installed '$pack'"
+    else
+        err "failed to install '$pack'"
+    fi
+}
+
+function cm_remove() {
+    local pack=$1
+    cm_doctor
+    cm_check_pack "$pack"
+    if [ "$1" == "" ]
+    then
+        err "remove requires a package name"
+        exit 1
+    fi
+    if [ ! -f "$CM_BIN_PATH/$pack" ]
+    then
+        err "package is not installed"
+        exit 1
+    fi
+    rm "$CM_BIN_PATH/$pack" || exit 1
+    log "removed '$pack'"
+}
+
+if [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]
+then
+    show_help
+elif [ "$1" == "install" ]
+then
+    cm_install "$2"
+elif [ "$1" == "remove" ]
+then
+    cm_remove "$2"
+elif [ "$1" == "list-local" ]
+then
+    ls "$CM_BIN_PATH"
+elif [ "$1" == "list-remote" ]
+then
+	wget -O "$CM_TMP_PATH/LISTING" "$MIRROR/LISTING"
+    cat "$CM_TMP_PATH/LISTING"
+elif [ "$1" == "purge" ]
+then
+    for p in "$CM_BIN_PATH"/*
+    do
+        if [ "$(basename "$p")" == "*" ]
+        then
+            err "no packages installed"
+            exit 1
+        fi
+        cm_remove "$(basename "$p")"
+    done
+else
+    show_help
+fi
+
+# #!/bin/bash
+# # crackman_listing.sh - running on mirror server
+# if [ ! -f LISTING ]
+# then
+#     touch LISTING
+# fi
+# for pack in ./*
+# do
+#     p="${pack:2}"
+#     if [ "$p" == "$(basename "$0")" ] || [ "$p" == "LISTING" ]
+#     then
+#         continue
+#     fi
+#     if ! grep -q "^$p " LISTING
+#     then
+#         echo "$p (no description)" >> LISTING
+#     fi
+# done
+
