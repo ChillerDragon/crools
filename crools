@@ -79,9 +79,9 @@ then
     echo "[*] installing shell functions ..."
     echo '
 whereami() {
-    echo "STY: $STY"
+    echo -e "STY: \033[0;31m$STY\033[0m"
     ps wwf -s $$
 }
-    ' >> "$shellrc"
+' >> "$shellrc"
 fi
 
