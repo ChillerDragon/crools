@@ -70,8 +70,11 @@ fi
 
 if ! echo "$PATH" | grep -q crools
 then
-    echo "[*] adding crools to path ..."
-    echo "export PATH=\"\$PATH:$crools_dir\"" >> "$shellrc"
+    if [ -f zzh ] && [ -f crools ]
+    then
+        echo "[*] adding crools to path ..."
+        echo "export PATH=\"\$PATH:$(pwd)\"" >> "$shellrc"
+    fi
 fi
 
 if ! is_func whereami && ! grep -q whereami "$shellrc"
