@@ -38,8 +38,8 @@ then
         exit
     fi
 fi
-echo "$buffer" > /tmp/bstd.tmp
+echo "$buffer" > "/tmp/bstd_$USER.tmp"
 paste=$(cstd /tmp/bstd.tmp)
 echo "$paste"
-os_copy $paste
+os_copy "$paste"
 
