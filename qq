@@ -16,7 +16,7 @@ function os_paste() {
 }
 clip="$(os_paste)"
 firefox "$clip"
-# ssh user@remote "firefox $clip"
+# ssh user@remote "export DISPLAY=:1;firefox $clip"
 EOF
 
 function check_conf() {
