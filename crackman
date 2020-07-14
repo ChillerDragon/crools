@@ -123,6 +123,19 @@ function cm_remove() {
     log "removed '$pack'"
 }
 
+function list_remote() {
+    local name
+    local desc
+	wget -O "$CM_TMP_PATH/LISTING" "$MIRROR/LISTING"
+    while read -r line
+    do
+        name="${line%% *}"
+        desc="${line#*$name }"
+        echo "$(tput bold)$name$(tput sgr0)"
+        echo "  $desc"
+    done < "$CM_TMP_PATH/LISTING"
+}
+
 if [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
     show_help
@@ -137,8 +150,7 @@ then
     ls "$CM_BIN_PATH"
 elif [ "$1" == "list-remote" ]
 then
-	wget -O "$CM_TMP_PATH/LISTING" "$MIRROR/LISTING"
-    cat "$CM_TMP_PATH/LISTING"
+    list_remote
 elif [ "$1" == "purge" ]
 then
     for p in "$CM_BIN_PATH"/*
