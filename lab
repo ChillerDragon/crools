@@ -7,10 +7,13 @@ then
 fi
 
 tmux new-session -d
-tmux send-keys 'cd /home/chiller/Desktop/git/teeworlds' C-m
+tmux send-keys 'cd /home/chiller/Desktop/git/teeworlds/build' C-m C-m
+tmux send-keys 'cmake .. && ./teeworlds'
 tmux split-window -h
-tmux send-keys 'cd /home/chiller/.teeworlds/maps' C-m
+tmux send-keys 'cd /home/chiller/.teeworlds/maps' C-m C-m
+tmux send-keys 'git status'
 tmux split-window -v
-tmux send-keys 'cd /home/chiller/Desktop/git/teeworlds/datasrc/editor/automap' C-m
+tmux send-keys 'cd /home/chiller/Desktop/git/teeworlds/datasrc/editor/automap' C-m C-m
+tmux send-keys 'code .'
 tmux a -t 0
 
