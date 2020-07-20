@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if tmux ls;
+then
+    echo "Error: lab running already"
+    exit 1
+fi
+
+tmux new-session -d
+tmux send-keys 'cd /home/chiller/Desktop/git/teeworlds' C-m
+tmux split-window -h
+tmux send-keys 'cd /home/chiller/.teeworlds/maps' C-m
+tmux split-window -v
+tmux send-keys 'cd /home/chiller/Desktop/git/teeworlds/datasrc/editor/automap' C-m
+tmux a -t 0
+
