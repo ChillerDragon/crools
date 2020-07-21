@@ -39,7 +39,7 @@ then
     fi
 fi
 echo "$buffer" > "/tmp/bstd_$USER.tmp"
-paste=$(cstd /tmp/bstd.tmp)
+paste=$(cstd "/tmp/bstd_$USER.tmp")
 echo "$paste"
 os_copy "$paste"
 
