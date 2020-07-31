@@ -8,5 +8,5 @@
 #
 # screen -r crools_weechat_irc
 
-ssh -t chiller@zillyhuhn.com "screen -r irc"
+ssh -t "$(zzh --host 1)" "screen -r irc"
 
