@@ -1,12 +1,39 @@
 #!/bin/bash
-# proc="$(ps aux | grep 'SCREEN.*crools_weechat_irc' | grep -v grep)"
-# if [ "$proc" == "" ]
-# then
-#     echo "[*] starting weechat"
-#     screen -AmdS crools_weechat_irc /usr/bin/weechat
-# fi
-#
-# screen -r crools_weechat_irc
 
-ssh -t "$(zzh --host 1)" "screen -r irc"
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]
+then
+    echo "usage: $(basename "$1") [ZZH HOSTNUM|--local]"
+    echo "description: opens weechat irc client"
+    echo "options:"
+    echo "    without options it trys the first zzh host"
+    echo ""
+    echo "  ZZH HOSTNUM"
+    echo "    providing a digit will pick corresponding zzh host"
+    echo "    order your zzh hosts using: zzh --edit"
+    echo ""
+    echo "  --local"
+    echo "    uses irc client on current machine"
+    exit 0
+fi
+
+if [ "$1" == "--local" ]
+then
+    if [ ! -x "$(command -v weechat)" ]
+    then
+        echo "Error: install weechat to use irc"
+        exit 1
+    fi
+    proc="$(ps aux | grep 'SCREEN.*crools_weechat_irc' | grep -v grep)"
+    if [ "$proc" == "" ]
+    then
+        echo "[*] starting weechat"
+        screen -AmdS crools_weechat_irc /usr/bin/weechat
+    fi
+
+    screen -r crools_weechat_irc
+    exit 0
+fi
+
+HOST="${1:-1}"
+ssh -t "$(zzh --host "$HOST")" "screen -r irc"
 

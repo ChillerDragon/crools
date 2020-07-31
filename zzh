@@ -43,7 +43,7 @@ elif [ "$1" == "--host" ]
 then
     ishost=1
     shift
-    if [ "$#" == "0" ]
+    if ! [[ "$1" =~ ^[1-9][0-9]*$ ]]
     then
         echo "usage: $(basename "$0") --host <number>"
         exit 1
