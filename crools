@@ -40,15 +40,17 @@ else
     git_save_pull
 fi
 
-if [ -d ../dotfiles ] && [ -f ../dotfiles/setup.sh ]
-then
-    cd ../dotfiles || exit 1
-    if git remote -v | grep -q '^origin.*ChillerDragon/dotfiles '
+(
+    if [ -d ../dotfiles ] && [ -f ../dotfiles/setup.sh ]
     then
-        git_save_pull dotfiles
-        ./setup.sh
+        cd ../dotfiles || exit 1
+        if git remote -v | grep -q '^origin.*ChillerDragon/dotfiles '
+        then
+            git_save_pull dotfiles
+            ./setup.sh
+        fi
     fi
-fi
+)
 
 if is_func pullpw
 then
@@ -68,9 +70,9 @@ then
     shellrc=~/.bash_profile
 fi
 
-if ! echo "$PATH" | grep -q crools
+if ! grep -q "^export PATH=.*$(pwd)" "$shellrc"
 then
-    if [ -f zzh ] && [ -f crools ]
+    if [ -f ./zzh ] && [ -f ./crools ]
     then
         echo "[*] adding crools to path ..."
         echo "export PATH=\"\$PATH:$(pwd)\"" >> "$shellrc"
