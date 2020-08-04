@@ -4,6 +4,7 @@ conf_dir=~/.config/crools
 conf=~/.config/crools/zzh.cnf
 ismosh=0
 ishost=0
+pattern=""
 arg=""
 function edit_cnf() {
     if [ ! -f $conf ]
@@ -36,8 +37,15 @@ function check_conf() {
 }
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
-    echo "usage: $(basename "$0") [--edit|--host <number>|connection number]"
-    echo "quick select ssh connections"
+    echo "usage: $(tput bold)$(basename "$0") [OPTION]$(tput sgr0)"
+    echo "description:"
+    echo "  quick select ssh connections"
+    echo "options:"
+    echo "  $(tput bold)--edit$(tput sgr0)          edit config"
+    echo "  $(tput bold)--host <number>$(tput sgr0) get hostname by number"
+    echo "  $(tput bold)--help$(tput sgr0)          show this help"
+    echo "  $(tput bold)<number>$(tput sgr0)        skip menu and go to number"
+    echo "  $(tput bold)/<pattern>$(tput sgr0)      chose first entry matching <pattern>"
     exit 0
 elif [ "$1" == "--host" ]
 then
@@ -52,6 +60,9 @@ elif [ "$1" == "--edit" ] || [ "$1" == "-e" ]
 then
     edit_cnf
     exit 0
+elif [ "${1:0:1}" == "/" ]
+then
+    pattern="${1:1}"
 elif [ "$1" == "--mosh" ]
 then
     ismosh=1
@@ -96,6 +107,22 @@ if [ $lines -eq 1 ]
 then
     eval "${options[0]}"
     exit 0
+fi
+
+# match entry
+if [ "$pattern" != "" ]
+then
+    for entry in "${options[@]}"
+    do
+        if [[ "${entry,,}" =~ ${pattern,,} ]]
+        then
+            echo "[zzh] matched '$entry'"
+            eval "$entry"
+            exit 0
+        fi
+    done
+    echo "pattern not found"
+    exit 1
 fi
 
 # arg entry
