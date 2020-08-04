@@ -5,7 +5,7 @@ conf=~/.config/crools/zzh.cnf
 ismosh=0
 ishost=0
 pattern=""
-arg=""
+arg_num=""
 function edit_cnf() {
     if [ ! -f $conf ]
     then
@@ -37,13 +37,14 @@ function check_conf() {
 }
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
-    echo "usage: $(tput bold)$(basename "$0") [OPTION]$(tput sgr0)"
+    echo "usage: $(tput bold)$(basename "$0") [OPTION]...$(tput sgr0)"
     echo "description:"
     echo "  quick select ssh connections"
     echo "options:"
     echo "  $(tput bold)--edit$(tput sgr0)          edit config"
     echo "  $(tput bold)--host <number>$(tput sgr0) get hostname by number"
     echo "  $(tput bold)--help$(tput sgr0)          show this help"
+    echo "  $(tput bold)--mosh$(tput sgr0)          use mosh instead of ssh"
     echo "  $(tput bold)<number>$(tput sgr0)        skip menu and go to number"
     echo "  $(tput bold)/<pattern>$(tput sgr0)      chose first entry matching <pattern>"
     exit 0
@@ -60,19 +61,26 @@ elif [ "$1" == "--edit" ] || [ "$1" == "-e" ]
 then
     edit_cnf
     exit 0
-elif [ "${1:0:1}" == "/" ]
-then
-    pattern="${1:1}"
-elif [ "$1" == "--mosh" ]
-then
-    ismosh=1
-    shift
 fi
-if [[ "$1" =~ ^[1-9][0-9]*$ ]]
-then
-    arg="$1"
-    arg="$((arg-1))"
-fi
+
+for arg in "$@"
+do
+    if [ "${arg:0:1}" == "/" ]
+    then
+        pattern="${arg:1}"
+    elif [ "$arg" == "--mosh" ]
+    then
+        ismosh=1
+    elif [[ "$arg" =~ ^[1-9][0-9]*$ ]]
+    then
+        arg_num="$arg"
+        arg_num="$((arg_num-1))"
+    else
+        echo "[zzh] Error: invalid argument '$arg'"
+        echo "[zzh]        try $(basename "$0") --help"
+        exit 1
+    fi
+done
 
 check_conf
 if [ ! -f $conf ]
@@ -125,19 +133,19 @@ then
     exit 1
 fi
 
-# arg entry
-if [ "$arg" != "" ]
+# arg_num entry
+if [ "$arg_num" != "" ]
 then
-    if [ "${#options[@]}" -lt "$arg" ]
+    if [ "${#options[@]}" -lt "$arg_num" ]
     then
-        echo "Error: selected item $arg out of ${#options[@]}"
+        echo "Error: selected item $arg_num out of ${#options[@]}"
         exit 1
     fi
     if [ "$ishost" == "1" ]
     then
-        echo "${options[$arg]}" | cut -d' ' -f2
+        echo "${options[$arg_num]}" | cut -d' ' -f2
     else
-        eval "${options[$arg]}"
+        eval "${options[$arg_num]}"
     fi
     exit 0
 fi
