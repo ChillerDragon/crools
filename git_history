@@ -18,8 +18,8 @@ pattern=$1
 
 echo "searching for pattern '$pattern' ..."
 git rev-list --all | (
-    while read revision; do
-        git grep "$pattern" $revision
+    while read -r revision; do
+        git grep "$pattern" "$revision"
     done
 )
 
