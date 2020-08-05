@@ -154,12 +154,14 @@ fi
 PS3='Select ssh connection: '
 select opt in "${options[@]}"
 do
-    if [[ " ${options[@]} " =~ " ${opt} " ]]
-    then
-        eval "$opt"
-        exit 0
-    else
-        echo "invalid option $REPLY"
-    fi
+    for o in "${options[@]}"
+    do
+        if [[ "$o" == "$opt" ]]
+        then
+            eval "$opt"
+            exit 0
+        fi
+    done
+    echo "invalid option $REPLY"
 done
 
