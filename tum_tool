@@ -2,11 +2,10 @@
 # tool that does my homework for university
 
 pgdp_path=~/Desktop/uni/pgdp
-eclipse_logfile=/tmp/uni_eclipse.log
 version="0.0.1"
 
 figlet "TUM homework"
-cd "$pgdp_path"
+cd "$pgdp_path" || exit 1
 ex="invalid_exercises"
 
 function err()
@@ -28,7 +27,7 @@ then
     ex="${ex%.*}" # chop of .git
     echo "navigating to exercises '$ex'"
 else
-    ex=$(ls -d pgdp* | grep "h" | sort | tail -n1)
+    ex=$(grep "h" ./pgdp*/ | sort | tail -n1)
     if [ ! -d "$ex" ]
     then
         err "invalid path '$ex'"
@@ -37,7 +36,7 @@ else
     echo "latest homework is '$ex'"
 fi
 
-cd "$ex"
+cd "$ex" || exit 1
 echo " -- global git ---"
 git config --global user.name
 git config --global user.email
