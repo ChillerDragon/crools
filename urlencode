@@ -8,4 +8,4 @@ then
     echo 'printf "$*" | urlencodepipe'
     exit 0
 fi
-printf "$*" | urlencodepipe
+printf "%s" "$*" | urlencodepipe
