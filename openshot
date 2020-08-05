@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1117
 
 cat << EOF
                       _
@@ -14,21 +15,21 @@ EOF
 OPENSHOT=/home/$USER/Desktop/git-extern/openshot-qt
 LIBOPENSHOT=/home/$USER/Desktop/git-extern/libopenshot
 
-if [ ! -d $OPENSHOT ]
+if [ ! -d "$OPENSHOT" ]
 then
 	echo "Error: openshot-qt is not installed at expected location"
 	echo "$OPENSHOT"
 	exit 1
 fi
 
-if [ ! -d $LIBOPENSHOT ]
+if [ ! -d "$LIBOPENSHOT" ]
 then
 	echo "Error: libopenshot is not installed at expected location"
 	echo "$LIBOPENSHOT"
 	exit 1
 fi
 
-cd $OPENSHOT || exit 1
+cd "$OPENSHOT" || exit 1
 export PYTHONPATH=$LIBOPENSHOT/build/src/bindings/python
 python3 src/launch.py
 
