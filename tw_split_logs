@@ -5,69 +5,128 @@
 
 MAX_LINES=100000
 LOGFILE=invalid.txt
-FILE_EXTENSION=txt
-BASENAME=sample_srv_
 
 mkdir -p /tmp/tw_split || exit 1
 
-if [ "$#" == "1" ]
+function bold() {
+    tput bold
+    echo "$*"
+    tput sgr0
+}
+
+function show_help() {
+    echo "usage: $(basename "$0") [OPTIONS]"
+    echo "options:"
+    echo "  filename        file to split"
+    echo "  <MAX_LINES>     split chunk size"
+    echo "  --auto          split all big files in current dir"
+    echo "examples:"
+    bold "  $(basename "$0") 2020-05-21_21-18-00.log"
+    echo "    split logfile into $MAX_LINES lines chunks"
+    echo ""
+    bold "  $(basename "$0") foo.log 20"
+    echo "    split logfile into 20 lines chunks"
+    echo ""
+    bold "  $(basename "$0") --auto"
+    echo "    split all logfiles in current dir that are too big"
+}
+
+if [ "$1" == "--help" ] || [ "$1" == "-h" ] || [ "$#" == "0" ]
 then
-    LOGFILE="$1"
-elif [ "$#" == "2" ]
-then
-    LOGFILE="$1"
-    MAX_LINES="$2"
-    if [[ ! $MAX_LINES =~ ^[0-9]*$ ]]
-    then
-        echo "Error: MAX_LINES has to be numeric!"
-        echo "       '$MAX_LINES' is not a number!"
-        exit 1
-    fi
-else
-    echo "usage: $(basename "$0") <tw logfile> [MAX_LINES]"
-    exit 1
+    show_help
+    exit 0
 fi
 
-if [ ! -f "$LOGFILE" ]
-then
-    echo "invalid logfile."
-    exit 1
-fi
+IS_AUTO=0
 
-year="$(date +'%Y')"
-FILE_EXTENSION="${LOGFILE##*.}"
-FILE_TS="${LOGFILE##*$year}"
-FILE_TS="$year${FILE_TS%.*}"
-
-mkdir -p "$FILE_TS" || exit 1
-
-mv "$LOGFILE" "$FILE_TS" || exit 1
-cd "$FILE_TS" || exit 1
-
-BACKUP="/tmp/tw_split/$LOGFILE.bak"
-cp "$LOGFILE" "$BACKUP"
-BASENAME="${LOGFILE%$year*}"
-
-split -d -l "$MAX_LINES" "$LOGFILE"
-rm "$LOGFILE"
-
-for log in ./x*
+for arg in "$@"
 do
-    echo "logfile: $log"
-    first_line="$(head -n1 "$log")"
-    if [[ "$first_line" =~ ^\[(.*)\]\[ ]]
+    # OPTIONS
+    if [ "${arg:0:2}" == "--" ]
     then
-        ts_raw="${BASH_REMATCH[1]}"
-        ts="$(echo "$ts_raw" | sed 's/:/-/g' | sed 's/ /_/g')"
-        mv "$log" "${BASENAME}${ts}.${FILE_EXTENSION}"
+        if [ "$arg" == "--auto" ]
+        then
+            IS_AUTO=1
+        else
+            echo "unkown option '$arg' try --help"
+            exit 1
+        fi
+    fi
+
+    # FILE OR LINENUM
+    if [[ "$arg" =~ ^[0-9]*$ ]]
+    then
+        MAX_LINES="$arg"
     else
-        echo "Could not parse teeworlds time stamp"
-        exit 1
+        LOGFILE="$arg"
     fi
 done
 
-echo "finished!"
-echo "replaced file '$LOGFILE'"
-echo "with the folder '$FILE_TS'"
-echo "original file was moved to '$BACKUP'"
+function split_log() {
+    # usage: split_log <filename>
+    local year
+    local backup
+    local basename
+    local file_ext
+    local file_ts
+    local logfile
+    logfile="$1"
+    year="$(date +'%Y')"
+    file_ext="${logfile##*.}"
+    file_ts="${logfile##*$year}"
+    file_ts="$year${file_ts%.*}"
+    if [ ! -f "$logfile" ]
+    then
+        echo "invalid logfile $logfile"
+        exit 1
+    fi
+
+    mkdir -p "$file_ts" || exit 1
+
+    mv "$logfile" "$file_ts" || exit 1
+    cd "$file_ts" || exit 1
+
+    backup="/tmp/tw_split/$logfile.bak"
+    cp "$logfile" "$backup"
+    basename="${logfile%$year*}"
+
+    split -d -l "$MAX_LINES" "$logfile"
+    rm "$logfile"
+
+    for log in ./x*
+    do
+        echo "logfile: $log"
+        first_line="$(head -n1 "$log")"
+        if [[ "$first_line" =~ ^\[(.*)\]\[ ]]
+        then
+            ts_raw="${BASH_REMATCH[1]}"
+            ts="$(echo "$ts_raw" | sed 's/:/-/g' | sed 's/ /_/g')"
+            mv "$log" "${basename}${ts}.${file_ext}"
+        else
+            echo "Could not parse teeworlds time stamp"
+            exit 1
+        fi
+    done
+
+    echo "finished!"
+    echo "replaced file '$logfile'"
+    echo "with the folder '$file_ts'"
+    echo "original file was moved to '$backup'"
+}
+
+if [ "$IS_AUTO" == "1" ]
+then
+    for f in ./*.log ./*.txt
+    do
+        [[ -e "$f" ]] || { echo "no logfiles found."; exit 1; }
+
+        lines="$(wc -l "$f" | cut -d' ' -f1)"
+        if [ "$lines" -gt "$((MAX_LINES * 2))" ]
+        then
+            split_log "$f"
+        fi
+    done
+else
+    split_log "$LOGFILE"
+fi
 
