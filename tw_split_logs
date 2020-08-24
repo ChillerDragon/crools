@@ -85,7 +85,7 @@ function split_log() {
     if [ "$lines" -lt "$((MAX_LINES * 2))" ]
     then
         echo "skipping file because it has less than $((MAX_LINES * 2)) lines:"
-        wc -l "$lines"
+        wc -l "$logfile"
         return
     fi
 
