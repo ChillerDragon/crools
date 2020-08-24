@@ -81,7 +81,7 @@ function split_log() {
         echo "invalid logfile $logfile"
         exit 1
     fi
-    lines="$(wc -l "$f" | cut -d' ' -f1)"
+    lines="$(wc -l "$logfile" | cut -d' ' -f1)"
     if [ "$lines" -lt "$((MAX_LINES * 2))" ]
     then
         echo "skipping file because it has less than $((MAX_LINES * 2)) lines:"
