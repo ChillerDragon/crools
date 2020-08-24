@@ -67,6 +67,7 @@ function split_log() {
     local year
     local backup
     local basename
+    local lines
     local file_ext
     local file_ts
     local logfile
@@ -79,6 +80,13 @@ function split_log() {
     then
         echo "invalid logfile $logfile"
         exit 1
+    fi
+    lines="$(wc -l "$f" | cut -d' ' -f1)"
+    if [ "$lines" -lt "$((MAX_LINES * 2))" ]
+    then
+        echo "skipping file because it has less than $((MAX_LINES * 2)) lines:"
+        wc -l "$lines"
+        return
     fi
 
     mkdir -p "$file_ts" || exit 1
@@ -120,11 +128,7 @@ then
     do
         [[ -e "$f" ]] || { echo "no logfiles found."; exit 1; }
 
-        lines="$(wc -l "$f" | cut -d' ' -f1)"
-        if [ "$lines" -gt "$((MAX_LINES * 2))" ]
-        then
-            split_log "$f"
-        fi
+        split_log "$f"
     done
 else
     split_log "$LOGFILE"
