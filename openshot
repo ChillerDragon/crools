@@ -12,21 +12,131 @@ OPENSHOT-QT LAUNCH FROM SOURCE SCRIPT
 
 EOF
 
-OPENSHOT=/home/$USER/Desktop/git-extern/openshot-qt
-LIBOPENSHOT=/home/$USER/Desktop/git-extern/libopenshot
+OPENSHOT_ROOT=/home/$USER/Desktop/git-extern
+OPENSHOT="$OPENSHOT_ROOT/openshot-qt"
+LIBOPENSHOT="$OPENSHOT_ROOT/libopenshot"
+
+function v_eval() {
+    # verbose eval
+    tput bold
+    echo "$*"
+    tput sgr0
+    eval "$*"
+}
+
+function install_openshot() {
+    echo "do you want to install openshot? [y/N]"
+    read -r -n 1 yn
+    echo ""
+    if ! [[ "$yn" =~ [yY] ]]
+    then
+        exit 1
+    fi
+
+    mkdir -p "$OPENSHOT_ROOT" || exit 1
+    cd "$OPENSHOT_ROOT" || exit 1
+
+    # DEPENDENCIES
+    if [ "$(grep -Ei 'debian|buntu|mint' /etc/*release)" ]
+    then
+		sudo apt-get install \
+			cmake \
+			libx11-dev \
+			libasound2-dev \
+			libavcodec-dev \
+			libavdevice-dev \
+			libavfilter-dev \
+			libavformat-dev \
+			libavresample-dev \
+			libavutil-dev \
+			libfdk-aac-dev \
+			libfreetype6-dev \
+			libjsoncpp-dev \
+			libmagick++-dev \
+			libswscale-dev \
+			libunittest++-dev \
+			libxcursor-dev \
+			libxinerama-dev \
+			libxrandr-dev \
+			libzmq3-dev \
+			pkg-config \
+			python3-dev \
+			qtbase5-dev \
+			qtmultimedia5-dev \
+            swig
+    else
+        echo "Error: unsupported distribution"
+        exit 1
+    fi
+
+    # AUDIO
+    v_eval "git clone https://github.com/OpenShot/libopenshot-audio.git"
+    (
+        v_eval "cd libopenshot-audio || exit 1"
+        v_eval "git pull"
+        v_eval "mkdir -p build || exit 1"
+        v_eval "cd build || exit"
+        v_eval "cmake .. || exit 1"
+        v_eval "make || exit 1"
+        v_eval "sudo make install || exit 1"
+    ) || exit 1
+
+    # LIB
+    v_eval "git clone https://github.com/OpenShot/libopenshot.git"
+    (
+        v_eval "cd libopenshot || exit 1"
+        v_eval "git pull"
+        v_eval "mkdir -p build || exit 1"
+        v_eval "cd build || exit 1"
+        v_eval "cmake .. || exit 1"
+        v_eval "make || exit 1"
+        v_eval "sudo make install || exit 1"
+    ) || exit 1
+
+
+    # QT
+    v_eval "git clone https://github.com/OpenShot/openshot-qt"
+    (
+        v_eval "cd openshot-qt || exit 1"
+        v_eval "git pull"
+    ) || exit 1
+}
 
 if [ ! -d "$OPENSHOT" ]
 then
-	echo "Error: openshot-qt is not installed at expected location"
-	echo "$OPENSHOT"
-	exit 1
+    echo "Error: openshot-qt is not installed at expected location"
+    echo "$OPENSHOT"
+    install_openshot
+    exit 1
 fi
 
 if [ ! -d "$LIBOPENSHOT" ]
 then
-	echo "Error: libopenshot is not installed at expected location"
-	echo "$LIBOPENSHOT"
-	exit 1
+    echo "Error: libopenshot is not installed at expected location"
+    echo "$LIBOPENSHOT"
+    install_openshot
+    exit 1
+fi
+
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]
+then
+    echo "usage: openshot [OPTIONS]"
+    echo "description: openshot-qt wrapper by ChillerDragon"
+    echo "  powered by crools script"
+    echo "options:"
+    echo "  --reinstall  delete and install"
+    echo "  --install    download and build from source"
+    echo "  --update     same as install"
+    exit 0
+elif [ "$1" == "--install" ] || [ "$1" == "--update" ]
+then
+    install_openshot force
+elif [ "$1" == "--reinstall" ]
+then
+    rm -rf "$OPENSHOT_ROOT"/libopenshot
+    rm -rf "$OPENSHOT_ROOT"/libopenshot-audio
+    rm -rf "$OPENSHOT_ROOT"/openshot-qt
+    install_openshot force
 fi
 
 cd "$OPENSHOT" || exit 1
