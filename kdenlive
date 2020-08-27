@@ -1,0 +1,126 @@
+#!/bin/bash
+# shellcheck disable=SC1117
+
+cat << EOF
+                      _
+  ___ _ __ ___   ___ | |___
+ / __| '__/ _ \ / _ \| / __|
+| (__| | | (_) | (_) | \__ \\
+ \___|_|  \___/ \___/|_|___/
+
+KDENLIVE LAUNCH FROM SOURCE SCRIPT
+
+EOF
+
+KDENLIVE_ROOT=/home/$USER/Desktop/git-extern
+KDENLIVE="$KDENLIVE_ROOT/kdenlive"
+MLT="$KDENLIVE_ROOT/mlt"
+
+function v_eval() {
+    # verbose eval
+    tput bold
+    echo "$*"
+    tput sgr0
+    eval "$*"
+}
+
+function install_kdenlive() {
+    echo "do you want to install kdenlive? [y/N]"
+    read -r -n 1 yn
+    echo ""
+    if ! [[ "$yn" =~ [yY] ]]
+    then
+        exit 1
+    fi
+
+    mkdir -p "$KDENLIVE_ROOT" || exit 1
+    cd "$KDENLIVE_ROOT" || exit 1
+
+    # DEPENDENCIES
+    if [ "$(grep -Ei 'debian|buntu|mint' /etc/*release)" ]
+    then
+        # remove collisions
+        sudo apt remove kdenlive kdenlive-data
+
+        # dependencies
+        sudo apt install build-essential git cmake extra-cmake-modules libsm-dev
+
+        sudo apt install libkf5archive-dev libkf5bookmarks-dev libkf5coreaddons-dev libkf5config-dev \
+            libkf5configwidgets-dev libkf5dbusaddons-dev libkf5kio-dev libkf5widgetsaddons-dev \
+            libkf5notifyconfig-dev libkf5newstuff-dev libkf5xmlgui-dev libkf5declarative-dev \
+            libkf5notifications-dev libkf5guiaddons-dev libkf5textwidgets-dev libkf5purpose-dev \
+            libkf5iconthemes-dev kdoctools-dev libkf5crash-dev libkf5filemetadata-dev  kio \
+            kinit qtdeclarative5-dev libqt5svg5-dev qml-module-qtquick-controls \
+            qtmultimedia5-dev qtquickcontrols2-5-dev
+
+        sudo apt install frei0r-plugins ffmpeg
+
+        sudo apt install subversion gnupg2 gettext
+    else
+        echo "Error: unsupported distribution"
+        exit 1
+    fi
+
+    # MLT
+    v_eval "git clone https://github.com/mltframework/mlt"
+    (
+        v_eval "cd mlt || exit 1"
+        v_eval "git pull"
+        v_eval "./configure || exit 1"
+        v_eval "make || exit 1"
+        v_eval "sudo make install || exit 1"
+    ) || exit 1
+
+    # KDENLIVE
+    v_eval "git clone https://github.com/KDE/kdenlive"
+    (
+        v_eval "cd kdenlive || exit 1"
+        v_eval "git pull"
+        v_eval "mkdir -p build || exit 1"
+        v_eval "cd build || exit"
+        v_eval "cmake .. -DKDE_INSTALL_USE_QT_SYS_PATHS=ON -DCMAKE_INSTALL_PREFIX=/usr -DRELEASE_BUILD=OFF || exit 1"
+        v_eval "make fetch-translations || exit 1"
+        v_eval "make -j$(nproc) || exit 1"
+        v_eval "sudo make install || exit 1"
+    ) || exit 1
+}
+
+if [ ! -d "$KDENLIVE" ]
+then
+    echo "Error: kdenlive is not installed at expected location"
+    echo "$KDENLIVE"
+    install_kdenlive
+    exit 1
+fi
+
+if [ ! -d "$MLT" ]
+then
+    echo "Error: MLT is not installed at expected location"
+    echo "$MLT"
+    install_kdenlive
+    exit 1
+fi
+
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]
+then
+    echo "usage: kdenlive [OPTIONS]"
+    echo "description: kdenlive wrapper by ChillerDragon"
+    echo "  powered by crools script"
+    echo "options:"
+    echo "  --reinstall  delete and install"
+    echo "  --install    download and build from source"
+    echo "  --update     same as install"
+    exit 0
+elif [ "$1" == "--install" ] || [ "$1" == "--update" ]
+then
+    install_kdenlive force
+elif [ "$1" == "--reinstall" ]
+then
+    rm -rf "$KDENLIVE"
+    rm -rf "$MLT"
+    install_kdenlive force
+fi
+
+cd "$KDENLIVE"/build/bin || exit 1
+./kdenlive
+
