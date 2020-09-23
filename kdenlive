@@ -122,5 +122,5 @@ then
 fi
 
 cd "$KDENLIVE"/build/bin || exit 1
-./kdenlive
+./kdenlive $*
 
