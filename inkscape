@@ -79,10 +79,12 @@ then
 elif [ "$1" == "--install" ] || [ "$1" == "--update" ]
 then
     install_inkscape
+    exit
 elif [ "$1" == "--reinstall" ]
 then
     rm -rf "$INKSCAPE"
     install_inkscape
+    exit
 fi
 
 if [ "$#" -eq "0" ]
