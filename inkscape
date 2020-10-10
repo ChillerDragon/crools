@@ -1,0 +1,106 @@
+#!/bin/bash
+# shellcheck disable=SC1117
+
+cat << EOF
+                      _
+  ___ _ __ ___   ___ | |___
+ / __| '__/ _ \ / _ \| / __|
+| (__| | | (_) | (_) | \__ \\
+ \___|_|  \___/ \___/|_|___/
+
+INKSCAPE LAUNCH FROM SOURCE SCRIPT
+
+EOF
+
+GIT_ROOT=/home/$USER/Desktop/git-extern
+INKSCAPE="$GIT_ROOT/inkscape"
+INKSCAPE_BIN="$INKSCAPE/build/bin/inkscape"
+REMOTE_ORG="https://gitlab.com/inkscape"
+REMOTE_REPO="${REMOTE_ORG}/inkscape"
+
+function v_eval() {
+    # verbose eval
+    tput bold
+    echo "$*"
+    tput sgr0
+    eval "$*"
+}
+
+function install_inkscape() {
+    echo "do you want to install inkscape? [y/N]"
+    read -r -n 1 yn
+    echo ""
+    if ! [[ "$yn" =~ [yY] ]]
+    then
+        exit 1
+    fi
+
+    mkdir -p "$GIT_ROOT" || exit 1
+    cd "$GIT_ROOT" || exit 1
+
+    # INKSCAPE
+    if [ ! -d inkscape ]
+    then
+        v_eval "git clone --recurse-submodules ${REMOTE_REPO}.git"
+    fi
+    (
+        v_eval "cd inkscape || exit 1"
+        v_eval "git pull --recurse-submodules && git submodule update"
+        v_eval "wget -v ${REMOTE_ORG}/inkscape-ci-docker/-/raw/master/install_dependencies.sh -O install_dependencies.sh"
+        v_eval "bash install_dependencies.sh --recommended"
+        v_eval "rm install_dependencies.sh"
+        v_eval "mkdir -p build || exit 1"
+        v_eval "cd build || exit 1"
+        v_eval "cmake .. -DCMAKE_INSTALL_PREFIX=${PWD}/install_dir -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug"
+        v_eval "make -j$(nproc) || exit 1"
+        v_eval "make install || exit 1"
+    ) || exit 1
+}
+
+
+if [ ! -d "$INKSCAPE" ] || [ ! -f "$INKSCAPE_BIN" ]
+then
+    echo "Error: inkscape is not installed at expected location"
+    echo "$INKSCAPE_BIN"
+    install_inkscape
+    exit 1
+fi
+
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]
+then
+    echo "usage: inkscape [OPTIONS]"
+    echo "description: inkscape wrapper by ChillerDragon"
+    echo "  powered by crools script"
+    echo "options:"
+    echo "  --reinstall  delete and install"
+    echo "  --install    download and build from source"
+    echo "  --update     same as install"
+    exit 0
+elif [ "$1" == "--install" ] || [ "$1" == "--update" ]
+then
+    install_inkscape
+elif [ "$1" == "--reinstall" ]
+then
+    rm -rf "$INKSCAPE"
+    install_inkscape
+fi
+
+if [ "$#" -eq "0" ]
+then
+    gdb \
+        -ex='set pagination off' \
+        -ex='set confirm off' \
+        -ex=run \
+        -ex=bt \
+        -ex=quit \
+        "$INKSCAPE_BIN"
+else
+    gdb \
+        -ex='set pagination off' \
+        -ex='set confirm off' \
+        -ex=run \
+        -ex=bt \
+        -ex=quit \
+        --args "$INKSCAPE_BIN" "$@"
+fi
+
