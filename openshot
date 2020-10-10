@@ -37,7 +37,7 @@ function install_openshot() {
     cd "$OPENSHOT_ROOT" || exit 1
 
     # DEPENDENCIES
-    if [ "$(grep -Ei 'debian|buntu|mint' /etc/*release)" ]
+    if grep -Eiq 'debian|buntu|mint' /etc/*release
     then
         sudo apt-get install \
             cmake \
