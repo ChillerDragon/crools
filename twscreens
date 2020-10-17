@@ -17,11 +17,12 @@ then
     xdg-open "$screendir"
 else
     echo "Error: no file manager found."
-    cmd="cd $screendir"
-    echo "$cmd"
-    if [ -x "$(command -v xsel)" ]
-    then
-        echo "$cmd" | xsel -ib
-    fi
+fi
+
+cmd="cd $screendir"
+echo "$cmd"
+if [ -x "$(command -v xsel)" ]
+then
+    echo "$cmd" | xsel -ib
 fi
 
