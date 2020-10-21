@@ -11,12 +11,42 @@ then
     echo "    providing a digit will pick corresponding zzh host"
     echo "    order your zzh hosts using: zzh --edit"
     echo ""
-    echo "  --local"
+    echo "  --local | -l"
     echo "    uses irc client on current machine"
+    echo ""
+    echo "  --force | -f"
+    echo "    uses screen -r -d to force deattach"
     exit 0
 fi
 
-if [ "$1" == "--local" ]
+is_local=0
+is_force=0
+arg_host=1
+
+for arg in "$@"
+do
+    if [ "$arg" == "--local" ] || [ "$arg" == "-l" ]
+    then
+        is_local=1
+    elif [ "$arg" == "--force" ] || [ "$arg" == "-f" ]
+    then
+        is_force=1
+    elif [[ "$arg" =~ ^[0-9]*$ ]]
+    then
+        arg_host="$arg"
+    else
+        echo "error: unkown arg '$arg' try --help"
+        exit 1
+    fi
+done
+
+screen_cmd="screen -r"
+if [ "$is_force" == "1" ]
+then
+    screen_cmd="screen -r -d"
+fi
+
+if [ "$is_local" == "1" ]
 then
     if [ ! -x "$(command -v weechat)" ]
     then
@@ -30,10 +60,9 @@ then
         screen -AmdS crools_weechat_irc /usr/bin/weechat
     fi
 
-    screen -r crools_weechat_irc
+    eval "$screen_cmd crools_weechat_irc"
     exit 0
 fi
 
-HOST="${1:-1}"
-ssh -t "$(zzh --host "$HOST")" "screen -r irc"
+ssh -t "$(zzh --host "$arg_host")" "$screen_cmd irc"
 
