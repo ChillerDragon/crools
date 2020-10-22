@@ -25,15 +25,17 @@ function do_local() {
 
 function list_options() {
     echo "Options:"
-    echo "  --local     do not change current working dir to /tmp/cplay"
-    echo "  --cpp       C++ instead of C"
-    echo "  --list      show recently edited files"
+    echo "-h, --help        show help"
+    echo "-L, --local       do not change current working dir to /tmp/cplay"
+    echo "-+, --cpp         C++ instead of C"
+    echo "-l, --list        show recently edited files"
+    echo "-m, --makefile    create makefile first"
 }
 
 function parse_arg() {
     local arg
     arg="$1"
-    if [ "$arg" == "--help" ]
+    if [ "$arg" == "--help" ] || [ "$arg" == "-h" ]
     then
         echo "cplay $version"
         echo "a C playground tool"
@@ -43,13 +45,16 @@ function parse_arg() {
         echo "files are saved under $filepath"
         list_options
         exit
-    elif [ "$arg" == "--local" ]
+    elif [ "$arg" == "--local" ] || [ "$arg" == "-L" ]
     then
         do_local
-    elif [ "$arg" == "--cpp" ]
+    elif [ "$arg" == "--cpp" ] || [ "$arg" == "-+" ]
     then
         is_cpp=1
-    elif [ "$arg" == "--list" ]
+    elif [ "$arg" == "--makefile" ] || [ "$arg" == "-m" ]
+    then
+        is_makefile=1
+    elif [ "$arg" == "--list" ] || [ "$arg" == "-l" ]
     then
         if [ "$is_cpp" == "1" ]
         then
@@ -84,7 +89,7 @@ then
     # get filename first
     for arg in "$@"
     do
-        if ! [[ "$arg" =~ ^-- ]]
+        if ! [[ "$arg" =~ ^- ]]
         then
             filename="$arg"
         fi
@@ -92,7 +97,7 @@ then
     # parse options second
     for arg in "$@"
     do
-        if [[ "$arg" =~ ^-- ]]
+        if [[ "$arg" =~ ^- ]]
         then
             parse_arg "$arg"
         fi
@@ -110,11 +115,15 @@ then
     echo "file extension missing '$filename'"
     filename="${filename}.c"
 fi
+binary=ERROR
 if [ "$is_cpp" == "1" ] && ! echo "$filename" | grep -Eq '\.cpp$'
 then
     filename="${filename}pp"
+    binary="${filename::-4}"
+else
+    binary="${filename::-2}"
 fi
-echo "preparing file '$filename'"
+echo "preparing file '$filename' (binary '$binary')"
 
 read -rd '' c_template << EOF
 /*
@@ -130,6 +139,38 @@ int main()
     return 0;
 }
 EOF
+
+read -rd '' make_template << EOF
+# the compiler to use
+CC = clang
+
+# compiler flags:
+#  -g    adds debugging information to the executable file
+#  -Wall turns on most, but not all, compiler warnings
+CFLAGS  = -g -Wall
+
+#files to link:
+LFLAGS = -lncurses
+
+# the name to use for both the target source file, and the output file:
+TARGET = $binary
+
+all: \$(TARGET)
+
+\$(TARGET): \$(TARGET).c
+EOF
+
+if [ "$is_makefile" == "1" ]
+then
+    mkdir -p make || exit 1
+    cd make || exit 1
+    if [ ! -f Makefile ]
+    then
+        echo "$make_template" > Makefile
+        echo -e "\t\$(CC) \$(CFLAGS) -o \$(TARGET) \$(TARGET).c \$(LFLAGS)" >> Makefile
+        vim Makefile
+    fi
+fi
 
 if [ ! -f "$filename" ]
 then
