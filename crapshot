@@ -62,6 +62,45 @@ function install_tool() {
         fi
     fi
 }
+function screenshot() {
+    local file
+    file="$1"
+    if [ "$2" == "-s" ]
+    then
+        if [ -x "$(command -v maim)" ]
+        then
+            if ! maim --select "$file"
+            then
+                return 1
+            fi
+            return 0
+        elif [ -x "$(command -v gnome-screenshot)" ]
+        then
+            gnome-screenshot --area --file "$file"
+            return 0
+        else
+            echo "no screenshot tool found"
+            return 1
+        fi
+    else
+        if [ -x "$(command -v maim)" ]
+        then
+            if ! main "$file"
+            then
+                return 1
+            fi
+            return 0
+        elif [ -x "$(command -v gnome-screenshot)" ]
+        then
+            gnome-screenshot --file "$file"
+            return 0
+        else
+            echo "no screenshot tool found"
+            return 1
+        fi
+    fi
+    return 0
+}
 function os_copy() {
     if is_apple
     then
@@ -116,7 +155,10 @@ function check_conf() {
         edit_cnf
     fi
 }
-install_tool maim
+if [ ! -x "$(command -v gnome-screenshot)" ]
+then
+    install_tool maim
+fi
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
     echo "usage: $(basename "$0") [--edit|--select|--no-browser|--list|--file <filepath>]"
@@ -241,14 +283,14 @@ elif [ "$1" == "-s" ] || [ "$1" == "--select" ]
 then
     shift
     os_say "select" &
-    if ! maim -s "$picpath"
+    if ! screenshot "$picpath" -s
     then
         os_say "abort"
         echo "crapshot aborted."
         exit 1
     fi
 else
-    if ! maim "$picpath"
+    if ! screenshot "$picpath"
     then
         say "failed"
         echo "crapshot failed."
