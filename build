@@ -224,6 +224,18 @@ then
     else
         mvn compile && mvn package
     fi
+elif [ -f Gemfile ]
+then
+    if [ ! -x "$(command -v bundle)" ]
+    then
+        if [ ! -x "$(command -v gem)" ]
+        then
+            echo "Error: you need ruby installed"
+            exit 1
+        fi
+        gem install bundler
+    fi
+    bundle
 else
     echo "I am sorry, I have no clue how to build this."
 fi
