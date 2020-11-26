@@ -16,6 +16,32 @@ then
 fi
 url=$remote
 
+function open_browser() {
+    local url
+    url="$1"
+    if [ -n "$SSH_CLIENT" ]
+    then
+        return
+    fi
+    if [ "$BROWSER" != "" ]
+    then
+        $BROWSER "$url" &
+    elif [ "$(uname)" == "Darwin" ]
+    then
+        open -a Safari "$url"
+    else
+        if [ -x "$(command -v firefox)" ]
+        then
+            firefox "$url" &
+        elif [ -x "$(command -v chromium)" ]
+        then
+            chromium "$url" &
+        else
+            echo "error: no supported browser installed"
+        fi
+    fi
+}
+
 if [[ $remote =~ ^git@ ]]
 then
     echo "'$remote' is a ssh remote"
@@ -48,13 +74,5 @@ else
     exit 1
 fi
 
-if [ "$BROWSER" != "" ]
-then
-    $BROWSER "$url" &
-elif [ "$(uname)" == "Darwin" ]
-then
-    open -a Safari "$url"
-else
-    firefox "$url" &
-fi
+open_browser "$url"
 
