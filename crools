@@ -44,7 +44,7 @@ fi
     if [ -d ../dotfiles ] && [ -f ../dotfiles/setup.sh ]
     then
         cd ../dotfiles || exit 1
-        if git remote -v | grep -q '^origin.*ChillerDragon/dotfiles '
+        if git remote -v | grep -Eq '^origin.*ChillerDragon/dotfiles( |.git)'
         then
             git_save_pull dotfiles
             ./setup.sh
