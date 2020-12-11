@@ -8,6 +8,11 @@ function main() {
     while IFS= read -r c;
     do
         case $c in [a-zA-Z0-9.~_-]) printf "%s" "$c"; continue ;; esac
+        # if [ "$c" == "&" ] || [ "$c" == "=" ]
+        # then
+        #     printf "%s" "$c"
+        #     continue
+        # fi
         printf "%s" "$c" | od -An -tx1 | tr ' ' % | tr -d '\n'
     done <<EOF
 $(fold -w1)
