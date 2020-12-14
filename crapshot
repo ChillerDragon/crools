@@ -85,7 +85,7 @@ function screenshot() {
     else
         if [ -x "$(command -v maim)" ]
         then
-            if ! main "$file"
+            if ! maim "$file"
             then
                 return 1
             fi
