@@ -46,6 +46,15 @@ do
     then
         if [ "$arg" == "--auto" ]
         then
+            echo "[!] WARNING DO NOT USE --auto WHEN THE SERVER IS RUNNING"
+            echo "[!] IT COULD FORMAT A LOGFILE THAT IS CURRENTLY USED FOR WRITING"
+            echo "do you really want to continue? [y/N]"
+            read -r -n 1 yn
+            echo ""
+            if [[ ! "$yn" =~ [yY] ]]
+            then
+                exit
+            fi
             IS_AUTO=1
         else
             echo "unkown option '$arg' try --help"
