@@ -6,7 +6,7 @@
 MAX_LINES=100000
 LOGFILE=invalid.txt
 
-mkdir -p /tmp/tw_split || exit 1
+mkdir -p /tmp/tw_split_"$USER" || exit 1
 
 function bold() {
     tput bold
@@ -103,7 +103,7 @@ function split_log() {
     mv "$logfile" "$file_ts" || exit 1
     cd "$file_ts" || exit 1
 
-    backup="/tmp/tw_split/$logfile.bak"
+    backup="/tmp/tw_split_$USER/$logfile.bak"
     cp "$logfile" "$backup"
     basename="${logfile%$year*}"
 
