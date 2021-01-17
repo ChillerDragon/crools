@@ -154,30 +154,28 @@ function check_conf() {
         } > $conf
         edit_cnf
     fi
+    if [ ! -f $conf ]
+    then
+        echo "Error: config missing"
+        exit 1
+    fi
 }
-if [ ! -x "$(command -v gnome-screenshot)" ]
-then
-    install_tool maim
-fi
-if [ "$1" == "--help" ] || [ "$1" == "-h" ]
-then
-    echo "usage: $(basename "$0") [--edit|--select|--no-browser|--list|--file <filepath>]"
-    echo "description: upload screenshots via scp"
-    echo "exmaple: $(basename "$0") -s --no-browser"
-    exit 0
-elif [ "$1" == "--edit" ] || [ "$1" == "-e" ]
-then
-    edit_cnf
-    exit 0
-fi
-
-check_conf
-if [ ! -f $conf ]
-then
-    echo "Error: config missing"
-    exit 1
-fi
-
+function read_conf() {
+    check_conf
+    while IFS= read -r line
+    do
+        if [ "${line:0:1}" == "#" ]
+        then
+            continue
+        fi
+        remote="$(echo "$line" | cut -d' ' -f2)"
+        host="$(echo "$remote" | cut -d'@' -f2)"
+        ts="$(date +%s)"
+        picname="crapshot_$ts.png"
+        picpath="/tmp/$picname"
+        break
+    done < $conf
+}
 function add_history() {
     local filename
     filename="$1"
@@ -188,7 +186,6 @@ function add_history() {
     fi
     echo "$filename" >> "$histfile"
 }
-
 function delete_history() {
     if [ ! -f "$histfile" ]
     then
@@ -232,7 +229,6 @@ function delete_history() {
         fi
     done
 }
-
 function list_all() {
     cmd="ssh $remote \"ls -a $picdir\""
     echo "$cmd"
@@ -246,42 +242,68 @@ function list_all() {
     exit 0
 }
 
-while IFS= read -r line
-do
-    if [ "${line:0:1}" == "#" ]
-    then
-        continue
-    fi
-    remote="$(echo "$line" | cut -d' ' -f2)"
-    host="$(echo "$remote" | cut -d'@' -f2)"
-    ts="$(date +%s)"
-    picname="crapshot_$ts.png"
-    picpath="/tmp/$picname"
-    break
-done < $conf
+arg_no_browser=0
+arg_select=0
+arg_is_file=0
+arg_file=''
 
-if [ "$1" == "--delete" ]
+if [ ! -x "$(command -v gnome-screenshot)" ]
 then
-    delete_history
-    exit 0
-elif [ "$1" == "--list" ]
-then
-    list_all
-    exit 0
-elif [ "$1" == "--file" ]
-then
-    shift
-    inputfile="$1"
-    shift
-    if [ ! -f "$inputfile" ]
+    install_tool maim
+fi
+
+for arg in "$@"
+do
+    if [ "$arg" == "--delete" ]
     then
-        echo "Error file '$inputfile' not found."
+        read_conf
+        delete_history
+        exit 0
+    elif [ "$arg" == "--help" ] || [ "$arg" == "-h" ]
+    then
+        echo "usage: $(basename "$0") [--edit|--select|--no-browser|--list|--file <filepath>]"
+        echo "description: upload screenshots via scp"
+        echo "exmaple: $(basename "$0") -s --no-browser"
+        exit 0
+    elif [ "$arg" == "--edit" ] || [ "$arg" == "-e" ]
+    then
+        edit_cnf
+        exit 0
+    elif [ "$arg" == "--list" ]
+    then
+        read_conf
+        list_all
+        exit 0
+    elif [ "$arg" == "--no-browser" ]
+    then
+        arg_no_browser=1
+    elif [ "$arg" == "--file" ]
+    then
+        read_conf
+        arg_is_file=1
+    elif [ "$arg" == "-s" ] || [ "$arg" == "--select" ]
+    then
+        arg_select=1
+    elif [ "${arg::1}" == "-" ]
+    then
+        echo "error: unknown argument '$arg'"
+        echo "       see '$(tput bold)$(basename "$0") --help$(tput sgr0)' for help"
         exit 1
+    elif [ "$arg_is_file" == "1" ] && [ "$arg_file" == "" ]
+    then
+        arg_file="$arg"
+        if [ ! -f "$arg_file" ]
+        then
+            echo "Error file '$arg_file' not found."
+            exit 1
+        fi
+        cp "$arg_file" "$picpath" || exit 1
     fi
-    cp "$inputfile" "$picpath" || exit 1
-elif [ "$1" == "-s" ] || [ "$1" == "--select" ]
+done
+
+if [ "$arg_select" == "1" ]
 then
-    shift
+    read_conf
     os_say "select" &
     if ! screenshot "$picpath" -s
     then
@@ -289,7 +311,9 @@ then
         echo "crapshot aborted."
         exit 1
     fi
-else
+elif [ "$arg_is_file" == "0" ]
+then
+    read_conf
     if ! screenshot "$picpath"
     then
         say "failed"
@@ -306,7 +330,7 @@ add_history ".$ts.png"
 url="https://$host/cs/.$ts.png"
 echo "$url"
 os_copy "$url"
-if [ "$1" == "--no-browser" ]
+if [ "$arg_no_browser" == "1" ]
 then
     exit 0
 fi
