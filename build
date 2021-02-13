@@ -211,6 +211,12 @@ then
     get_cpp
     ./configure
     make
+elif [ -f autogen.sh ]
+then
+    get_cpp
+    ./autogen.sh
+    ./configure
+    make
 elif [ -f Cargo.lock ] && [ -f Cargo.toml ]
 then
     get_rust
