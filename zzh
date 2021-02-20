@@ -5,6 +5,7 @@ conf=~/.config/crools/zzh.cnf
 ismosh=0
 ishost=0
 pattern=""
+arg_search=0
 arg_num=""
 function edit_cnf() {
     if [ ! -f $conf ]
@@ -47,6 +48,7 @@ then
     echo "  $(tput bold)--mosh$(tput sgr0)          use mosh instead of ssh"
     echo "  $(tput bold)<number>$(tput sgr0)        skip menu and go to number"
     echo "  $(tput bold)/<pattern>$(tput sgr0)      chose first entry matching <pattern>"
+    echo "  $(tput bold)/$(tput sgr0)               open fuzzy search if fzf is installed"
     exit 0
 elif [ "$1" == "--host" ]
 then
@@ -68,6 +70,7 @@ do
     if [ "${arg:0:1}" == "/" ]
     then
         pattern="${arg:1}"
+        arg_search=1
     elif [ "$arg" == "--mosh" ]
     then
         ismosh=1
@@ -153,8 +156,22 @@ fi
 #     fi
 # }
 
+function print_options() {
+    for entry in "${options[@]}"
+    do
+        echo "$entry"
+    done
+}
+
 # match entry
-if [ "$pattern" != "" ]
+if [ "$arg_search" == "1" ] && [ "$pattern" == "" ] && [ -x "$(command -v fzf)" ]
+then
+    # fuzzy find using fzf
+    entry="$(print_options | fzf)"
+    echo "[zzh] matched '$entry'"
+    eval "$entry"
+    exit 0
+elif [ "$pattern" != "" ]
 then
     for entry in "${options[@]}"
     do
