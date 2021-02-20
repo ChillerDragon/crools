@@ -50,7 +50,8 @@ if [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
     echo "usage: $(basename "$0") <video> [OPTION]"
     echo "options:"
-    echo "  --unlisted      upload unlisted video"
+    echo "  --unlisted              upload unlisted video"
+    echo "  --user|-u <username>    upload to user dir"
     echo "description: upload videos to opentube"
     exit 0
 fi
@@ -75,12 +76,17 @@ done < $conf
 
 inputfile="$1"
 inputfile_base="$(basename "$inputfile")"
-viddir="$OPENTUBE_ROOT/saved_videos"
+viddir="$OPENTUBE_ROOT/videos/saved"
 url="https://$host/OpenTube/video.php?t=$inputfile_base"
 if [ "$2" == "--unlisted" ]
 then
-    viddir="$OPENTUBE_ROOT/unlisted_videos"
+    viddir="$OPENTUBE_ROOT/videos/unlisted"
     url="https://$host/OpenTube/video.php?t=$inputfile_base&unlisted=true"
+fi
+if [ "$2" == "--user" ] || [ "$2" == "-u" ]
+then
+    viddir="$OPENTUBE_ROOT/videos/users/$3"
+    url="https://$host/OpenTube/video.php?t=$inputfile_base&u=$3"
 fi
 if ! [[ "$inputfile" =~ ^[0-9A-Za-z\./_-]+$ ]]
 then
