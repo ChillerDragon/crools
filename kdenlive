@@ -79,7 +79,6 @@ function install_kdenlive() {
         v_eval "mkdir -p build || exit 1"
         v_eval "cd build || exit"
         v_eval "cmake .. -DKDE_INSTALL_USE_QT_SYS_PATHS=ON -DCMAKE_INSTALL_PREFIX=/usr -DRELEASE_BUILD=OFF || exit 1"
-        v_eval "make fetch-translations || exit 1"
         v_eval "make -j$(nproc) || exit 1"
         v_eval "sudo make install || exit 1"
     ) || exit 1
