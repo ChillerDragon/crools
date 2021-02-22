@@ -7,7 +7,7 @@
 version="v.0003"
 ts_file=$(date "+%Y-%m-%d_%H:%M:%S.c")
 filename=$ts_file
-filepath=/tmp/cplay
+filepath=/tmp/"$USER"/cplay
 
 mkdir -p "$filepath"
 local_dir=$(pwd)
@@ -167,7 +167,7 @@ then
     if [ ! -f Makefile ]
     then
         echo "$make_template" > Makefile
-        echo -e "\t\$(CC) \$(CFLAGS) -o \$(TARGET) \$(TARGET).c \$(LFLAGS)" >> Makefile
+        echo -e "\\t\$(CC) \$(CFLAGS) -o \$(TARGET) \$(TARGET).c \$(LFLAGS)" >> Makefile
         vim Makefile
     fi
 fi
