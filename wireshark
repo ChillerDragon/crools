@@ -120,11 +120,17 @@ function print_version() {
 	exit 0
 }
 
+function exec_dir() {
+	goto_wireshark_dir
+	eval "$arg_exec"
+}
+
 arg_action=run_wireshark
 arg_path=''
 arg_branch=''
 arg_bin='wireshark'
 arg_wireshark_args=()
+arg_exec='test'
 
 function parse_args() {
 	local arg
@@ -147,10 +153,12 @@ function parse_args() {
 			echo "	--path	<path>		provide a src path"
 			echo "	--branch <branch>	checkout branch and rebuild"
 			echo "	--bin <binary>		binary to execute (default: wireshark)"
+			echo "	--exec <binary>		shell to execute in src dir"
 			echo "examples:"
 			echo "  $(basename "$0") --branch wireshark-3.4.3 --update"
 			echo "  $(basename "$0") --bin tshark"
 			echo "  $(basename "$0") --bin tshark -- -r dump.pcapng"
+			echo "  $(basename "$0") --exec 'git tag'"
 			exit 0
 		elif [ "$arg" == "--path" ]
 		then
@@ -163,6 +171,11 @@ function parse_args() {
 		elif [ "$arg" == "--bin" ]
 		then
 			arg_bin="$1"
+			shift
+		elif [ "$arg" == "--exec" ]
+		then
+			arg_action=exec_dir
+			arg_exec="$1"
 			shift
 		elif [ "$arg" == "--version" ]
 		then
