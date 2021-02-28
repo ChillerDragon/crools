@@ -1,0 +1,167 @@
+#!/bin/bash
+
+# I am not sure if i want wireshark in my path
+# nor if i want this script at all
+# so I decided to go back to the crools origin and do some crap script
+# This repo has been getting way too try hard latley
+
+# Also trying to figure out https://github.com/ChillerDragon/dotfiles/issues/13
+# so tabs testing it is...
+
+aSrcDirs=(
+	"$HOME"/Desktop/git/wireshark
+	"$HOME"/Desktop/git-extern/wireshark
+)
+
+declare -A aGitRemotes
+aGitRemotes[git@gitlab.com:ChillerDragon/wireshark.git]="git master (good base for libtw2)"
+aGitRemotes[git@github.com:ChillerDragon/wireshark.git]="git twdis (fstd twdis)"
+aGitRemotes[git@gitlab.com:ChillerDragon/wireshark.git]="git chiller (Learath2 teedissect)"
+aGitRemotes[git@gitlab.com:wireshark/wireshark.git]="git-extern master (good base for libtw2)"
+aGitRemotes[git@github.com:wireshark/wireshark.git]="git-extern master (good base for libtw2)"
+
+function get_wireshark_src_dir() {
+	local dir
+	if [ "$arg_path" != "" ]
+	then
+		echo "$arg_path"
+		return 0
+	fi
+	for dir in "${aSrcDirs[@]}"
+	do
+		if [ -d "$dir" ]
+		then
+			echo "$dir"
+			return 0
+		fi
+	done
+	return 1
+}
+
+function install_wireshark() {
+	for key in "${!aGitRemotes[@]}"; do
+		echo "Key:   ${key}"
+		echo "Value: ${aGitRemotes[$key]}"
+	done
+	echo "TODO: implement"
+}
+
+function goto_wireshark_dir() {
+	local dir
+	if ! dir="$(get_wireshark_src_dir)"
+	then
+		echo "Error: wireshark is not found. Try running --install first"
+		exit 1
+	fi
+	echo "[*] using wireshark dir: $dir"
+	if [ ! -d "$dir" ]
+	then
+		echo "Error: directory not found: $dir"
+		echo "       Try running --install first"
+		exit 1
+	fi
+	cd "$dir" || exit 1
+	if [ "$arg_branch" != "" ]
+	then
+		git checkout "$arg_branch" || exit 1
+	fi
+}
+
+function run_wireshark() {
+	local bin=./build/run/wireshark
+	goto_wireshark_dir
+	if [ ! -f "$bin" ]
+	then
+		echo "Error: no binary found. Try running --update"
+		exit 1
+	fi
+	"$bin"
+}
+
+function update_wireshark() {
+	goto_wireshark_dir
+	mkdir -p build
+	cd build || exit 1
+	cmake ..
+	make -j"$(nproc)"
+	echo "[*] done installing wireshark."
+	exit 0
+}
+
+function print_version() {
+	goto_wireshark_dir
+	echo "[*] using remote:"
+	git remote -v
+	echo "[*] using branch:"
+	tput bold
+	if git describe --tags > /dev/null
+	then
+		git describe --tags
+	else
+		git rev-parse --abbrev-ref HEAD
+	fi
+	tput sgr0
+	exit 0
+}
+
+arg_action=run_wireshark
+arg_path=''
+arg_branch=''
+
+function parse_args() {
+	local arg
+	while true
+	do
+		arg="$1"
+		shift
+		[[ "$arg" == "" ]] && break
+
+		if [ "$arg" == "--help" ] || [ "$arg" == "-h" ] || [ "$arg" == "help" ]
+		then
+			echo "useage: $(basename "$0") [OPTIONS..]"
+			echo "description:"
+			echo "	runs wireshark from source"
+			echo "options:"
+			echo "	--version		get wireshark version"
+			echo "	--install		do a fresh clone and build from source"
+			echo "	--update		selecte a clone, pull and rebuild"
+			echo "	--uninstall		delete a src repo"
+			echo "	--path	<path>		provide a src path"
+			echo "	--branch <branch>	checkout branch and rebuild"
+			echo "examples:"
+			echo "  $(basename "$0") --branch wireshark-3.4.3 --update"
+			exit 0
+		elif [ "$arg" == "--path" ]
+		then
+			arg_path="$1"
+			shift
+		elif [ "$arg" == "--branch" ]
+		then
+			arg_branch="$1"
+			shift
+		elif [ "$arg" == "--version" ]
+		then
+			arg_action=print_version
+		elif [ "$arg" == "--update" ]
+		then
+			arg_action=update_wireshark
+		elif [ "$arg" == "--install" ]
+		then
+			arg_action=install_wireshark
+		else
+			echo "Error: invalid argument '$arg' see --help"
+			exit 1
+		fi
+	done
+}
+
+parse_args "$@"
+
+if [ "$arg_action" != "" ]
+then
+	eval "$arg_action"
+else
+	echo "Error: no action found"
+	exit 1
+fi
+
