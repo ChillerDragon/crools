@@ -68,14 +68,30 @@ function goto_wireshark_dir() {
 }
 
 function run_wireshark() {
-	local bin=./build/run/wireshark
-	goto_wireshark_dir
-	if [ ! -f "$bin" ]
-	then
-		echo "Error: no binary found. Try running --update"
-		exit 1
-	fi
-	"$bin"
+	local bin=build/run/"$arg_bin"
+	local dir
+	local run
+	local arg
+	(
+		goto_wireshark_dir
+		if [ ! -f "$bin" ]
+		then
+			echo "Error: no binary found. Try running --update"
+			exit 1
+		fi
+	) || exit 1
+	dir="$(get_wireshark_src_dir)"
+	echo "[*] running:"
+
+	run="$dir/$bin"
+	for arg in "${arg_wireshark_args[@]}"
+	do
+		run+=" '$arg'"
+	done
+	tput bold
+	echo "$run"
+	tput sgr0
+	eval "$run"
 }
 
 function update_wireshark() {
@@ -107,6 +123,8 @@ function print_version() {
 arg_action=run_wireshark
 arg_path=''
 arg_branch=''
+arg_bin='wireshark'
+arg_wireshark_args=()
 
 function parse_args() {
 	local arg
@@ -114,11 +132,11 @@ function parse_args() {
 	do
 		arg="$1"
 		shift
-		[[ "$arg" == "" ]] && break
+		[[ "$arg" == "" ]] || [[ "$arg" == "--" ]] && break
 
 		if [ "$arg" == "--help" ] || [ "$arg" == "-h" ] || [ "$arg" == "help" ]
 		then
-			echo "useage: $(basename "$0") [OPTIONS..]"
+			echo "useage: $(basename "$0") [OPTIONS..] [WIRESHARK OPTIONS..]"
 			echo "description:"
 			echo "	runs wireshark from source"
 			echo "options:"
@@ -128,8 +146,11 @@ function parse_args() {
 			echo "	--uninstall		delete a src repo"
 			echo "	--path	<path>		provide a src path"
 			echo "	--branch <branch>	checkout branch and rebuild"
+			echo "	--bin <binary>		binary to execute (default: wireshark)"
 			echo "examples:"
 			echo "  $(basename "$0") --branch wireshark-3.4.3 --update"
+			echo "  $(basename "$0") --bin tshark"
+			echo "  $(basename "$0") --bin tshark -- -r dump.pcapng"
 			exit 0
 		elif [ "$arg" == "--path" ]
 		then
@@ -138,6 +159,10 @@ function parse_args() {
 		elif [ "$arg" == "--branch" ]
 		then
 			arg_branch="$1"
+			shift
+		elif [ "$arg" == "--bin" ]
+		then
+			arg_bin="$1"
 			shift
 		elif [ "$arg" == "--version" ]
 		then
@@ -153,6 +178,7 @@ function parse_args() {
 			exit 1
 		fi
 	done
+	arg_wireshark_args=( "$@" )
 }
 
 parse_args "$@"
