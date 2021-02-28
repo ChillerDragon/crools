@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# wip: hardcodet testing tool
+
+HOST=http://localhost:9090/upload.php
+
+if [ "$#" -lt "1" ]
+then
+	echo "filöename mikssign"
+	exit 1
+fi
+
+curl -F "file=@$1;type=image/png" "$HOST"
+
