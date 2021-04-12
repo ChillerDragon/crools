@@ -91,7 +91,7 @@ function split_log() {
 		exit 1
 	fi
 	file_ext="${ts_and_ext##*.}"
-	file_ts="${ts_and_ext%.*}"
+	file_ts="${ts_and_ext%%.*}"
 	if [ ! -f "$logfile" ]
 	then
 		echo "invalid logfile $logfile"
