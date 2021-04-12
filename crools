@@ -139,7 +139,12 @@ function add_to_rc() {
     fi
 }
 
-mkdir -p ~/.config/crools/bashrc.d
+if [ ! -d ~/.config/crools/bashrc.d ]
+then
+	echo "[*] setting up bashrc.d ..."
+	mkdir -p ~/.config/crools
+	git clone git@github.com:ChillerDragon/bashrc.d.git ~/.config/crools/bashrc.d
+fi
 
 # shellcheck disable=SC2016
 add_to_rc 'for crools_rc in ~/.config/crools/bashrc.d' \
