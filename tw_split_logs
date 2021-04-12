@@ -73,7 +73,7 @@ done
 
 function split_log() {
 	# usage: split_log <filename>
-	local year
+	local ts_and_ext
 	local backup
 	local basename
 	local lines
@@ -81,10 +81,17 @@ function split_log() {
 	local file_ts
 	local logfile
 	logfile="$1"
-	year="$(date +'%Y')"
-	file_ext="${logfile##*.}"
-	file_ts="${logfile##*$year}"
-	file_ts="$year${file_ts%.*}"
+	ts_and_ext="$(
+		echo "$logfile" | \
+		grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}-[0-9]{2}(.txt|.log)+$'
+	)"
+	if [ "$ts_and_ext" == "" ]
+	then
+		echo "Error: could not parse timestamp of file '$logfile'"
+		exit 1
+	fi
+	file_ext="${ts_and_ext##*.}"
+	file_ts="${ts_and_ext%.*}"
 	if [ ! -f "$logfile" ]
 	then
 		echo "invalid logfile $logfile"
@@ -105,7 +112,7 @@ function split_log() {
 
 	backup="/tmp/tw_split_$USER/$logfile.bak"
 	cp "$logfile" "$backup"
-	basename="${logfile%$year*}"
+	basename="${logfile%$ts_and_ext*}"
 
 	split -d -l "$MAX_LINES" "$logfile"
 	rm "$logfile"
