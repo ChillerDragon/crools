@@ -72,63 +72,63 @@ do
 done
 
 function split_log() {
-    # usage: split_log <filename>
-    local year
-    local backup
-    local basename
-    local lines
-    local file_ext
-    local file_ts
-    local logfile
-    logfile="$1"
-    year="$(date +'%Y')"
-    file_ext="${logfile##*.}"
-    file_ts="${logfile##*$year}"
-    file_ts="$year${file_ts%.*}"
-    if [ ! -f "$logfile" ]
-    then
-        echo "invalid logfile $logfile"
-        exit 1
-    fi
-    lines="$(wc -l "$logfile" | cut -d' ' -f1)"
-    if [ "$lines" -lt "$((MAX_LINES * 2))" ]
-    then
-        echo "skipping file because it has less than $((MAX_LINES * 2)) lines:"
-        wc -l "$logfile"
-        return
-    fi
+	# usage: split_log <filename>
+	local year
+	local backup
+	local basename
+	local lines
+	local file_ext
+	local file_ts
+	local logfile
+	logfile="$1"
+	year="$(date +'%Y')"
+	file_ext="${logfile##*.}"
+	file_ts="${logfile##*$year}"
+	file_ts="$year${file_ts%.*}"
+	if [ ! -f "$logfile" ]
+	then
+		echo "invalid logfile $logfile"
+		exit 1
+	fi
+	lines="$(wc -l "$logfile" | cut -d' ' -f1)"
+	if [ "$lines" -lt "$((MAX_LINES * 2))" ]
+	then
+		echo "skipping file because it has less than $((MAX_LINES * 2)) lines:"
+		wc -l "$logfile"
+		return
+	fi
 
-    mkdir -p "$file_ts" || exit 1
+	mkdir -p "$file_ts" || exit 1
 
-    mv "$logfile" "$file_ts" || exit 1
-    cd "$file_ts" || exit 1
+	mv "$logfile" "$file_ts" || exit 1
+	cd "$file_ts" || exit 1
 
-    backup="/tmp/tw_split_$USER/$logfile.bak"
-    cp "$logfile" "$backup"
-    basename="${logfile%$year*}"
+	backup="/tmp/tw_split_$USER/$logfile.bak"
+	cp "$logfile" "$backup"
+	basename="${logfile%$year*}"
 
-    split -d -l "$MAX_LINES" "$logfile"
-    rm "$logfile"
+	split -d -l "$MAX_LINES" "$logfile"
+	rm "$logfile"
 
-    for log in ./x*
-    do
-        echo "logfile: $log"
-        first_line="$(head -n1 "$log")"
-        if [[ "$first_line" =~ ^\[(.*)\]\[ ]]
-        then
-            ts_raw="${BASH_REMATCH[1]}"
-            ts="$(echo "$ts_raw" | sed 's/:/-/g' | sed 's/ /_/g')"
-            mv "$log" "${basename}${ts}.${file_ext}"
-        else
-            echo "Could not parse teeworlds time stamp"
-            exit 1
-        fi
-    done
+	for log in ./x*
+	do
+		echo "logfile: $log"
+		first_line="$(head -n1 "$log")"
+		if [[ "$first_line" =~ ^\[(.*)\]\[ ]]
+		then
+			ts_raw="${BASH_REMATCH[1]}"
+			ts="$(echo "$ts_raw" | sed 's/:/-/g' | sed 's/ /_/g')"
+			mv "$log" "${basename}${ts}.${file_ext}"
+		else
+			echo "Could not parse teeworlds time stamp"
+			exit 1
+		fi
+	done
 
-    echo "finished!"
-    echo "replaced file '$logfile'"
-    echo "with the folder '$file_ts'"
-    echo "original file was moved to '$backup'"
+	echo "finished!"
+	echo "replaced file '$logfile'"
+	echo "with the folder '$file_ts'"
+	echo "original file was moved to '$backup'"
 }
 
 if [ "$IS_AUTO" == "1" ]
