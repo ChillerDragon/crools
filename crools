@@ -158,5 +158,25 @@ for crools_rc in ~/.config/crools/bashrc.d/*.sh
 do
 	[ -e "$crools_rc" ] || continue
 	source "$crools_rc"
+done
+for crools_rcd in ~/.config/crools/bashrc.d/*/
+do
+	[ -e "$crools_rcd" ] || continue
+	[ -d "$crools_rcd" ] || continue
+	for crools_rc in ~/.config/crools/bashrc.d/"$crools_rcd"/*.sh
+	do
+		[ -e "$crools_rc" ] || continue
+		source "$crools_rc"
+	done
+	for crools_rcdd in "$crools_rcd"*/
+	do
+		[ -e "$crools_rcdd" ] || continue
+		[ -d "$crools_rcdd" ] || continue
+		for crools_rc in "$crools_rcdd"/*.sh
+		do
+			[ -e "$crools_rc" ] || continue
+			source "$crools_rc"
+		done
+	done
 done'
 
