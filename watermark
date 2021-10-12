@@ -4,6 +4,12 @@ function show_help() {
 	echo "usage: watermark <video_in> <video_out> <text>"
 }
 
+if [ "$#" != "3" ]
+then
+	show_help
+	exit 1
+fi
+
 arg_video_in="$1"
 arg_video_out="$2"
 arg_text="$3"
