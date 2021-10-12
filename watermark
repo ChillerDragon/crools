@@ -1,0 +1,15 @@
+#!/bin/bash
+
+function show_help() {
+	echo "usage: watermark <video_in> <video_out> <text>"
+}
+
+arg_video_in="$1"
+arg_video_out="$2"
+arg_text="$3"
+
+ffmpeg \
+	-i "$arg_video_in" \
+	-vf drawtext="fontfile=/usr/share/fonts/TTF/knowyour.ttf:fontsize=20: fontcolor=black:x=10:y=10:text='$arg_text'" \
+	"$arg_video_out"
+
