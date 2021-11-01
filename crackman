@@ -6,6 +6,14 @@ MIRROR=https://zillyhuhn.com/crack
 CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
 CM_TMP_PATH="$HOME/.config/crools/crackman/tmp"
 
+declare -A Packages=(
+	[clang-format-10]='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-f3a37dd2/clang-format-10_linux-amd64'
+	[clang-format-11]='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-f3a37dd2/clang-format-11_linux-amd64'
+	[clang-format-12]='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-f3a37dd2/clang-format-12_linux-amd64'
+	[clang-format-13]='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-f3a37dd2/clang-format-13_linux-amd64'
+	[clang-format-14]='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-f3a37dd2/clang-format-14_linux-amd64'
+)
+
 function show_help() {
 	echo "usage: $(tput bold)crackman [install|upgrade|search|list] [ARGS...]$(tput sgr0)"
 	echo "install:       takes package names as arg"
@@ -77,15 +85,20 @@ function cm_check_pack() {
 	wget -O "$CM_TMP_PATH/LISTING" "$MIRROR/LISTING"
 	if ! grep -q "^$pack " "$CM_TMP_PATH/LISTING"
 	then
+		if [ "${Packages[$pack]}" != "" ]
+		then
+			return 1
+		fi
 		err "no such package '$pack'"
 		exit 1
 	fi
+	return 0
 }
 
 function cm_install() {
 	local pack=$1
+	local url=0
 	cm_doctor
-	cm_check_pack "$pack"
 	if [ "$1" == "" ]
 	then
 		err "install requires a package name"
@@ -96,12 +109,23 @@ function cm_install() {
 		log "'$pack' is installed already"
 		exit 0
 	fi
-	if wget -O "$CM_BIN_PATH/$pack" "$MIRROR/$pack"
+	if cm_check_pack "$pack"
 	then
-		chmod +x "$CM_BIN_PATH/$pack" || exit 1
-		log "installed '$pack'"
+		if wget -O "$CM_BIN_PATH/$pack" "$MIRROR/$pack"
+		then
+			chmod +x "$CM_BIN_PATH/$pack" || exit 1
+			log "installed '$pack'"
+		else
+			err "failed to install '$pack'"
+		fi
 	else
-		err "failed to install '$pack'"
+		if wget -O "$CM_BIN_PATH/$pack" "${Packages[$pack]}"
+		then
+			chmod +x "$CM_BIN_PATH/$pack" || exit 1
+			log "installed '$pack'"
+		else
+			err "failed to install '$pack'"
+		fi
 	fi
 }
 
