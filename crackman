@@ -7,171 +7,171 @@ CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
 CM_TMP_PATH="$HOME/.config/crools/crackman/tmp"
 
 function show_help() {
-    echo "usage: $(tput bold)crackman [install|upgrade|search|list] [ARGS...]$(tput sgr0)"
-    echo "install:       takes package names as arg"
-    echo "remove:        takes package names as arg"
-    echo "upgrade:       takes package names as arg"
-    echo "purge:         takes no args and deletes all packages"
-    echo "search-local:  takes a regex as arg"
-    echo "search-remote: takes a regex as arg"
-    echo "list-local:    takes no arguments and lists all packages"
-    echo "list-remote:   takes no arguments and lists all packages"
-    exit 0
+	echo "usage: $(tput bold)crackman [install|upgrade|search|list] [ARGS...]$(tput sgr0)"
+	echo "install:       takes package names as arg"
+	echo "remove:        takes package names as arg"
+	echo "upgrade:       takes package names as arg"
+	echo "purge:         takes no args and deletes all packages"
+	echo "search-local:  takes a regex as arg"
+	echo "search-remote: takes a regex as arg"
+	echo "list-local:    takes no arguments and lists all packages"
+	echo "list-remote:   takes no arguments and lists all packages"
+	exit 0
 }
 
 function is_apple() {
-    if [[ "$OSTYPE" == "darwin"* ]]
-    then
-        return 0
-    fi
-    return 1
+	if [[ "$OSTYPE" == "darwin"* ]]
+	then
+		return 0
+	fi
+	return 1
 }
 
 function err() {
-    echo "[!] $1"
+	echo "[!] $1"
 }
 
 function log() {
-    echo "[*] $1"
+	echo "[*] $1"
 }
 
 function cm_doctor() {
-    local shellrc
-    if [ ! -d "$CM_BIN_PATH" ]
-    then
-        mkdir -p "$CM_BIN_PATH" || exit 1
-    fi
-    if [ ! -d "$CM_TMP_PATH" ]
-    then
-        mkdir -p "$CM_TMP_PATH" || exit 1
-    fi
-    if ! echo "$PATH" | grep -q "$CM_BIN_PATH" 
-    then
-        shellrc=~/.bashrc
-        if is_apple
-        then
-            shellrc=~/.bash_profile
-        fi
-        if grep -q "$CM_BIN_PATH" "$shellrc"
-        then
-            err "PATH error restart your shell"
-            exit 1
-        else
-            echo "export PATH=\"\$PATH:$CM_BIN_PATH\"" >> "$shellrc"
-        fi
-    fi
-    if [ ! -x "$(command -v wget)" ]
-    then
-        err "missing depedency wget"
-        exit 1
-    fi
+	local shellrc
+	if [ ! -d "$CM_BIN_PATH" ]
+	then
+		mkdir -p "$CM_BIN_PATH" || exit 1
+	fi
+	if [ ! -d "$CM_TMP_PATH" ]
+	then
+		mkdir -p "$CM_TMP_PATH" || exit 1
+	fi
+	if ! echo "$PATH" | grep -q "$CM_BIN_PATH" 
+	then
+		shellrc=~/.bashrc
+		if is_apple
+		then
+			shellrc=~/.bash_profile
+		fi
+		if grep -q "$CM_BIN_PATH" "$shellrc"
+		then
+			err "PATH error restart your shell"
+			exit 1
+		else
+			echo "export PATH=\"\$PATH:$CM_BIN_PATH\"" >> "$shellrc"
+		fi
+	fi
+	if [ ! -x "$(command -v wget)" ]
+	then
+		err "missing depedency wget"
+		exit 1
+	fi
 }
 
 function cm_check_pack() {
-    local pack=$1
-    if [[ ! "$pack" =~ ^[0-9a-zA-Z_-]*$ ]]
-    then
-        err "invalid package name '$pack'"
-        exit 1
-    fi
+	local pack=$1
+	if [[ ! "$pack" =~ ^[0-9a-zA-Z_-]*$ ]]
+	then
+		err "invalid package name '$pack'"
+		exit 1
+	fi
 	wget -O "$CM_TMP_PATH/LISTING" "$MIRROR/LISTING"
-    if ! grep -q "^$pack " "$CM_TMP_PATH/LISTING"
-    then
-        err "no such package '$pack'"
-        exit 1
-    fi
+	if ! grep -q "^$pack " "$CM_TMP_PATH/LISTING"
+	then
+		err "no such package '$pack'"
+		exit 1
+	fi
 }
 
 function cm_install() {
-    local pack=$1
-    cm_doctor
-    cm_check_pack "$pack"
-    if [ "$1" == "" ]
-    then
-        err "install requires a package name"
-        exit 1
-    fi
-    if [ -f "$CM_BIN_PATH/$pack" ]
-    then
-        log "'$pack' is installed already"
-        exit 0
-    fi
-    if wget -O "$CM_BIN_PATH/$pack" "$MIRROR/$pack"
-    then
-        chmod +x "$CM_BIN_PATH/$pack" || exit 1
-        log "installed '$pack'"
-    else
-        err "failed to install '$pack'"
-    fi
+	local pack=$1
+	cm_doctor
+	cm_check_pack "$pack"
+	if [ "$1" == "" ]
+	then
+		err "install requires a package name"
+		exit 1
+	fi
+	if [ -f "$CM_BIN_PATH/$pack" ]
+	then
+		log "'$pack' is installed already"
+		exit 0
+	fi
+	if wget -O "$CM_BIN_PATH/$pack" "$MIRROR/$pack"
+	then
+		chmod +x "$CM_BIN_PATH/$pack" || exit 1
+		log "installed '$pack'"
+	else
+		err "failed to install '$pack'"
+	fi
 }
 
 function cm_remove() {
-    local pack=$1
-    cm_doctor
-    cm_check_pack "$pack"
-    if [ "$1" == "" ]
-    then
-        err "remove requires a package name"
-        exit 1
-    fi
-    if [ ! -f "$CM_BIN_PATH/$pack" ]
-    then
-        err "package is not installed"
-        exit 1
-    fi
-    rm "$CM_BIN_PATH/$pack" || exit 1
-    log "removed '$pack'"
+	local pack=$1
+	cm_doctor
+	cm_check_pack "$pack"
+	if [ "$1" == "" ]
+	then
+		err "remove requires a package name"
+		exit 1
+	fi
+	if [ ! -f "$CM_BIN_PATH/$pack" ]
+	then
+		err "package is not installed"
+		exit 1
+	fi
+	rm "$CM_BIN_PATH/$pack" || exit 1
+	log "removed '$pack'"
 }
 
 function list_remote() {
-    local name
-    local desc
-    local listfile
-    listfile="$CM_TMP_PATH/LISTING"
-    cm_doctor
+	local name
+	local desc
+	local listfile
+	listfile="$CM_TMP_PATH/LISTING"
+	cm_doctor
 	wget -O "$listfile" "$MIRROR/LISTING"
-    if [ ! -f "$listfile" ]
-    then
-        err "list file not found '$listfile'"
-        exit 1
-    fi
-    while read -r line
-    do
-        name="${line%% *}"
-        desc="${line#*$name }"
-        echo "$(tput bold)$name$(tput sgr0)"
-        echo "  $desc"
-    done < "$listfile"
+	if [ ! -f "$listfile" ]
+	then
+		err "list file not found '$listfile'"
+		exit 1
+	fi
+	while read -r line
+	do
+		name="${line%% *}"
+		desc="${line#*$name }"
+		echo "$(tput bold)$name$(tput sgr0)"
+		echo "  $desc"
+	done < "$listfile"
 }
 
 if [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
-    show_help
+	show_help
 elif [ "$1" == "install" ]
 then
-    cm_install "$2"
+	cm_install "$2"
 elif [ "$1" == "remove" ]
 then
-    cm_remove "$2"
+	cm_remove "$2"
 elif [ "$1" == "list-local" ]
 then
-    ls "$CM_BIN_PATH"
+	ls "$CM_BIN_PATH"
 elif [ "$1" == "list-remote" ]
 then
-    list_remote
+	list_remote
 elif [ "$1" == "purge" ]
 then
-    for p in "$CM_BIN_PATH"/*
-    do
-        if [ "$(basename "$p")" == "*" ]
-        then
-            err "no packages installed"
-            exit 1
-        fi
-        cm_remove "$(basename "$p")"
-    done
+	for p in "$CM_BIN_PATH"/*
+	do
+		if [ "$(basename "$p")" == "*" ]
+		then
+			err "no packages installed"
+			exit 1
+		fi
+		cm_remove "$(basename "$p")"
+	done
 else
-    show_help
+	show_help
 fi
 
 # #!/bin/bash
