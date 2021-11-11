@@ -148,6 +148,13 @@ else
 	(
 		cd ~/.config/crools/bashrc.d || exit 1
 		git_save_pull
+		for bashrc in ~/.config/crools/bashrc.d/other/*/
+		do
+			(
+				cd "$bashrc" || exit 1
+				git_save_pull
+			)
+		done
 	)
 fi
 
