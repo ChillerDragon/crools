@@ -150,6 +150,7 @@ else
 		git_save_pull
 		for bashrc in ~/.config/crools/bashrc.d/other/*/
 		do
+			[[ -d "$bashrc" ]] || break
 			(
 				cd "$bashrc" || exit 1
 				git_save_pull
