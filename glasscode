@@ -3,31 +3,86 @@
 # https://github.com/hikarin522/GlassIt-VSC/issues/20#issuecomment-720251659
 # https://github.com/hikarin522/GlassIt-VSC/blob/v0.2.2/extension.js#L80
 
-codeIds=(`pgrep 'code'`)
+if [ ! -x "$(command -v xprop)" ]
+then
+	echo "Error: xprop not found"
+	echo "       make sure you are on X11 and have xprop installed"
+	exit 1
+fi
 
-echo "codeIds: ${codeIds[@]}"
+is_verbose=0
+force=0
+
+for arg in "$@"
+do
+	if [ "$arg" == "--verbose" ]
+	then
+		is_verbose=1
+	elif [ "$arg" == "on" ]
+	then
+		force="on"
+	elif [ "$arg" == "off" ]
+	then
+		force="off"
+	else
+		echo "usage: glasscode [--verbose|on|off]"
+		echo "description:"
+		echo "  toggles vs code windows transparency"
+		echo "  requires X11 and xprop"
+		exit 0
+	fi
+done
+
+function dbg() {
+	if [ "$is_verbose" == "0" ]
+	then
+		return
+	fi
+	printf "[*] %s\n" "$1"
+}
+
+read -r -a codeIds <<< "$(pgrep 'code')"
+
+dbg "codeIds: ${codeIds[*]}"
 
 IFS=', '
-windowIds=`xprop -root  |  grep '_NET_CLIENT_LIST(WINDOW)'`
-windowIds=(${windowIds#*#})
-echo "windowIds : ${windowIds[@]}"
+windowIds="$(xprop -root | grep '_NET_CLIENT_LIST(WINDOW)')"
+read -r -a windowIds <<< "${windowIds#*#}"
+dbg "windowIds : ${windowIds[*]}"
 
 pids=()
 targets=()
-for wid in  ${windowIds[@]}; do
-  pid=`xprop -id ${wid} _NET_WM_PID`
-  pid=${pid#*= }
-  pids+=($pid)
-  for code in ${codeIds[@]}; do
-    if [[ $pid == $code ]]; then
-      targets+=($wid)
-    fi
-  done
+for wid in "${windowIds[@]}"
+do
+	pid="$(xprop -id "${wid}" _NET_WM_PID)"
+	pid="${pid#*= }"
+	pids+=("$pid")
+	for code in "${codeIds[@]}"
+	do
+		if [[ "$pid" == "$code" ]]
+		then
+			targets+=("$wid")
+		fi
+	done
 done
 
-echo "pids : ${pids[@]}"
+dbg "pids : ${pids[*]}"
+dbg "targets : ${targets[*]}"
 
-echo "targets : ${targets[@]}"
+current="$(xprop -id "${targets[0]}" _NET_WM_WINDOW_OPACITY | cut -d' ' -f3)"
 
-xprop -id ${targets[0]}  -f _NET_WM_WINDOW_OPACITY 32c -set _NET_WM_WINDOW_OPACITY $(( 0xffffffff * 200 / 256 ))
+if [[ ( "$current" == "not"  ||  "$current" == "4294967295"  ||  "$force" == "on"  ) &&  "$force" != "off" ]]
+then
+	echo "[+] transparency ON!"
+	xprop \
+		-id "${targets[0]}" \
+		-f _NET_WM_WINDOW_OPACITY 32c \
+		-set _NET_WM_WINDOW_OPACITY $(( 0xffffffff * 200 / 256 ))
+else
+	echo "[-] transparency OFF!"
+	xprop \
+		-id "${targets[0]}" \
+		-f _NET_WM_WINDOW_OPACITY 32c \
+		-set _NET_WM_WINDOW_OPACITY $(( 0xffffffff ))
+fi
 
