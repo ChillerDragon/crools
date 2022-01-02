@@ -77,7 +77,7 @@ then
 	xprop \
 		-id "${targets[0]}" \
 		-f _NET_WM_WINDOW_OPACITY 32c \
-		-set _NET_WM_WINDOW_OPACITY $(( 0xffffffff * 200 / 256 ))
+		-set _NET_WM_WINDOW_OPACITY $(( 0xffffffff * 235 / 256 ))
 else
 	echo "[-] transparency OFF!"
 	xprop \
