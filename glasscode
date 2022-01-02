@@ -12,6 +12,7 @@ fi
 
 is_verbose=0
 force=0
+opacity=235
 
 for arg in "$@"
 do
@@ -24,8 +25,12 @@ do
 	elif [ "$arg" == "off" ]
 	then
 		force="off"
+	elif [[ "$arg" =~ ^[0-9]+$ ]]
+	then
+		force="custom"
+		opacity="$arg"
 	else
-		echo "usage: glasscode [--verbose|on|off]"
+		echo "usage: glasscode [--verbose] [on|off|opacity 0-256]"
 		echo "description:"
 		echo "  toggles vs code windows transparency"
 		echo "  requires X11 and xprop"
@@ -71,18 +76,19 @@ dbg "targets : ${targets[*]}"
 
 current="$(xprop -id "${targets[0]}" _NET_WM_WINDOW_OPACITY | cut -d' ' -f3)"
 
-if [[ ( "$current" == "not"  ||  "$current" == "4294967295"  ||  "$force" == "on"  ) &&  "$force" != "off" ]]
+if [ "$force" == "custom" ]
+then
+	echo "[+] transparency $opacity!"
+elif [[ ( "$current" == "not"  ||  "$current" == "4294967295"  ||  "$force" == "on"  ) &&  "$force" != "off" ]]
 then
 	echo "[+] transparency ON!"
-	xprop \
-		-id "${targets[0]}" \
-		-f _NET_WM_WINDOW_OPACITY 32c \
-		-set _NET_WM_WINDOW_OPACITY $(( 0xffffffff * 235 / 256 ))
 else
 	echo "[-] transparency OFF!"
-	xprop \
-		-id "${targets[0]}" \
-		-f _NET_WM_WINDOW_OPACITY 32c \
-		-set _NET_WM_WINDOW_OPACITY $(( 0xffffffff ))
+	opacity=256
 fi
+
+xprop \
+	-id "${targets[0]}" \
+	-f _NET_WM_WINDOW_OPACITY 32c \
+	-set _NET_WM_WINDOW_OPACITY $(( 0xffffffff * opacity / 256 ))
 
