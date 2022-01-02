@@ -13,6 +13,73 @@ fi
 is_verbose=0
 force=0
 opacity=235
+pids=()
+targets=()
+
+function dbg() {
+	if [ "$is_verbose" == "0" ]
+	then
+		return
+	fi
+	printf "[*] %s\n" "$1"
+}
+
+function update_ids() {
+	read -r -a codeIds <<< "$(pgrep 'code')"
+
+	dbg "codeIds: ${codeIds[*]}"
+
+	IFS=', '
+	windowIds="$(xprop -root | grep '_NET_CLIENT_LIST(WINDOW)')"
+	read -r -a windowIds <<< "${windowIds#*#}"
+	dbg "windowIds : ${windowIds[*]}"
+
+	for wid in "${windowIds[@]}"
+	do
+		pid="$(xprop -id "${wid}" _NET_WM_PID)"
+		pid="${pid#*= }"
+		pids+=("$pid")
+		for code in "${codeIds[@]}"
+		do
+			if [[ "$pid" == "$code" ]]
+			then
+				targets+=("$wid")
+			fi
+		done
+	done
+
+	dbg "pids : ${pids[*]}"
+	dbg "targets : ${targets[*]}"
+
+	current="$(xprop -id "${targets[0]}" _NET_WM_WINDOW_OPACITY | cut -d' ' -f3)"
+}
+
+function set_opacity() {
+	local value="$1"
+	xprop \
+		-id "${targets[0]}" \
+		-f _NET_WM_WINDOW_OPACITY 32c \
+		-set _NET_WM_WINDOW_OPACITY $(( 0xffffffff * value / 256 ))
+}
+
+function animate() {
+	local i
+	while true
+	do
+		# for i in {4..50} {50..4}
+		# do
+		# 	update_ids
+		# 	set_opacity "$((i * 5))"
+		# 	sleep 0.1
+		# done
+		for i in {100..230} {230..100}
+		do
+			update_ids
+			set_opacity "$i"
+			sleep 0.001
+		done
+	done
+}
 
 for arg in "$@"
 do
@@ -25,12 +92,15 @@ do
 	elif [ "$arg" == "off" ]
 	then
 		force="off"
+	elif [ "$arg" == "animate" ]
+	then
+		animate
 	elif [[ "$arg" =~ ^[0-9]+$ ]]
 	then
 		force="custom"
 		opacity="$arg"
 	else
-		echo "usage: glasscode [--verbose] [on|off|opacity 0-256]"
+		echo "usage: glasscode [--verbose] [on|off|opacity 0-256|animate]"
 		echo "description:"
 		echo "  toggles vs code windows transparency"
 		echo "  requires X11 and xprop"
@@ -38,43 +108,7 @@ do
 	fi
 done
 
-function dbg() {
-	if [ "$is_verbose" == "0" ]
-	then
-		return
-	fi
-	printf "[*] %s\n" "$1"
-}
-
-read -r -a codeIds <<< "$(pgrep 'code')"
-
-dbg "codeIds: ${codeIds[*]}"
-
-IFS=', '
-windowIds="$(xprop -root | grep '_NET_CLIENT_LIST(WINDOW)')"
-read -r -a windowIds <<< "${windowIds#*#}"
-dbg "windowIds : ${windowIds[*]}"
-
-pids=()
-targets=()
-for wid in "${windowIds[@]}"
-do
-	pid="$(xprop -id "${wid}" _NET_WM_PID)"
-	pid="${pid#*= }"
-	pids+=("$pid")
-	for code in "${codeIds[@]}"
-	do
-		if [[ "$pid" == "$code" ]]
-		then
-			targets+=("$wid")
-		fi
-	done
-done
-
-dbg "pids : ${pids[*]}"
-dbg "targets : ${targets[*]}"
-
-current="$(xprop -id "${targets[0]}" _NET_WM_WINDOW_OPACITY | cut -d' ' -f3)"
+update_ids
 
 if [ "$force" == "custom" ]
 then
@@ -87,8 +121,5 @@ else
 	opacity=256
 fi
 
-xprop \
-	-id "${targets[0]}" \
-	-f _NET_WM_WINDOW_OPACITY 32c \
-	-set _NET_WM_WINDOW_OPACITY $(( 0xffffffff * opacity / 256 ))
+set_opacity "$opacity"
 
