@@ -110,6 +110,16 @@ function cm_install() {
 		log "'$pack' is installed already"
 		exit 0
 	fi
+	local p
+	local full_path
+	local dir_path
+	full_path="$(realpath "$0")"
+	dir_path="$(dirname "$full_path")"
+	if [ -f "$dir_path"/packages/"$pack" ]
+	then
+		"$dir_path"/packages/"$pack"
+		exit "$?"
+	fi
 	if cm_check_pack "$pack"
 	then
 		if wget -O "$CM_BIN_PATH/$pack" "$MIRROR/$pack"

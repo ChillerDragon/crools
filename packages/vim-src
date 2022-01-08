@@ -1,0 +1,26 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+
+if [ "$1" == "delete" ]
+then
+	rm "$CM_BIN_PATH"/vim
+	rm -rf "$CM_SRC_PATH"/vim
+else
+	cd "$CM_SRC_PATH" || exit 1
+	if [ ! -d "vim" ]
+	then
+		git clone https://github.com/vim/vim.git
+	fi
+	cd vim || exit 1
+	git pull
+	cd src || exit 1
+	make
+	sudo make install
+fi
+
