@@ -3,6 +3,7 @@
 # its like a package manager but its crack
 
 MIRROR=https://zillyhuhn.com/crack
+CM_PKG_PATH="$(dirname "$(realpath "$0")")"/packages
 CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
 CM_TMP_PATH="$HOME/.config/crools/crackman/tmp"
 
@@ -83,6 +84,10 @@ function cm_check_pack() {
 		err "invalid package name '$pack'"
 		exit 1
 	fi
+	if [ -f "$CM_PKG_PATH/$pack" ]
+	then
+		return 2
+	fi
 	wget -O "$CM_TMP_PATH/LISTING" "$MIRROR/LISTING"
 	if ! grep -q "^$pack " "$CM_TMP_PATH/LISTING"
 	then
@@ -96,31 +101,39 @@ function cm_check_pack() {
 	return 0
 }
 
+function cm_is_installed() {
+	local pack="$1"
+	if [ -f "$CM_PKG_PATH/$pack" ]
+	then
+		if "$CM_PKG_PATH/$pack" is_installed? > /dev/null
+		then
+			return 1
+		else
+			return 0
+		fi
+	elif [ -f "$CM_BIN_PATH/$pack" ]
+	then
+		return 0
+	fi
+	return 1
+}
+
 function cm_install() {
 	local pack=$1
-	local url=0
 	cm_doctor
 	if [ "$1" == "" ]
 	then
 		err "install requires a package name"
 		exit 1
 	fi
-	if [ -f "$CM_BIN_PATH/$pack" ]
+	if cm_is_installed "$pack"
 	then
 		log "'$pack' is installed already"
 		exit 0
 	fi
-	local p
-	local full_path
-	local dir_path
-	full_path="$(realpath "$0")"
-	dir_path="$(dirname "$full_path")"
-	if [ -f "$dir_path"/packages/"$pack" ]
-	then
-		"$dir_path"/packages/"$pack"
-		exit "$?"
-	fi
-	if cm_check_pack "$pack"
+	cm_check_pack "$pack"
+	valid_pack="$?"
+	if [ "$valid_pack" == "0" ]
 	then
 		if wget -O "$CM_BIN_PATH/$pack" "$MIRROR/$pack"
 		then
@@ -129,6 +142,10 @@ function cm_install() {
 		else
 			err "failed to install '$pack'"
 		fi
+	elif [ "$valid_pack" == "2" ]
+	then
+		"$CM_PKG_PATH/$pack"
+		exit "$?"
 	else
 		if wget -O "$CM_BIN_PATH/$pack" "${Packages[$pack]}"
 		then
@@ -149,12 +166,17 @@ function cm_remove() {
 		err "remove requires a package name"
 		exit 1
 	fi
-	if [ ! -f "$CM_BIN_PATH/$pack" ]
+	if ! cm_is_installed "$pack"
 	then
 		err "package is not installed"
 		exit 1
 	fi
-	rm "$CM_BIN_PATH/$pack" || exit 1
+	if [ -f "$CM_PKG_PATH/$pack" ]
+	then
+		"$CM_PKG_PATH/$pack" delete
+	else
+		rm "$CM_BIN_PATH/$pack" || exit 1
+	fi
 	log "removed '$pack'"
 }
 

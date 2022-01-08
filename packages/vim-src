@@ -9,8 +9,18 @@ mkdir -p "$CM_SRC_PATH"
 
 if [ "$1" == "delete" ]
 then
-	rm "$CM_BIN_PATH"/vim
 	rm -rf "$CM_SRC_PATH"/vim
+	sudo rm /usr/local/bin/vim
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -f /usr/local/bin/vim ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
 else
 	cd "$CM_SRC_PATH" || exit 1
 	if [ ! -d "vim" ]
