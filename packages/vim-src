@@ -20,7 +20,19 @@ else
 	cd vim || exit 1
 	git pull
 	cd src || exit 1
-	make
+	# https://github.com/ycm-core/YouCompleteMe/wiki/Building-Vim-from-source
+	make distclean
+	./configure --with-features=huge \
+		    --enable-multibyte \
+		    --enable-rubyinterp=yes \
+		    --enable-python3interp=yes \
+		    --with-python3-config-dir="$(python3-config --configdir)" \
+		    --enable-perlinterp=yes \
+		    --enable-luainterp=yes \
+		    --enable-gui=gtk2 \
+		    --enable-cscope \
+		    --prefix=/usr/local
+	make VIMRUNTIMEDIR=/usr/local/share/vim/vim82
 	sudo make install
 fi
 
