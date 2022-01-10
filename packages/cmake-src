@@ -1,0 +1,37 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+
+if [ "$1" == "delete" ]
+then
+	rm -rf "$CM_SRC_PATH"/cmake
+	sudo rm /usr/local/bin/cmake
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -f /usr/local/bin/cmake ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	cd "$CM_SRC_PATH" || exit 1
+	if [ ! -d "cmake" ]
+	then
+		git clone https://github.com/Kitware/CMake.git cmake
+	fi
+	cd cmake || exit 1
+	git pull
+	cd src || exit 1
+	./bootstrap || exit 1
+	make || exit 1
+	sudo make install
+fi
+
