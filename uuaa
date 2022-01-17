@@ -1,0 +1,86 @@
+#!/bin/bash
+
+# this crap was cracked together out of bordem
+
+cat <<- 'EOF'
+ _   _ _   _  __ _  __ _ 
+| | | | | | |/ _` |/ _` |
+| |_| | |_| | (_| | (_| |
+ \__,_|\__,_|\__,_|\__,_|
+EOF
+
+function log() {
+	printf "[*] %s\n" "$1"
+}
+function err() {
+	printf "[-] %s\n" "$1"
+}
+function wrn() {
+	printf "[!] %s\n" "$1"
+}
+
+echo ""
+tput bold
+echo "UUAA - the update & upgrade script on crack"
+tput sgr0
+echo ""
+log "this script is going places!!!"
+log "Are you sure you up for dis? [y/N]"
+read -r -n 1 yn
+if [[ ! "$yn" =~ [yY] ]]
+then
+	log "aborting ..."
+	exit 1
+fi
+
+function update_os() {
+	if [ -x "$(command -v apt)" ] && grep -qEi 'debian|buntu|mint' /etc/*release
+	then
+		sudo apt-get update -y
+		sudo apt-get upgrade -y
+	elif [ -x "$(command -v yay)" ] && [ -f /etc/arch-release ]
+	then
+		yay
+	elif [ -x "$(command -v pacman)" ] && [ -f /etc/arch-release ]
+	then
+		sudo pacman -Syu
+	elif [ -x "$(command -v brew)" ] && [[ "$OSTYPE" == "darwin"* ]]
+	then
+		brew update
+		brew upgrade
+	fi
+}
+
+function git_save_pull() {
+	local repo="$1"
+	if [ "$(git status | tail -n1)" != "nothing to commit, working tree clean" ]
+	then
+		wrn "WARNING: git pull failed! Is your $repo working tree clean?"
+		return
+	fi
+	log "updating $repo ..."
+	git pull
+	git submodule update
+}
+
+function update_repos() {
+	local repo
+	(
+		cd ~/Desktop/git || cd ~/git || exit 1
+		for repo in ./*/
+		do
+			(
+				cd "$repo" || exit 1 
+				git_save_pull "$repo"
+			)
+		done
+	)
+}
+
+crools
+crools
+
+update_os
+
+update_repos
+
