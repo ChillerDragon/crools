@@ -47,6 +47,10 @@ else
 	cmake .. -DHEADLESS_CLIENT=ON -DCURSES_CLIENT=ON || exit 1
 	make -j"$(get_cores)" || exit 1
 	cp chillerbot-ux "$CM_BIN_PATH"/term-ux
-	cp -r data "$CM_BIN_PATH"
+	if [ ! -d /usr/share/ddnet/data ]
+	then
+		sudo mkdir -p /usr/share/ddnet
+		sudo cp -r data /usr/share/ddnet
+	fi
 fi
 
