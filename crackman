@@ -195,7 +195,12 @@ function list_remote() {
 	do
 		name="${line%% *}"
 		desc="${line#*$name }"
-		echo "$(tput bold)$name$(tput sgr0)"
+		if cm_is_installed "$name"
+		then
+			echo "$(tput bold)$name [installed]$(tput sgr0)"
+		else
+			echo "$(tput bold)$name$(tput sgr0)"
+		fi
 		echo "  $desc"
 	done < "$listfile"
 }
@@ -206,7 +211,12 @@ function list_local() {
 	for pack in "$CM_PKG_PATH"/*
 	do
 		tput bold
-		basename "$pack"
+		if cm_is_installed "$(basename "$pack")"
+		then
+			printf '%s [installed]\n' "$(basename "$pack")"
+		else
+			basename "$pack"
+		fi
 		tput sgr0
 		printf '  %s\n' "$("$pack" description)"
 	done
