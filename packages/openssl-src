@@ -6,8 +6,10 @@ CM_SRC_PATH="$HOME/.config/crools/crackman/src"
 mkdir -p "$CM_BIN_PATH"
 mkdir -p "$CM_SRC_PATH"
 
-
-if [ "$1" == "delete" ]
+if [ "$1" == "description" ]
+then
+	echo "openssl library built from source"
+elif [ "$1" == "delete" ]
 then
 	sudo rm -rf /usr/local/ssl
 	(

@@ -7,7 +7,10 @@ mkdir -p "$CM_BIN_PATH"
 mkdir -p "$CM_SRC_PATH"
 
 
-if [ "$1" == "delete" ]
+if [ "$1" == "description" ]
+then
+	echo "ncurses text editor built from source"
+elif [ "$1" == "delete" ]
 then
 	rm -rf "$CM_SRC_PATH"/vim
 	sudo rm /usr/local/bin/vim

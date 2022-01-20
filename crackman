@@ -23,9 +23,8 @@ function show_help() {
 	echo "  remove  <package>        remove a package"
 	echo "  upgrade <package>        upgrade a package"
 	echo "  purge                    deletes all packages"
-	echo "  list-local               lists packages provided by local files"
-	echo "  list-remote              lists packages provided by remote"
-	echo "  list-installed           lists installed packages"
+	echo "  list                     list installable packages"
+	echo "  installed                lists installed packages"
 	exit 0
 }
 
@@ -186,7 +185,7 @@ function list_remote() {
 	local listfile
 	listfile="$CM_TMP_PATH/LISTING"
 	cm_doctor
-	wget -O "$listfile" "$MIRROR/LISTING"
+	wget --quiet -O "$listfile" "$MIRROR/LISTING"
 	if [ ! -f "$listfile" ]
 	then
 		err "list file not found '$listfile'"
@@ -203,9 +202,13 @@ function list_remote() {
 
 function list_local() {
 	local pack
+	local desc
 	for pack in "$CM_PKG_PATH"/*
 	do
+		tput bold
 		basename "$pack"
+		tput sgr0
+		printf '  %s\n' "$("$pack" description)"
 	done
 }
 
@@ -218,13 +221,11 @@ then
 elif [ "$1" == "remove" ]
 then
 	cm_remove "$2"
-elif [ "$1" == "list-local" ]
-then
-	list_local
-elif [ "$1" == "list-remote" ]
+elif [ "$1" == "list" ]
 then
 	list_remote
-elif [ "$1" == "list-installed" ]
+	list_local
+elif [ "$1" == "installed" ]
 then
 	ls "$CM_BIN_PATH"
 elif [ "$1" == "purge" ]

@@ -15,7 +15,10 @@ function get_cores() {
 	fi
 }
 
-if [ "$1" == "delete" ]
+if [ "$1" == "description" ]
+then
+	echo "Headless version of chillerbot-ux"
+elif [ "$1" == "delete" ]
 then
 	rm -rf "$CM_SRC_PATH"/term-ux
 	sudo rm "$CM_BIN_PATH"/term-ux
