@@ -17,15 +17,15 @@ declare -A Packages=(
 )
 
 function show_help() {
-	echo "usage: $(tput bold)crackman [install|upgrade|search|list] [ARGS...]$(tput sgr0)"
-	echo "install:       takes package names as arg"
-	echo "remove:        takes package names as arg"
-	echo "upgrade:       takes package names as arg"
-	echo "purge:         takes no args and deletes all packages"
-	echo "search-local:  takes a regex as arg"
-	echo "search-remote: takes a regex as arg"
-	echo "list-local:    takes no arguments and lists all packages"
-	echo "list-remote:   takes no arguments and lists all packages"
+	echo "usage: $(tput bold)crackman [COMMAND] [ARGS...]$(tput sgr0)"
+	echo "commands:"
+	echo "  install <package>        install a package"
+	echo "  remove  <package>        remove a package"
+	echo "  upgrade <package>        upgrade a package"
+	echo "  purge                    deletes all packages"
+	echo "  list-local               lists packages provided by local files"
+	echo "  list-remote              lists packages provided by remote"
+	echo "  list-installed           lists installed packages"
 	exit 0
 }
 
@@ -201,6 +201,14 @@ function list_remote() {
 	done < "$listfile"
 }
 
+function list_local() {
+	local pack
+	for pack in "$CM_PKG_PATH"/*
+	do
+		basename "$pack"
+	done
+}
+
 if [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
 	show_help
@@ -212,10 +220,13 @@ then
 	cm_remove "$2"
 elif [ "$1" == "list-local" ]
 then
-	ls "$CM_BIN_PATH"
+	list_local
 elif [ "$1" == "list-remote" ]
 then
 	list_remote
+elif [ "$1" == "list-installed" ]
+then
+	ls "$CM_BIN_PATH"
 elif [ "$1" == "purge" ]
 then
 	for p in "$CM_BIN_PATH"/*
