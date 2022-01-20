@@ -1,0 +1,40 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+
+if [ "$1" == "delete" ]
+then
+	sudo rm -rf /usr/local/ssl
+	(
+		cd "$CM_SRC_PATH"/openssl || exit 1
+		sudo make uninstall || exit 1
+	) || exit 1
+	rm -rf "$CM_SRC_PATH"/openssl
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -d /usr/local/ssl ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	cd "$CM_SRC_PATH" || exit 1
+	if [ ! -d "openssl" ]
+	then
+		git clone git@github.com:openssl/openssl.git
+	fi
+	cd openssl || exit 1
+	git pull
+	./Configure || exit 1
+	make || exit 1
+	sudo make install || exit 1
+fi
+
