@@ -129,6 +129,15 @@ then
     fi
 fi
 
+if [ -d ~/.lib-crash/lib-teeworlds/.git ]
+then
+	echo "[*] updating lib-teeworlds ..."
+	(
+		cd ~/.lib-crash/lib-teeworlds || exit 1
+		git_save_pull
+	)
+fi
+
 function add_to_rc() {
     local name="$1"
     local code="$2"
