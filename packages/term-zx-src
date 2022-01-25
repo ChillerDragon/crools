@@ -1,0 +1,59 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+function get_cores() {
+	if [ -x "$(command -v nproc)" ]
+	then
+		nproc
+	else
+		echo 1
+	fi
+}
+
+if [ "$1" == "description" ]
+then
+	echo "Headless version of chillerbot-zx"
+elif [ "$1" == "delete" ]
+then
+	rm -rf "$CM_SRC_PATH"/term-zx
+	sudo rm "$CM_BIN_PATH"/term-zx
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -f "$CM_BIN_PATH"/term-zx ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	if [ -f "/etc/arch-release" ]
+	then
+		sudo pacman -S --needed base-devel cmake curl freetype2 git glew gmock libnotify opusfile python sdl2 sqlite wavpack ncurses
+	fi
+	cd "$CM_SRC_PATH" || exit 1
+	if [ ! -d "term-zx" ]
+	then
+		git clone --recursive git@github.com:chillerbot/chillerbot-zx.git term-zx
+	fi
+	cd term-zx || exit 1
+	git pull
+	git submodule update
+	mkdir -p build
+	cd build || exit 1
+	cmake .. -DHEADLESS_CLIENT=ON -DCURSES_CLIENT=ON || exit 1
+	make -j"$(get_cores)" || exit 1
+	cp chillerbot-zx "$CM_BIN_PATH"/term-zx
+	if [ ! -d /usr/share/ddnet/data ]
+	then
+		sudo mkdir -p /usr/share/ddnet
+		sudo cp -r data /usr/share/ddnet
+	fi
+fi
+
