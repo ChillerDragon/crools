@@ -125,11 +125,6 @@ function cm_install() {
 		err "install requires a package name"
 		exit 1
 	fi
-	if cm_is_installed "$pack"
-	then
-		log "'$pack' is installed already"
-		exit 0
-	fi
 	cm_check_pack "$pack"
 	valid_pack="$?"
 	if [ "$valid_pack" == "0" ]
@@ -226,6 +221,14 @@ if [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
 	show_help
 elif [ "$1" == "install" ]
+then
+	if cm_is_installed "$1"
+	then
+		log "'$1' is installed already"
+		exit 0
+	fi
+	cm_install "$2"
+elif [ "$1" == "upgrade" ]
 then
 	cm_install "$2"
 elif [ "$1" == "remove" ]
