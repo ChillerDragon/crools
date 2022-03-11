@@ -56,6 +56,8 @@ function install_kdenlive() {
         sudo apt install frei0r-plugins ffmpeg
 
         sudo apt install subversion gnupg2 gettext
+
+	sudo apt install qtbase5-dev qtdeclarative5-dev libqt5svg5-dev
     else
         echo "Error: unsupported distribution"
         exit 1
@@ -66,9 +68,9 @@ function install_kdenlive() {
     (
         v_eval "cd mlt || exit 1"
         v_eval "git pull"
-        v_eval "./configure || exit 1"
-        v_eval "make || exit 1"
-        v_eval "sudo make install || exit 1"
+        v_eval "cmake . || exit 1"
+        v_eval "cmake --build . || exit 1"
+        v_eval "sudo cmake --install . || exit 1"
     ) || exit 1
 
     # KDENLIVE
