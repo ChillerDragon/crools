@@ -33,6 +33,9 @@ then
 	exit 1
 fi
 
+log "Entering sudo mode ..."
+sudo test
+
 function update_os() {
 	if [ -x "$(command -v apt)" ] && grep -qEi 'debian|buntu|mint' /etc/*release
 	then
