@@ -22,6 +22,7 @@ function show_help() {
 	echo "  install <package>        install a package"
 	echo "  remove  <package>        remove a package"
 	echo "  upgrade <package>        upgrade a package"
+	echo "  update                   update all packages"
 	echo "  purge                    deletes all packages"
 	echo "  list                     list installable packages"
 	echo "  installed                lists installed packages"
@@ -217,6 +218,20 @@ function list_local() {
 	done
 }
 
+function update_all() {
+	local pack
+	# local ones
+	for pack in "$CM_PKG_PATH"/*
+	do
+		if cm_is_installed "$(basename "$pack")"
+		then
+			cm_install "$(basename "$pack")"
+		fi
+	done
+	# remote ones
+	# TODO: check version checksum or anything else before redownloading
+}
+
 if [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
 	show_help
@@ -231,6 +246,9 @@ then
 elif [ "$1" == "upgrade" ]
 then
 	cm_install "$2"
+elif [ "$1" == "update" ]
+then
+	update_all
 elif [ "$1" == "remove" ]
 then
 	cm_remove "$2"

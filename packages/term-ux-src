@@ -33,9 +33,13 @@ then
 		exit 0
 	fi
 else
-	if [ -f "/etc/arch-release" ]
+
+	if [ -f /etc/arch-release ]
 	then
-		sudo pacman -S --needed base-devel cmake curl freetype2 git glew gmock libnotify opusfile python sdl2 sqlite wavpack ncurses
+		sudo pacman -S --needed base-devel cmake curl freetype2 git glew gmock libnotify opusfile python sdl2 sqlite wavpack x264 ffmpeg vulkan-icd-loader vulkan-headers glslang spirv-tools
+	elif [ -f /etc/debian_version ]
+	then
+		sudo apt install build-essential cmake git google-mock libcurl4-openssl-dev libssl-dev libfreetype6-dev libglew-dev libnotify-dev libogg-dev libopus-dev libopusfile-dev libpnglite-dev libsdl2-dev libsqlite3-dev libwavpack-dev python libx264-dev libavfilter-dev libavdevice-dev libavformat-dev libavcodec-extra libavutil-dev libvulkan-dev glslang-tools spirv-tools
 	fi
 	cd "$CM_SRC_PATH" || exit 1
 	if [ ! -d "term-ux" ]
