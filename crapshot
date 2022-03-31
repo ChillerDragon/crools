@@ -261,9 +261,18 @@ do
         exit 0
     elif [ "$arg" == "--help" ] || [ "$arg" == "-h" ]
     then
-        echo "usage: $(basename "$0") [--edit|--select|--no-browser|--list|--file <filepath>]"
-        echo "description: upload screenshots via scp"
-        echo "exmaple: $(basename "$0") -s --no-browser"
+        echo "usage: $(basename "$0") [OPTION..]"
+	echo "options:"
+	echo "  --edit"
+	echo "  --select"
+	echo "  --no-browser"
+	echo "  --list"
+	echo "  --delete"
+	echo "  --file <filepath>"
+        echo "description:"
+	echo "  upload screenshots via scp"
+        echo "exmaple:"
+	echo "  $(basename "$0") -s --no-browser"
         exit 0
     elif [ "$arg" == "--edit" ] || [ "$arg" == "-e" ]
     then
