@@ -255,6 +255,14 @@ then
 		gem install bundler
 	fi
 	bundle
+elif [ -f ./*.cabal ]
+then
+	if [ ! -x "$(command -v bundle)" ]
+	then
+		echo "Error: you need cabal for haskell projects"
+		exit 1
+	fi
+	cabal
 else
     echo "I am sorry, I have no clue how to build this."
 fi
