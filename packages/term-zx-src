@@ -52,7 +52,7 @@ else
 	cd build || exit 1
 	cmake .. -DHEADLESS_CLIENT=ON -DCURSES_CLIENT=ON || exit 1
 	make -j"$(get_cores)" || exit 1
-	cp chillerbot-zx "$CM_BIN_PATH"/term-zx
+	cp term-zx "$CM_BIN_PATH"/term-zx
 	if [ ! -d /usr/share/ddnet/data ]
 	then
 		sudo mkdir -p /usr/share/ddnet
