@@ -89,3 +89,10 @@ crackman update
 
 update_repos
 
+if [ -d ~/Desktop/git/updatebot ]
+then
+	pushd ~/Desktop/git/updatebot || exit 1
+	./update.sh || exit 1
+	popd || exit 1
+fi
+
