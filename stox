@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+
+require 'colorize'
+require 'nokogiri'
+require 'open-uri'
+
+class Stock
+  attr_reader :ticker, :chg
+
+  def initialize(attr = {})
+    @ticker = attr[:ticker]
+    @chg = attr[:chg]
+  end
+end
+
+def print_volatiles(num = 20)
+  url = 'https://www.tradingview.com/markets/stocks-usa/market-movers-most-volatile/'
+  cache = "/tmp/stox_#{Time.new.strftime("%F-%H-%M")}.html"
+  if File.file? cache
+    html = File.open('index.html').read
+  else
+    html = URI.open(url)
+    File.open(cache, 'w') do |file|
+      file.write(html)
+    end
+  end
+  doc = Nokogiri::HTML(html)
+
+  stocks = []
+
+
+  doc.search('tr').each do |row|
+    cols = row.search('td')
+    next unless cols.length > 2
+
+    stocks << Stock.new(ticker: cols[0].text.strip, chg: cols[2].text.strip)
+  end
+
+  stocks.sort_by! do |stock|
+    -stock.chg.match(/\d+\.\d+/)[0].to_f
+  end
+
+  print `clear`
+  stocks.first(num).each_with_index do |stock, index|
+    print "#{index} - "
+    if stock.chg[0] == '−'
+      print stock.chg.red
+    else
+      print stock.chg.green
+    end
+    puts " #{stock.ticker}"
+  end
+end
+
+loop do
+  print_volatiles(20)
+  sleep 10 * 60
+end
+
