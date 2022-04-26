@@ -89,6 +89,11 @@ fi
 
 git_save_pull
 
+if [ -x "$(command -v bundle)" ]
+then
+	bundle install
+fi
+
 (
     if [ -d ../dotfiles ] && [ -f ../dotfiles/setup.sh ]
     then
