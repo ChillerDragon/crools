@@ -17,9 +17,9 @@ def print_volatiles(num = 20)
   url = 'https://www.tradingview.com/markets/stocks-usa/market-movers-most-volatile/'
   cache = "/tmp/stox_#{Time.new.strftime("%F-%H-%M")}.html"
   if File.file? cache
-    html = File.open('index.html').read
+    html = File.open(cache).read
   else
-    html = URI.open(url)
+    html = URI.open(url).read
     File.open(cache, 'w') do |file|
       file.write(html)
     end
@@ -27,7 +27,6 @@ def print_volatiles(num = 20)
   doc = Nokogiri::HTML(html)
 
   stocks = []
-
 
   doc.search('tr').each do |row|
     cols = row.search('td')
@@ -37,7 +36,8 @@ def print_volatiles(num = 20)
   end
 
   stocks.sort_by! do |stock|
-    -stock.chg.match(/\d+\.\d+/)[0].to_f
+    chg = stock.chg.match(/\d+\.\d+/)
+    chg.nil? ? 0 : -chg[0].to_f
   end
 
   print `clear`
