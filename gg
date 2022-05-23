@@ -13,6 +13,8 @@ LOGO
 
 function usage() {
 	echo "usage: gg <repo>"
+	echo "description:"
+	echo "  will merge the selected repo with its upstream"
 	echo "respos:"
 	echo "  zx|chillerbot-zx"
 	echo "  ddpp|ddnetpp|ddnet++"
