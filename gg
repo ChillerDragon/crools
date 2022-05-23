@@ -1,0 +1,133 @@
+#!/bin/bash
+
+cat << 'LOGO'
+       _ _                 _   
+  __ _(_) |_    __ _ _   _| |_ 
+ / _` | | __|  / _` | | | | __|
+| (_| | | |_  | (_| | |_| | |_ 
+ \__, |_|\__|  \__, |\__,_|\__|
+ |___/         |___/           
+
+LOGO
+
+
+function usage() {
+	echo "usage: gg <repo>"
+	echo "respos:"
+	echo "  zx|chillerbot-zx"
+	echo "  ddpp|ddnetpp|ddnet++"
+}
+
+function update_generic() {
+	# upstream remote and local branch need same name
+	# remote (ddnet) should be located on branch (ddnet)
+	# $ git fetch ddnet
+	# $ git checkout ddnet && git reset --hard ddnet/master
+	local upstream_remote
+	local upstream_branch
+	local branch
+	local origin
+	upstream_remote="$(echo "$1" | cut -d '=' -f2-)"
+	upstream_branch="$(echo "$2" | cut -d '=' -f2-)"
+	branch="$(echo "$3" | cut -d '=' -f2-)"
+	origin="$(echo "$4" | cut -d '=' -f2-)"
+	if [ ! -d ./.git/ ] && [ ! -d ../.git/ ]
+	then
+		echo "not a git dir"
+		return
+	fi
+	if ! git remote -v | grep origin | grep -q "$origin"
+	then
+		echo "not $origin remote"
+		return
+	fi
+	git fetch "$upstream_remote" || exit 1
+	git checkout "$upstream_remote" || exit 1
+	git reset --hard "$upstream_remote/$upstream_branch" || exit 1
+	git submodule update || exit 1
+	git push || exit 1
+	git checkout "$branch" || exit 1
+	git merge "$upstream_remote" || exit 1
+	git submodule update || exit 1
+}
+
+function update_zx() {
+	cd ~/Desktop/git/chillerbot-zx || exit 1
+	local commit
+	commit="$(git rev-parse HEAD)"
+	update_generic \
+		upstream_remote=ux \
+		upstream_branch=chillerbot \
+		branch=zx \
+		origin=chillerbot-zx
+	if [ "$(git rev-parse HEAD)" != "$commit" ]
+	then
+		echo "[*] new commit $commit -> $(git rev-parse HEAD) (building)"
+		cd build || exit 1
+		make -j"$(nproc)" || exit 1
+	fi
+}
+
+function update_ddnetpp() {
+	cd ~/Desktop/git/DDNetPP || exit 1
+	local commit
+	commit="$(git rev-parse HEAD)"
+	update_generic \
+		upstream_remote=ddnet \
+		upstream_branch=master \
+		branch=master \
+		origin=DDNetPP
+	if [ "$(git rev-parse HEAD)" != "$commit" ]
+	then
+		echo "[*] new commit $commit -> $(git rev-parse HEAD) (building)"
+		cd build || exit 1
+		make -j"$(nproc)" || exit 1
+	fi
+}
+
+function parse_args() {
+	local arg
+	local dry="$1"
+	shift
+	for arg in "$@"
+	do
+		if [[ "$arg" == "--help" ]] || [[ "$arg" == "-h" ]]
+		then
+			usage
+			exit
+		elif [[ "$arg" == "zx" ]] || [[ "$arg" == "chillerbot-zx" ]]
+		then
+			if [[ "$dry" != "dry" ]]
+			then
+				update_zx
+			fi
+		elif [[ "$arg" == "ddpp" ]] || [[ "$arg" == "ddnetpp" ]] || [[ "$arg" == "ddnet++" ]] || [[ "$arg" == "DDNetPP (ddnet++)" ]]
+		then
+			if [[ "$dry" != "dry" ]]
+			then
+				update_ddnetpp
+			fi
+		else
+			echo "Error: invalid repo '$arg'"
+			exit 1
+		fi
+	done
+}
+
+if [ "$#" == "0" ]
+then
+	if [ -x "$(command -v fzf)" ]
+	then
+		repos="chillerbot-zx\n"
+		repos+="DDNetPP (ddnet++)\n"
+		repo="$(echo -e "$repos" | fzf)"
+		parse_args wet "$repo"
+	else
+		usage
+	fi
+	exit
+fi
+
+parse_args dry "$@"
+parse_args wet "$@"
+
