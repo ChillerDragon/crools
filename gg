@@ -121,7 +121,7 @@ then
 	if [ -x "$(command -v fzf)" ]
 	then
 		repos="chillerbot-zx\n"
-		repos+="DDNetPP (ddnet++)\n"
+		repos+="DDNetPP (ddnet++)"
 		repo="$(echo -e "$repos" | fzf)"
 		parse_args wet "$repo"
 	else
