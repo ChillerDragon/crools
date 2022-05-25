@@ -43,6 +43,8 @@ function update_generic() {
 		echo "not $origin remote"
 		return
 	fi
+	git checkout "$branch" || exit 1
+	git pull || exit 1
 	git fetch "$upstream_remote" || exit 1
 	git checkout "$upstream_remote" || exit 1
 	git reset --hard "$upstream_remote/$upstream_branch" || exit 1
