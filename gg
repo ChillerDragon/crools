@@ -17,6 +17,7 @@ function usage() {
 	echo "  will merge the selected repo with its upstream"
 	echo "respos:"
 	echo "  zx|chillerbot-zx"
+	echo "  ux|chillerbot-ux"
 	echo "  ddpp|ddnetpp|ddnet++"
 }
 
@@ -72,6 +73,23 @@ function update_zx() {
 	fi
 }
 
+function update_ux() {
+	cd ~/Desktop/git/chillerbot-ux || exit 1
+	local commit
+	commit="$(git rev-parse HEAD)"
+	update_generic \
+		upstream_remote=ddnet \
+		upstream_branch=master \
+		branch=chillerbot \
+		origin=chillerbot-ux
+	if [ "$(git rev-parse HEAD)" != "$commit" ]
+	then
+		echo "[*] new commit $commit -> $(git rev-parse HEAD) (building)"
+		cd build || exit 1
+		make -j"$(nproc)" || exit 1
+	fi
+}
+
 function update_ddnetpp() {
 	cd ~/Desktop/git/DDNetPP || exit 1
 	local commit
@@ -105,6 +123,12 @@ function parse_args() {
 			then
 				update_zx
 			fi
+		elif [[ "$arg" == "ux" ]] || [[ "$arg" == "chillerbot-ux" ]]
+		then
+			if [[ "$dry" != "dry" ]]
+			then
+				update_ux
+			fi
 		elif [[ "$arg" == "ddpp" ]] || [[ "$arg" == "ddnetpp" ]] || [[ "$arg" == "ddnet++" ]] || [[ "$arg" == "DDNetPP (ddnet++)" ]]
 		then
 			if [[ "$dry" != "dry" ]]
@@ -123,6 +147,7 @@ then
 	if [ -x "$(command -v fzf)" ]
 	then
 		repos="chillerbot-zx\n"
+		repos+="chillerbot-ux\n"
 		repos+="DDNetPP (ddnet++)"
 		repo="$(echo -e "$repos" | fzf)"
 		parse_args wet "$repo"
