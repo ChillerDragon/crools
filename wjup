@@ -2,7 +2,6 @@
 
 flags=(
 	-Weverything
-	-stdlib=libc++
 	-Wno-c++20-compat -Wno-unused-command-line-argument
 	-Wno-cast-align
 	-Wno-reserved-id-macro
@@ -27,8 +26,7 @@ flags=(
 	-Wno-nested-anon-types
 	-Wno-old-style-cast
 	-Wno-c++98-compat-pedantic
-	-Wno-reserved-identifier
 )
 
-CXXFLAGS="${flags[*]}" cmake .. -DCMAKE_BUILD_TYPE=Debug
+CC=clang CXX=clang++ CXXFLAGS="${flags[*]}" cmake .. -DCMAKE_BUILD_TYPE=Debug
 
