@@ -1,0 +1,34 @@
+#!/bin/bash
+
+flags=(
+	-Weverything
+	-stdlib=libc++
+	-Wno-c++20-compat -Wno-unused-command-line-argument
+	-Wno-cast-align
+	-Wno-reserved-id-macro
+	-Wno-weak-vtables
+	-Wno-padded
+	-Wno-format-nonliteral
+	-Wno-documentation-unknown-command
+	-Wno-extra-semi-stmt
+	-Wno-switch-enum
+	-Wno-missing-prototypes
+	-Wno-covered-switch-default
+	-Wc++98-compat-extra-semi
+	-Wnewline-eof
+	-Wdouble-promotion
+	-pedantic
+	-pedantic-errors
+	-Wmissing-variable-declarations
+	-Wextra-semi
+	-Wundef
+	-Wunreachable-code-break
+	-Wno-gnu-anonymous-struct
+	-Wno-nested-anon-types
+	-Wno-old-style-cast
+	-Wno-c++98-compat-pedantic
+	-Wno-reserved-identifier
+)
+
+CXXFLAGS="${flags[*]}" cmake .. -DCMAKE_BUILD_TYPE=Debug
+
