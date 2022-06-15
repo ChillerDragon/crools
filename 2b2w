@@ -1,0 +1,61 @@
+#!/bin/bash
+
+function edit_secrets() {
+	touch ~/.config/crools/secrets.sh
+	vim ~/.config/crools/secrets.sh
+	source ~/.config/crools/secrets.sh
+}
+
+if [ ! -f ~/.config/crools/secrets.sh ]
+then
+	cat <<- EOF > ~/.config/crools/secrets.sh
+	_2B2W_HOST=https://2b2w.zillyhuhn.com/
+	_2B2W_PASS=plsnohackme
+	EOF
+fi
+
+source ~/.config/crools/secrets.sh
+
+if [ "$_2B2W_HOST" == "" ]
+then
+	echo '_2B2W_HOST=https://2b2w.zillyhuhn.com/' >> ~/.config/crools/secrets.sh
+	edit_secrets
+fi
+if [ "$_2B2W_PASS" == "" ]
+then
+	echo '_2B2W_PASS=pleasenohackme' >> ~/.config/crools/secrets.sh
+	edit_secrets
+fi
+
+for arg in "$@"
+do
+	if [ "$arg" == "--edit" ]
+	then
+		edit_secrets
+		exit
+	else
+		echo "Error: unkown arg '$arg'"
+	fi
+done
+
+function print_status() {
+	local state
+	state="$(curl --silent "$_2B2W_HOST/update" \
+		-H "XPassword: $_2B2W_PASS")"
+	clear
+	in_queue="$(echo "$state" | jq .isInQueue)"
+	if [ "$in_queue" != "true" ]
+	then
+		echo "not queing"
+		return
+	fi
+	echo "$state" | jq .queuePlace | figlet
+	echo "$state" | jq 'del(.password)'
+}
+
+while true
+do
+	print_status
+	sleep 1
+done
+
