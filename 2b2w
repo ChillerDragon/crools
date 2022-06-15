@@ -38,10 +38,17 @@ do
 	fi
 done
 
+last_state=''
+
 function print_status() {
 	local state
 	state="$(curl --silent "$_2B2W_HOST/update" \
 		-H "XPassword: $_2B2W_PASS")"
+	if [ "$state" == "$last_state" ]
+	then
+		return
+	fi
+	last_state="$state"
 	clear
 	in_queue="$(echo "$state" | jq .isInQueue)"
 	if [ "$in_queue" != "true" ]
