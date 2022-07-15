@@ -59,7 +59,7 @@ function install_bash_completion() {
 		err "Failed to get path"
 		exit 1
 	fi
-	pushd "$crools_path" || exit 1
+	pushd "$crools_path" > /dev/null || exit 1
 	if [ ! -f /usr/share/bash-completion/completions/crackman ]
 	then
 		if [ -f "$comp_file" ]
@@ -82,7 +82,7 @@ function install_bash_completion() {
 			wrn "bash completion not found"
 		fi
 	fi
-	popd || exit 1
+	popd > /dev/null || exit 1
 }
 install_bash_completion
 
