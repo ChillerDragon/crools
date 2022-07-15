@@ -1,0 +1,38 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+
+if [ "$1" == "description" ]
+then
+	echo "Kubernetes CLI To Manage Your Clusters In Style!"
+elif [ "$1" == "delete" ]
+then
+	rm -rf "$CM_SRC_PATH"/k9s
+	sudo rm /usr/local/bin/k9s
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -f /usr/local/bin/k9s ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	cd "$CM_SRC_PATH" || exit 1
+	if [ ! -d "k9s" ]
+	then
+		git clone https://github.com/derailed/k9s
+	fi
+	cd k9s || exit 1
+	git pull
+	make build
+	sudo mv execs/k9s /usr/local/bin
+fi
+
