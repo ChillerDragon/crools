@@ -38,12 +38,53 @@ function is_apple() {
 }
 
 function err() {
+	echo "[-] $1"
+}
+
+function wrn() {
 	echo "[!] $1"
 }
 
 function log() {
 	echo "[*] $1"
 }
+
+function install_bash_completion() {
+	local crools_path
+	local comp_file=./completions/crackman.bash.completion
+	crools_path="$(dirname "$0")"
+	crools_path="$(cd "$crools_path" && pwd)"
+	if [[ -z "$crools_path" ]]
+	then
+		err "Failed to get path"
+		exit 1
+	fi
+	pushd "$crools_path" || exit 1
+	if [ ! -f /usr/share/bash-completion/completions/crackman ]
+	then
+		if [ -f "$comp_file" ]
+		then
+			log "installing bash completion ..."
+			if [ "$UID" == "0" ]
+			then
+				cp \
+					"$comp_file" \
+					/usr/share/bash-completion/completions/crackman
+			elif [ -x "$(command -v sudo)" ]
+			then
+				sudo cp \
+					"$comp_file" \
+					/usr/share/bash-completion/completions/crackman
+			else
+				wrn "missing permission to install completion"
+			fi
+		else
+			wrn "bash completion not found"
+		fi
+	fi
+	popd || exit 1
+}
+install_bash_completion
 
 function cm_doctor() {
 	local shellrc

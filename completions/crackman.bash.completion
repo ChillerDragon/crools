@@ -1,0 +1,50 @@
+# shellcheck shell=bash
+
+_crackman_complete_installed() {
+	local pack
+	local cur="$1"
+	while read -r pack
+	do
+		COMPREPLY+=($(compgen -W "$pack" -- "$cur"))
+	done < <(crackman installed)
+}
+
+_crackman_complete() {
+	COMPREPLY=()
+	local cur="${COMP_WORDS[COMP_CWORD]}"
+	local commands="install remove upgrade update purge list installed"
+	if [[ "$COMP_CWORD" -gt "1" ]]
+	then
+		case "${COMP_WORDS[1]}" in
+			install)
+			if [ "$COMP_CWORD" -eq "2" ]
+			then
+				_crackman_complete_installed "$cur"
+			else
+				_filedir
+			fi
+		;;
+			remove)
+			if [ "$COMP_CWORD" -eq "2" ]
+			then
+				_crackman_complete_installed "$cur"
+			else
+				_filedir
+			fi
+		;;
+			update)
+			if [ "$COMP_CWORD" -eq "2" ]
+			then
+				_crackman_complete_installed "$cur"
+			else
+				_filedir
+			fi
+		;;
+		esac
+	else
+		COMPREPLY+=($(compgen -W "${commands}" -- "${cur}"))
+	fi
+}
+
+complete -F _crackman_complete crackman
+
