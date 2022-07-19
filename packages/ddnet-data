@@ -1,0 +1,51 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+if [ "$1" == "description" ]
+then
+	echo "ddnet data files"
+elif [ "$1" == "delete" ]
+then
+	echo "Not supported because it might conflict with package manager"
+	echo "You can still do it manually:"
+	echo ""
+	echo "  rm -rf /usr/share/ddnet/data"
+	echo ""
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -d /usr/share/ddnet/data ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	cd "$CM_SRC_PATH" || exit 1
+	ddnet_dir="term-ux"
+	if [ -d "term-ux" ]
+	then
+		ddnet_dir="term-ux"
+	elif [ -d "term-zx" ]
+	then
+		ddnet_dir="term-zx"
+	elif [ -d "ddnet" ]
+	then
+		ddnet_dir="ddnet"
+	else
+		crackman install term-ux-src
+	fi
+	cd "$ddnet_dir" || exit 1
+	if [ ! -d /usr/share/ddnet/data ]
+	then
+		sudo mkdir -p /usr/share/ddnet
+		sudo cp -r data /usr/share/ddnet
+	fi
+fi
+
