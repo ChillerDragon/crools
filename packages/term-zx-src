@@ -43,7 +43,7 @@ else
 	cd "$CM_SRC_PATH" || exit 1
 	if [ ! -d "term-zx" ]
 	then
-		git clone --recursive git@github.com:chillerbot/chillerbot-zx.git term-zx
+		git clone --recursive git@gitlab.com:chillerbot/chillerbot-zx.git term-zx
 	fi
 	cd term-zx || exit 1
 	git pull
