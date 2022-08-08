@@ -1,0 +1,74 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+
+if [ "$1" == "description" ]
+then
+	echo 'Wireshark is a network traffic analyzer, or "sniffer"'
+elif [ "$1" == "delete" ]
+then
+	rm -rf "$CM_SRC_PATH"/wireshark
+	sudo rm /usr/local/bin/wireshark
+	sudo rm /usr/local/bin/tshark
+	sudo rm /usr/local/bin/editcap
+	sudo rm /usr/local/bin/reordercap
+	sudo rm /usr/local/bin/text2pcap
+	sudo rm /usr/local/bin/sharkd
+	sudo rm /usr/local/bin/capinfos
+	sudo rm /usr/local/bin/captype
+	sudo rm /usr/local/bin/mergecap
+	sudo rm /usr/local/bin/randpkt
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -f /usr/local/bin/wireshark ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	distro="$(cat /etc/os-release | grep "^ID=" | cut -d'=' -f2)"
+	if [ "$distro" != "debian" ]
+	then
+		echo "Error: wireshark is only supported on debian"
+		exit 1
+	fi
+
+	if [ -f /usr/bin/wireshark ]
+	then
+		echo "Error: wireshark is already installed using apt"
+		tput bold
+		echo "    sudo apt remove wireshark"
+		tput sgr0
+		exit 1
+	fi
+
+	sudo apt install \
+		qttools5-dev \
+		flex \
+		libc-ares-dev \
+		libgcrypt20-dev \
+		libcrypto++-dev \
+		libpcap-dev
+
+	cd "$CM_SRC_PATH" || exit 1
+	if [ ! -d "wireshark" ]
+	then
+		git clone --recursive git@gitlab.com:wireshark/wireshark.git
+	fi
+	cd wireshark || exit 1
+	git pull
+	mkdir build
+	cd build || exit 1
+	cmake .. || exit 1
+	make -j$(nproc) || exit 1
+	sudo make install || exit 1
+fi
+
