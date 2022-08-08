@@ -50,8 +50,16 @@ else
 		exit 1
 	fi
 
+	tag="$(git tag | grep wireshark | sort | tail -n 10 | tac | fzf)"
+	if [ "$tag" == "" ]
+	then
+		echo "Error: invalid tag"
+		exit 1
+	fi
+
 	sudo apt install \
 		qttools5-dev \
+		qtmultimedia5-dev \
 		flex \
 		libc-ares-dev \
 		libgcrypt20-dev \
@@ -64,6 +72,8 @@ else
 		git clone --recursive git@gitlab.com:wireshark/wireshark.git
 	fi
 	cd wireshark || exit 1
+	git pull
+	git checkout "$tag" || exit 1
 	git pull
 	mkdir build
 	cd build || exit 1
