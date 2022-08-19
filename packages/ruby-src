@@ -1,0 +1,63 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+function get_cores() {
+	if [ -x "$(command -v nproc)" ]
+	then
+		nproc
+	else
+		echo 1
+	fi
+}
+
+if [ "$1" == "description" ]
+then
+	echo "ruby programming language from source code. USE rbenv INSTEAD!"
+elif [ "$1" == "delete" ]
+then
+	rm -rf "$CM_SRC_PATH"/ruby
+	sudo rm "$CM_BIN_PATH"/ruby
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -f "$CM_BIN_PATH"/ruby ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	if [ -f /etc/arch-release ]
+	then
+		# incomplete!
+		sudo pacman -S --needed base-devel 
+	elif [ -f /etc/debian_version ]
+	then
+		# incomplete!
+		sudo apt-get install -y libyaml-dev libbison
+	fi
+
+
+	cd "$CM_SRC_PATH" || exit 1
+	if [ ! -d "ruby" ]
+	then
+		git clone --recursive git@github.com:ruby/ruby.git
+	fi
+	cd ruby || exit 1
+	git pull
+	git submodule update
+
+	./autogen.sh || exit 1
+	./configure || exit 1
+	make || exit 1
+	# make -j"$(get_cores)" || exit 1
+
+	cp ruby "$CM_BIN_PATH"/ruby
+fi
+
