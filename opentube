@@ -7,6 +7,7 @@
 # make sure the first zzh host has permissions and opentube running
 conf_dir=~/.config/crools
 conf=~/.config/crools/zzh.cnf
+env_file=~/.config/crools/opentube.env
 OPENTUBE_ROOT=/var/www/html/OpenTube
 
 function os_copy() {
@@ -36,15 +37,45 @@ function check_conf() {
         then
             return
         fi
-        mkdir -p $conf_dir
+        mkdir -p "$conf_dir"
         {
             echo "# zzh - config"
             echo "# store your fav ssh commands here"
             echo "ssh crools@localhost"
             echo "ssh chillerdragon@149.202.127.134"
-        } > $conf
+        } > "$conf"
         edit_cnf
     fi
+}
+function edit_env() {
+    if [ ! -f $conf ]
+    then
+        echo "Error: could not edit env file (not found)."
+        exit 1
+    fi
+    crools_find_editor "$env_file"|| { echo "Error: failed to env file"; exit 1; }
+}
+function check_env {
+	if [ -f "$env_file" ]
+	then
+		return
+	fi
+        echo "env file not found!"
+        echo "Do you want to create one? [y/N]"
+        read -r -n 1 yn
+        echo ""
+        if [[ ! "$yn" =~ [yY] ]]
+        then
+            return
+        fi
+        mkdir -p "$conf_dir"
+        {
+            echo "# opentube token"
+	    echo "# generate one at https://zillyhuhn.com/OpenTube/php/profile.php"
+            echo "OPENTUBE_TOKEN=mytoken"
+        } > "$env_file"
+        edit_env
+
 }
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
@@ -57,11 +88,19 @@ then
 fi
 
 check_conf
-if [ ! -f $conf ]
+check_env
+if [ ! -f "$conf" ]
 then
-    echo "Error: config missing"
-    exit 1
+	echo "Error: config missing"
+	exit 1
 fi
+if [ ! -f "$env_file" ]
+then
+	echo "Error: env file missing"
+	exit 1
+fi
+
+source "$env_file"
 
 while IFS= read -r line
 do
@@ -78,6 +117,7 @@ inputfile="$1"
 inputfile_base="$(basename "$inputfile")"
 viddir="$OPENTUBE_ROOT/videos/saved"
 url="https://$host/OpenTube/video.php?t=$inputfile_base"
+user=''
 if [ "$2" == "--unlisted" ]
 then
     viddir="$OPENTUBE_ROOT/videos/unlisted"
@@ -85,8 +125,9 @@ then
 fi
 if [ "$2" == "--user" ] || [ "$2" == "-u" ]
 then
-    viddir="$OPENTUBE_ROOT/videos/users/$3"
-    url="https://$host/OpenTube/video.php?t=$inputfile_base&u=$3"
+	user="$3"
+	viddir="$OPENTUBE_ROOT/videos/users/$user"
+	url="https://$host/OpenTube/video.php?t=$inputfile_base&u=$user"
 fi
 if ! [[ "$inputfile" =~ ^[0-9A-Za-z\./_-]+$ ]]
 then
@@ -114,4 +155,10 @@ echo "$cmd"
 eval "$cmd"
 echo "$url"
 os_copy "$url"
+
+
+curl 'https://zillyhuhn.com/OpenTube/php/add_video.php' \
+	-X POST \
+	-H 'Content-Type: application/x-www-form-urlencoded' \
+	--data-raw "title=todo&description=todo&filepath=$inputfile&token=$OPENTUBE_TOKEN&username=$user"
 
