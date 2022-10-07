@@ -18,6 +18,14 @@ declare -A Packages=(
 
 function show_help() {
 	echo "usage: $(tput bold)crackman [COMMAND] [ARGS...]$(tput sgr0)"
+	echo "description:"
+	echo "  crackman the packet manager on crack"
+	echo "  ... but not in a good way"
+	echo ""
+	echo "  It has 3 different sources for packages which is a mess"
+	echo "   - There is a list of download links defined in a hashmap in this script"
+	echo "   - There is a package mirror expected to be running at $MIRROR"
+	echo "   - there are some package files expected at $CM_PKG_PATH"
 	echo "commands:"
 	echo "  install <package>        install a package"
 	echo "  remove  <package>        remove a package"
