@@ -9,6 +9,15 @@ _crackman_complete_installed() {
 	done < <(crackman installed)
 }
 
+_crackman_complete_installable() {
+	local pack
+	local cur="$1"
+	while read -r pack
+	do
+		COMPREPLY+=($(compgen -W "$pack" -- "$cur"))
+	done < <(crackman list --short)
+}
+
 _crackman_complete() {
 	COMPREPLY=()
 	local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -19,7 +28,7 @@ _crackman_complete() {
 			install)
 			if [ "$COMP_CWORD" -eq "2" ]
 			then
-				_crackman_complete_installed "$cur"
+				_crackman_complete_installable "$cur"
 			else
 				_filedir
 			fi
