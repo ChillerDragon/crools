@@ -19,7 +19,7 @@ declare -A Packages=(
 function show_help() {
 	echo "usage: $(tput bold)crackman [COMMAND] [ARGS...]$(tput sgr0)"
 	echo "description:"
-	echo "  crackman the packet manager on crack"
+	echo "  crackman the package manager on crack"
 	echo "  ... but not in a good way"
 	echo ""
 	echo "  It has 3 different sources for packages which is a mess"
@@ -34,6 +34,8 @@ function show_help() {
 	echo "  purge                    deletes all packages"
 	echo "  list                     list installable packages"
 	echo "  installed                lists installed packages"
+	echo "more help:"
+	echo "  you can also do $(tput bold)crackman <command> --help$(tput sgr0)"
 	exit 0
 }
 
@@ -286,30 +288,65 @@ then
 	show_help
 elif [ "$1" == "install" ]
 then
-	if cm_is_installed "$1"
+	if [ "$2" == "--help" ] || [ "$2" == "" ]
 	then
-		log "'$1' is installed already"
+		echo "usage: crackman install <package>"
+		exit 0
+	fi
+	if cm_is_installed "$2"
+	then
+		log "'$2' is installed already"
 		exit 0
 	fi
 	cm_install "$2"
 elif [ "$1" == "upgrade" ]
 then
+	if [ "$2" == "--help" ] || [ "$2" == "" ]
+	then
+		echo "usage: crackman upgrade <package>"
+		exit 0
+	fi
 	cm_install "$2"
 elif [ "$1" == "update" ]
 then
+	if [ "$2" == "--help" ]
+	then
+		echo "usage: crackman update"
+		exit 0
+	fi
 	update_all
 elif [ "$1" == "remove" ]
 then
+	if [ "$2" == "--help" ] || [ "$2" == "" ]
+	then
+		echo "usage: crackman remove <package>"
+		exit 0
+	fi
 	cm_remove "$2"
 elif [ "$1" == "list" ]
 then
+	if [ "$2" == "--help" ]
+	then
+		echo "usage: crackman list"
+		exit 0
+	fi
 	list_remote
 	list_local
 elif [ "$1" == "installed" ]
 then
+	if [ "$2" == "--help" ]
+	then
+		echo "usage: crackman installed"
+		exit 0
+	fi
 	ls "$CM_BIN_PATH"
 elif [ "$1" == "purge" ]
 then
+	if [ "$2" == "--help" ]
+	then
+		echo "usage: crackman purge"
+		exit 0
+	fi
 	for p in "$CM_BIN_PATH"/*
 	do
 		if [ "$(basename "$p")" == "*" ]
