@@ -1,0 +1,66 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+
+if [ "$1" == "description" ]
+then
+	echo "The Go programming language"
+elif [ "$1" == "delete" ]
+then
+	sudo rm -rf /usr/local/go
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -f /usr/local/go/bin/go ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	cd "$CM_SRC_PATH" || exit 1
+	rm -rf tmp-go &>/dev/null
+	mkdir -p tmp-go
+	cd tmp-go || exit 1
+	vers="$(curl \
+		--silent \
+		https://go.dev/dl/ |
+		grep -oE 'go[0-9]+\.[0-9]+[^"]*linux-amd64.tar.gz' |
+		sort -t "." -k1,1n -k2,2n -k3,3n |
+		uniq |
+		tac |
+		fzf)"
+	if [ "$vers" == "" ]
+	then
+		echo "Error: invalid version"
+		exit 1
+	fi
+	curl -O "https://dl.google.com/go/$vers"
+	if [ ! -f "$vers" ]
+	then
+		echo "Error: file not found $vers"
+		exit 1
+	fi
+
+	if [ -d /usr/local/go ]
+	then
+		sudo rm -rf /usr/local/go
+	fi
+	sudo tar -C /usr/local -xzf "$vers" || exit 1
+
+	cd "$CM_SRC_PATH" || exit 1
+	rm -rf tmp-go &>/dev/null
+
+	# shellcheck disable=SC2016
+	if ! grep -q '^export PATH=$PATH:/usr/local/go/bin' ~/.bashrc
+	then
+		echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+	fi
+fi
+
