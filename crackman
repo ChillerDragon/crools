@@ -227,6 +227,7 @@ function cm_remove() {
 }
 
 function list_remote() {
+	local list_type="$1"
 	local name
 	local desc
 	local listfile
@@ -241,6 +242,11 @@ function list_remote() {
 	while read -r line
 	do
 		name="${line%% *}"
+		if [ "$list_type" == "short" ]
+		then
+			echo "$name"
+			continue
+		fi
 		desc="${line#*$name }"
 		if cm_is_installed "$name"
 		then
@@ -253,19 +259,23 @@ function list_remote() {
 }
 
 function list_local() {
+	local list_type="$1"
 	local pack
 	local desc
 	for pack in "$CM_PKG_PATH"/*
 	do
-		tput bold
-		if cm_is_installed "$(basename "$pack")"
+		[[ "$list_type" != "short" ]] && tput bold
+		if [[ "$list_type" != "short" ]] && cm_is_installed "$(basename "$pack")"
 		then
 			printf '%s [installed]\n' "$(basename "$pack")"
 		else
 			basename "$pack"
 		fi
-		tput sgr0
-		printf '  %s\n' "$("$pack" description)"
+		[[ "$list_type" != "short" ]] && tput sgr0
+		if [ "$list_type" != "short" ]
+		then
+			printf '  %s\n' "$("$pack" description)"
+		fi
 	done
 }
 
@@ -325,13 +335,21 @@ then
 	cm_remove "$2"
 elif [ "$1" == "list" ]
 then
+	list_type=full
 	if [ "$2" == "--help" ]
 	then
 		echo "usage: crackman list"
 		exit 0
+	elif [ "$2" == "--short" ]
+	then
+		list_type=short
+	elif [ "$2" != "" ]
+	then
+		echo "Error: invalid argument '$2'"
+		exit 1
 	fi
-	list_remote
-	list_local
+	list_remote "$list_type"
+	list_local "$list_type"
 elif [ "$1" == "installed" ]
 then
 	if [ "$2" == "--help" ]
