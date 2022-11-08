@@ -40,6 +40,16 @@ else
 		echo "Error: wireshark is only supported on debian"
 		exit 1
 	fi
+	if [ ! -x "$(command -v fzf)" ]
+	then
+		echo "Error: missing dependency fzf"
+		exit 1
+	fi
+	if [ ! -x "$(command -v git)" ]
+	then
+		echo "Error: missing dependency git"
+		exit 1
+	fi
 
 	if [ -f /usr/bin/wireshark ]
 	then
@@ -47,13 +57,6 @@ else
 		tput bold
 		echo "    sudo apt remove wireshark"
 		tput sgr0
-		exit 1
-	fi
-
-	tag="$(git tag | grep wireshark | sort | tail -n 10 | tac | fzf)"
-	if [ "$tag" == "" ]
-	then
-		echo "Error: invalid tag"
 		exit 1
 	fi
 
@@ -72,6 +75,12 @@ else
 		git clone --recursive git@gitlab.com:wireshark/wireshark.git
 	fi
 	cd wireshark || exit 1
+	tag="$(git tag | grep wireshark | sort | tail -n 10 | tac | fzf)"
+	if [ "$tag" == "" ]
+	then
+		echo "Error: invalid tag"
+		exit 1
+	fi
 	git pull
 	git checkout "$tag" || exit 1
 	git pull
