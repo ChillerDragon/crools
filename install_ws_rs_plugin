@@ -1,0 +1,61 @@
+#!/bin/bash
+
+if [ ! -f Cargo.toml ]
+then
+	echo "Error: no Cargo.toml found"
+	exit 1
+fi
+
+rs_name="$(grep '^name = "' Cargo.toml | cut -d'"' -f2 | tr '-' '_')"
+
+if [ "$rs_name" == "" ]
+then
+	echo "Error: could not get project name from Cargo.toml"
+	exit 1
+fi
+
+WIRESHAR_VERSION=3.4
+
+SO_NAME="lib$rs_name.so"
+RELEASE_BIN="target/release/$SO_NAME"
+INSTALL_DIR="$HOME/.local/lib/wireshark/plugins/$WIRESHAR_VERSION/epan/"
+INSTALL_BIN="$INSTALL_DIR/$SO_NAME"
+
+mkdir -p "$INSTALL_DIR"
+
+
+for arg in "$@"
+do
+    if [ "$arg" == "--help" ] || [ "$arg" == "-h" ] || [ "$arg" == "help" ]
+    then
+        echo "--uninstall"
+        exit 0
+    elif [ "$arg" == "--uninstall" ]
+    then
+        if [ -f "$INSTALL_BIN" ]
+        then
+            echo "uninstalling ..."
+            rm "$INSTALL_BIN"
+        else
+            echo "not installed"
+        fi
+        exit 0
+    fi
+done
+
+cargo build --release || exit 1
+if [ -f "$RELEASE_BIN" ]
+then
+	cp "$RELEASE_BIN" "$INSTALL_BIN" || exit 1
+elif [ -f ../"$RELEASE_BIN" ]
+then
+	cp ../"$RELEASE_BIN" "$INSTALL_BIN" || exit 1
+else
+	echo "../$RELEASE_BIN"
+	echo "Error: could not find compiled lib"
+	exit 1
+fi
+
+echo "[*] installed $SO_NAME for wireshark v$WIRESHAR_VERSION"
+echo "[*] $INSTALL_DIR"
+
