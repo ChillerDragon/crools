@@ -14,7 +14,7 @@ then
 	exit 1
 fi
 
-WIRESHAR_VERSION=3.6
+WIRESHAR_VERSION=4.0
 
 SO_NAME="lib$rs_name.so"
 RELEASE_BIN="target/release/$SO_NAME"
