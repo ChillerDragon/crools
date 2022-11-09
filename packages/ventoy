@@ -1,0 +1,54 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+
+if [ "$1" == "description" ]
+then
+	echo "A new bootable USB solution."
+elif [ "$1" == "delete" ]
+then
+	sudo rm -rf /usr/local/ventoy
+	sudo rm /usr/local/bin/ventoy
+	cd "$CM_SRC_PATH" || exit 1
+	rm -rf tmp-ventoy &>/dev/null
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -d /usr/local/ventoy ] || [ -f /usr/local/bin/ventoy ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	cd "$CM_SRC_PATH" || exit 1
+	rm -rf tmp-ventoy &>/dev/null
+	mkdir -p tmp-ventoy
+	cd tmp-ventoy || exit 1
+
+	version=1.0.81
+	gz="ventoy-$version-linux.tar.gz"
+	if [ ! -f "$gz" ]
+	then
+		wget "https://github.com/ventoy/Ventoy/releases/download/v$version/$gz" || exit 1
+	fi
+	tar -xzf "$gz" || exit 1
+	[[ -d ventoy ]] &&  rm -rf ventoy
+	mv "ventoy-$version" ventoy || exit 1
+	sudo mv ventoy /usr/local || exit 1
+	cat <<- EOF > ventoy_wrapper
+	#!/bin/sh
+
+	cd /usr/local/ventoy || exit 1
+	exec ./Ventoy2Disk.sh "$@"
+	EOF
+	chmod +x ventoy_wrapper
+	sudo mv ventoy_wrapper /usr/local/bin/ventoy
+fi
+
