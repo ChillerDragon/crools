@@ -42,7 +42,7 @@ else
 	[[ -d ventoy ]] &&  rm -rf ventoy
 	mv "ventoy-$version" ventoy || exit 1
 	sudo mv ventoy /usr/local || exit 1
-	cat <<- EOF > ventoy_wrapper
+	cat <<- 'EOF' > ventoy_wrapper
 	#!/bin/sh
 
 	cd /usr/local/ventoy || exit 1
