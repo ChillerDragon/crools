@@ -1,0 +1,41 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+
+if [ "$1" == "description" ]
+then
+	echo "The teeworlds skin greensward by WHIS for 0.7"
+elif [ "$1" == "delete" ]
+then
+	rm ~/.teeworlds/skins/body/greensward.png
+	rm ~/.teeworlds/skins/greensward.json
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -f ~/.teeworlds/skins/greensward.json ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	cd "$CM_SRC_PATH" || exit 1
+	rm -rf tmp-greensward &>/dev/null
+	mkdir -p tmp-greensward
+	cd tmp-greensward || exit 1
+
+	curl -O "https://raw.githubusercontent.com/ChillerDragon/teeworlds/f6952ec0a444e4c76ea177c4d60e595d200f5eca/datasrc/skins/greensward.json"
+	curl -O "https://github.com/ChillerDragon/teeworlds/raw/f6952ec0a444e4c76ea177c4d60e595d200f5eca/datasrc/skins/body/greensward.png"
+	mv greensward.png ~/.teeworlds/skins/body/
+	mv greensward.json ~/.teeworlds/skins/
+
+	cd "$CM_SRC_PATH" || exit 1
+	rm -rf tmp-greensward &>/dev/null
+fi
+
