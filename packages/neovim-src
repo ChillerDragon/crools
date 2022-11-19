@@ -1,0 +1,67 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+if [ "$1" == "description" ]
+then
+	echo "Vim-fork focused on extensibility and usability"
+elif [ "$1" == "delete" ]
+then
+	rm -rf "$CM_SRC_PATH"/neovim
+	sudo rm /usr/local/bin/nvim
+	sudo rm -rf /usr/local/share/nvim
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -f /usr/local/bin/nvim ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	distro="$(grep "^ID=" /etc/os-release | cut -d'=' -f2)"
+	if [ "$distro" != "debian" ]
+	then
+		echo "Error: neovim is only supported on debian"
+		exit 1
+	fi
+	if [ ! -x "$(command -v fzf)" ]
+	then
+		sudo apt-get install -y fzf || exit 1
+	fi
+	if [ ! -x "$(command -v libtool)" ]
+	then
+		sudo apt-get install -y libtool-bin || exit 1
+	fi
+
+	cd "$CM_SRC_PATH" || exit 1
+	if [ ! -d "neovim" ]
+	then
+		git clone git@github.com:neovim/neovim.git
+	fi
+	cd neovim || exit 1
+	tag="$(git tag | fzf)"
+	if [ "$tag" == "" ]
+	then
+		echo "Error: invalid tag"
+		exit 1
+	fi
+	git pull
+	git checkout "$tag" || exit 1
+	git pull
+
+	make CMAKE_BUILD_TYPE=RelWithDebInfo || exit 1
+	sudo make install || exit 1
+
+	echo "[*] if you want to type 'vim' instead of 'nvim' run this:"
+	echo ""
+	echo "  sudo ln -s /usr/local/bin/nvim /usr/local/bin/vim"
+	echo ""
+fi
+
