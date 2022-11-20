@@ -66,5 +66,5 @@ then
 	# exit 0
 fi
 
-ssh -t "$(zzh --host "$arg_host")" "$screen_cmd term-zx"
+eval "$(zzh --host "$arg_host" --print) -t '$screen_cmd twbouncer'"
 
