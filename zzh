@@ -4,6 +4,7 @@ conf_dir=~/.config/crools
 conf=~/.config/crools/zzh.cnf
 ismosh=0
 ishost=0
+arg_print=0
 pattern=""
 arg_search=0
 arg_num=""
@@ -46,6 +47,7 @@ then
     echo "  $(tput bold)--host <number>$(tput sgr0) get hostname by number"
     echo "  $(tput bold)--help$(tput sgr0)          show this help"
     echo "  $(tput bold)--mosh$(tput sgr0)          use mosh instead of ssh"
+    echo "  $(tput bold)--print$(tput sgr0)         print instead of runing the command"
     echo "  $(tput bold)<number>$(tput sgr0)        skip menu and go to number"
     echo "  $(tput bold)/<pattern>$(tput sgr0)      chose first entry matching <pattern>"
     echo "  $(tput bold)/$(tput sgr0)               open fuzzy search if fzf is installed"
@@ -71,6 +73,9 @@ do
     then
         pattern="${arg:1}"
         arg_search=1
+    elif [ "$arg" == "--print" ] || [ "$arg" == "-p" ]
+    then
+        arg_print=1
     elif [ "$arg" == "--mosh" ]
     then
         ismosh=1
@@ -214,7 +219,10 @@ then
         echo "Error: selected item $arg_num out of ${#options[@]}"
         exit 1
     fi
-    if [ "$ishost" == "1" ]
+    if [ "$arg_print" == "1" ]
+    then
+        echo "${options[$arg_num]}" | cut -d'#' -f1
+    elif [ "$ishost" == "1" ]
     then
         echo "${options[$arg_num]}" | cut -d' ' -f2
     else
