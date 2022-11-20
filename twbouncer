@@ -1,0 +1,70 @@
+#!/bin/bash
+
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]
+then
+    echo "usage: $(basename "$1") [ZZH HOSTNUM|--local]"
+    echo "description: opens term-zx curses tw client on vps"
+    echo "options:"
+    echo "    without options it trys the first zzh host"
+    echo ""
+    echo "  ZZH HOSTNUM"
+    echo "    providing a digit will pick corresponding zzh host"
+    echo "    order your zzh hosts using: zzh --edit"
+    echo ""
+    # echo "  --local | -l"
+    # echo "    uses irc client on current machine"
+    echo ""
+    echo "  --force | -f"
+    echo "    uses screen -r -d to force deattach"
+    exit 0
+fi
+
+is_local=0
+is_force=0
+arg_host=1
+
+for arg in "$@"
+do
+    if [ "$arg" == "--local" ] || [ "$arg" == "-l" ]
+    then
+        is_local=1
+    elif [ "$arg" == "--force" ] || [ "$arg" == "-f" ]
+    then
+        is_force=1
+    elif [[ "$arg" =~ ^[0-9]*$ ]]
+    then
+        arg_host="$arg"
+    else
+        echo "error: unkown arg '$arg' try --help"
+        exit 1
+    fi
+done
+
+screen_cmd="screen -r"
+if [ "$is_force" == "1" ]
+then
+    screen_cmd="screen -r -d"
+fi
+
+if [ "$is_local" == "1" ]
+then
+	echo "local not supported yet"
+	exit 1
+	# if [ ! -x "$(command -v weechat)" ]
+	# then
+	#     echo "Error: install weechat to use irc"
+	#     exit 1
+	# fi
+	# proc="$(ps aux | grep 'SCREEN.*crools_weechat_irc' | grep -v grep)"
+	# if [ "$proc" == "" ]
+	# then
+	#     echo "[*] starting weechat"
+	#     screen -AmdS crools_weechat_irc /usr/bin/weechat
+	# fi
+
+	# eval "$screen_cmd crools_weechat_irc"
+	# exit 0
+fi
+
+ssh -t "$(zzh --host "$arg_host")" "$screen_cmd term-zx"
+
