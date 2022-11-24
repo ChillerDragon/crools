@@ -32,7 +32,12 @@ else
 	fi
 	cd kubernetes || exit 1
 	git pull
-	make kubectl
-	sudo mv _output/bin/kubectl /usr/local/bin
+	make kubectl || exit 1
+	sudo mv _output/bin/kubectl /usr/local/bin || exit 1
+	if ! grep -q 'kubectl completion bash' ~/.bashrc
+	then
+		echo "[*] installing bash completion ..."
+		echo 'type -a kubectl &>/dev/null && source <(kubectl completion bash)' >> ~/.bashrc
+	fi
 fi
 
