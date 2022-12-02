@@ -116,18 +116,18 @@ done < $conf
 inputfile="$1"
 inputfile_base="$(basename "$inputfile")"
 viddir="$OPENTUBE_ROOT/videos/saved"
-url="https://$host/OpenTube/video.php?t=$inputfile_base"
+url="https://tube.$host/video.php?t=$inputfile_base"
 user=''
 if [ "$2" == "--unlisted" ]
 then
     viddir="$OPENTUBE_ROOT/videos/unlisted"
-    url="https://$host/OpenTube/video.php?t=$inputfile_base&unlisted=true"
+    url="https://tube.$host/video.php?t=$inputfile_base&unlisted=true"
 fi
 if [ "$2" == "--user" ] || [ "$2" == "-u" ]
 then
 	user="$3"
 	viddir="$OPENTUBE_ROOT/videos/users/$user"
-	url="https://$host/OpenTube/video.php?t=$inputfile_base&u=$user"
+	url="https://tube.$host/video.php?t=$inputfile_base&u=$user"
 fi
 if ! [[ "$inputfile" =~ ^[0-9A-Za-z\./_-]+$ ]]
 then
@@ -157,7 +157,7 @@ echo "$url"
 os_copy "$url"
 
 
-curl 'https://zillyhuhn.com/OpenTube/php/add_video.php' \
+curl 'https://tube.zillyhuhn.com/php/add_video.php' \
 	-X POST \
 	-H 'Content-Type: application/x-www-form-urlencoded' \
 	--data-raw "title=todo&description=todo&filepath=$inputfile&token=$OPENTUBE_TOKEN&username=$user"
