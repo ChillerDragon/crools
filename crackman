@@ -5,6 +5,7 @@
 MIRROR=https://zillyhuhn.com/crack
 CM_PKG_PATH="$(dirname "$(realpath "$0")")"/packages
 CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_INSTALLED_PATH="$HOME/.config/crools/crackman/installed"
 CM_TMP_PATH="$HOME/.config/crools/crackman/tmp"
 
 declare -A Packages=(
@@ -102,6 +103,10 @@ function cm_doctor() {
 	then
 		mkdir -p "$CM_BIN_PATH" || exit 1
 	fi
+	if [ ! -d "$CM_INSTALLED_PATH" ]
+	then
+		mkdir -p "$CM_INSTALLED_PATH" || exit 1
+	fi
 	if [ ! -d "$CM_TMP_PATH" ]
 	then
 		mkdir -p "$CM_TMP_PATH" || exit 1
@@ -184,18 +189,24 @@ function cm_install() {
 		if wget -O "$CM_BIN_PATH/$pack" "$MIRROR/$pack"
 		then
 			chmod +x "$CM_BIN_PATH/$pack" || exit 1
+			touch "$CM_INSTALLED_PATH/$pack"
 			log "installed '$pack'"
 		else
 			err "failed to install '$pack'"
 		fi
 	elif [ "$valid_pack" == "2" ]
 	then
-		"$CM_PKG_PATH/$pack"
-		exit "$?"
+		if ! "$CM_PKG_PATH/$pack"
+		then
+			exit 1
+		fi
+		touch "$CM_INSTALLED_PATH/$pack"
+		exit 0
 	else
 		if wget -O "$CM_BIN_PATH/$pack" "${Packages[$pack]}"
 		then
 			chmod +x "$CM_BIN_PATH/$pack" || exit 1
+			touch "$CM_INSTALLED_PATH/$pack"
 			log "installed '$pack'"
 		else
 			err "failed to install '$pack'"
@@ -212,7 +223,10 @@ function cm_remove() {
 		err "remove requires a package name"
 		exit 1
 	fi
-	if ! cm_is_installed "$pack"
+	if [ -f "$CM_INSTALLED_PATH/$pack" ]
+	then
+		rm "$CM_INSTALLED_PATH/$pack"
+	elif ! cm_is_installed "$pack"
 	then
 		err "package is not installed"
 		exit 1
@@ -293,6 +307,17 @@ function update_all() {
 	# TODO: check version checksum or anything else before redownloading
 }
 
+function show_installed() {
+	cm_doctor
+	local pack
+	for pack in "$CM_INSTALLED_PATH"/*
+	do
+		[[ -f "$pack" ]] || continue
+
+		basename "$pack"
+	done
+}
+
 if [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
 	show_help
@@ -357,7 +382,7 @@ then
 		echo "usage: crackman installed"
 		exit 0
 	fi
-	ls "$CM_BIN_PATH"
+	show_installed
 elif [ "$1" == "purge" ]
 then
 	if [ "$2" == "--help" ]
