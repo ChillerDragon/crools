@@ -33,12 +33,9 @@ then
 		exit 0
 	fi
 else
-	if [ -f /etc/arch-release ]
+	if [ -f "$CM_SRC_PATH"/ddnet-deps/installed ]
 	then
-		sudo pacman -S --needed base-devel cargo cmake curl ffmpeg freetype2 git glew glslang gmock libnotify libpng opusfile python rust sdl2 spirv-tools sqlite vulkan-headers vulkan-icd-loader wavpack x264
-	elif [ -f /etc/debian_version ]
-	then
-		sudo apt-get install -y build-essential cargo cmake git glslang-tools google-mock libavcodec-extra libavdevice-dev libavfilter-dev libavformat-dev libavutil-dev libcurl4-openssl-dev libfreetype6-dev libglew-dev libnotify-dev libogg-dev libopus-dev libopusfile-dev libpng-dev libsdl2-dev libsqlite3-dev libssl-dev libvulkan-dev libwavpack-dev libx264-dev python rustc spirv-tools
+		crackman install ddnet-deps
 	fi
 	cd "$CM_SRC_PATH" || exit 1
 	if [ ! -d "term-ux" ]
