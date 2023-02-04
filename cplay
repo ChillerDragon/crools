@@ -14,129 +14,129 @@ local_dir=$(pwd)
 cd "$filepath" || { echo "Error: failed to cd into '$filepath'."; exit 1; }
 
 function do_local() {
-    if [ "$filename" == "" ]
-    then
-        filename=$ts_file
-    fi
-    # use absolute path for local case
-    filename="$filepath/$filename"
-    cd "$local_dir" || { echo "Error: failed to cd into '$local_dir'"; exit 1; }
+	if [ "$filename" == "" ]
+	then
+		filename=$ts_file
+	fi
+	# use absolute path for local case
+	filename="$filepath/$filename"
+	cd "$local_dir" || { echo "Error: failed to cd into '$local_dir'"; exit 1; }
 }
 
 function list_options() {
-    echo "Options:"
-    echo "-h, --help        show help"
-    echo "-L, --local       do not change current working dir to /tmp/cplay"
-    echo "-+, --cpp         C++ instead of C"
-    echo "-l, --list        show recently edited files"
-    echo "-m, --makefile    create makefile first"
+	echo "Options:"
+	echo "-h, --help        show help"
+	echo "-L, --local       do not change current working dir to /tmp/cplay"
+	echo "-+, --cpp         C++ instead of C"
+	echo "-l, --list        show recently edited files"
+	echo "-m, --makefile    create makefile first"
 }
 
 function parse_arg() {
-    local arg
-    arg="$1"
-    if [ "$arg" == "--help" ] || [ "$arg" == "-h" ]
-    then
-        echo "cplay $version"
-        echo "a C playground tool"
-        echo "usage: cplay [OPTIONS..] [filename] [OPTIONS..]"
-        echo ""
-        echo "if no filname provided it uses current timestamp as filename"
-        echo "files are saved under $filepath"
-        list_options
-        exit
-    elif [ "$arg" == "--local" ] || [ "$arg" == "-L" ]
-    then
-        do_local
-    elif [ "$arg" == "--cpp" ] || [ "$arg" == "-+" ]
-    then
-        is_cpp=1
-    elif [ "$arg" == "--makefile" ] || [ "$arg" == "-m" ]
-    then
-        is_makefile=1
-    elif [ "$arg" == "--list" ] || [ "$arg" == "-l" ]
-    then
-        if [ "$is_cpp" == "1" ]
-        then
-            for f in "$filepath"/*.cpp
-            do
-                if [ -f "$f" ]; then
-                    echo "$f"
-                else
-                    echo "There are no cplay C++ files."
-                fi
-            done
-        else
-            for f in "$filepath"/*.c
-            do
-                if [ -f "$f" ]; then
-                    echo "$f"
-                else
-                    echo "There are no cplay C files."
-                fi
-            done
-        fi
-        exit 0
-    else
-        echo "Error: invalid option '$arg'"
-        list_options
-        exit 1
-    fi
+	local arg
+	arg="$1"
+	if [ "$arg" == "--help" ] || [ "$arg" == "-h" ]
+	then
+		echo "cplay $version"
+		echo "a C playground tool"
+		echo "usage: cplay [OPTIONS..] [filename] [OPTIONS..]"
+		echo ""
+		echo "if no filname provided it uses current timestamp as filename"
+		echo "files are saved under $filepath"
+		list_options
+		exit
+	elif [ "$arg" == "--local" ] || [ "$arg" == "-L" ]
+	then
+		do_local
+	elif [ "$arg" == "--cpp" ] || [ "$arg" == "-+" ]
+	then
+		is_cpp=1
+	elif [ "$arg" == "--makefile" ] || [ "$arg" == "-m" ]
+	then
+		is_makefile=1
+	elif [ "$arg" == "--list" ] || [ "$arg" == "-l" ]
+	then
+		if [ "$is_cpp" == "1" ]
+		then
+			for f in "$filepath"/*.cpp
+			do
+				if [ -f "$f" ]; then
+					echo "$f"
+				else
+					echo "There are no cplay C++ files."
+				fi
+			done
+		else
+			for f in "$filepath"/*.c
+			do
+				if [ -f "$f" ]; then
+					echo "$f"
+				else
+					echo "There are no cplay C files."
+				fi
+			done
+		fi
+		exit 0
+	else
+		echo "Error: invalid option '$arg'"
+		list_options
+		exit 1
+	fi
 }
 
 if [ $# -gt 0 ]
 then
-    # get filename first
-    for arg in "$@"
-    do
-        if ! [[ "$arg" =~ ^- ]]
-        then
-            filename="$arg"
-        fi
-    done
-    # parse options second
-    for arg in "$@"
-    do
-        if [[ "$arg" =~ ^- ]]
-        then
-            parse_arg "$arg"
-        fi
-    done
+	# get filename first
+	for arg in "$@"
+	do
+		if ! [[ "$arg" =~ ^- ]]
+		then
+			filename="$arg"
+		fi
+	done
+	# parse options second
+	for arg in "$@"
+	do
+		if [[ "$arg" =~ ^- ]]
+		then
+			parse_arg "$arg"
+		fi
+	done
 fi
 
 if [[ "$filename" =~ ^- ]]
 then
-    echo "Error: filenames starting with - are not allowed."
-    exit 1
+	echo "Error: filenames starting with - are not allowed."
+	exit 1
 fi
 
 if ! echo "$filename" | grep -Eq '\.c(pp)?$'
 then
-    echo "file extension missing '$filename'"
-    filename="${filename}.c"
+	echo "file extension missing '$filename'"
+	filename="${filename}.c"
 fi
 binary=ERROR
 if [ "$is_cpp" == "1" ] && ! echo "$filename" | grep -Eq '\.cpp$'
 then
-    filename="${filename}pp"
-    binary="${filename::-4}"
+	filename="${filename}pp"
+	binary="${filename::-4}"
 else
-    binary="${filename::-2}"
+	binary="${filename::-2}"
 fi
 echo "preparing file '$filename' (binary '$binary')"
 
 read -rd '' c_template << EOF
 /*
-    C playground by ChillerDragon
-    press <F4> to compile
-    File: $filename
+	C playground by ChillerDragon
+	press <F4> to compile
+	File: $filename
 */
 #include "stdio.h"
 
 int main()
 {
-    puts("hello world");
-    return 0;
+	puts("hello world");
+	return 0;
 }
 EOF
 
@@ -162,19 +162,19 @@ EOF
 
 if [ "$is_makefile" == "1" ]
 then
-    mkdir -p make || exit 1
-    cd make || exit 1
-    if [ ! -f Makefile ]
-    then
-        echo "$make_template" > Makefile
-        echo -e "\\t\$(CC) \$(CFLAGS) -o \$(TARGET) \$(TARGET).c \$(LFLAGS)" >> Makefile
-        vim Makefile
-    fi
+	mkdir -p make || exit 1
+	cd make || exit 1
+	if [ ! -f Makefile ]
+	then
+		echo "$make_template" > Makefile
+		echo -e "\\t\$(CC) \$(CFLAGS) -o \$(TARGET) \$(TARGET).c \$(LFLAGS)" >> Makefile
+		vim Makefile
+	fi
 fi
 
 if [ ! -f "$filename" ]
 then
-    echo "$c_template" > "$filename"
+	echo "$c_template" > "$filename"
 fi
 
 vim "$filename"
