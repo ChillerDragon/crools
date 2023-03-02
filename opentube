@@ -8,7 +8,7 @@
 conf_dir=~/.config/crools
 conf=~/.config/crools/zzh.cnf
 env_file=~/.config/crools/opentube.env
-OPENTUBE_ROOT=/var/www/html/OpenTube
+OPENTUBE_ROOT=/var/www/OpenTube
 
 function os_copy() {
 if [ "$(uname)" == "Darwin" ]
