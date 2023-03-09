@@ -19,7 +19,7 @@ find src -name '*.h' | while read -r i; do grep -r -q "$(basename "$i")" || (ech
 
 echo "[*] Check absolute includes"
 
-if grep --exclude-dir rust-bridge -rE '^#include \"(antibot|base|engine|game|steam|test)/' src/
+if grep --exclude-dir rust-bridge -rE '^#include "(antibot|base|engine|game|steam|test)/' src/
 then
 	echo "[-] Error: see wrong includes above ^"
 fi
