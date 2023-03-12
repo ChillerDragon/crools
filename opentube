@@ -147,18 +147,21 @@ then
 fi
 
 echo -n "[*] checking auth ... "
-token_code="$(curl -o /dev/null -s -w "%{http_code}\\n" "$base_url/test_token.php?username=$user&token=$OPENTUBE_TOKEN")"
+token_url="$base_url/php/test_token.php?username=$user&token=$OPENTUBE_TOKEN"
+token_code="$(curl -o /dev/null -s -w "%{http_code}\\n" "$token_url")"
 if [ "$token_code" != "200" ]
 then
 	echo "ERROR (status code: $token_code)"
+	echo "       more details at $token_url"
 	echo "       generate new token here:"
 	echo "       https://tube.zillyhuhn.com/php/profile.php"
 	exit 1
 fi
-token_msg="$(curl "$base_url/test_token.php?username=$user&token=$OPENTUBE_TOKEN")"
+token_msg="$(curl "$token_url")"
 if [ "$token_msg" != "OK" ]
 then
 	echo "ERROR: $token_msg"
+	echo "       more details at $token_url"
 	echo "       generate new token here:"
 	echo "       https://tube.zillyhuhn.com/php/profile.php"
 	exit 1
