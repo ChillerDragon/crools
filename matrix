@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ ! -x "$(command -v gomuks)" ]
+then
+	echo "Error: install gomuks to use irc"
+	exit 1
+fi
+proc="$(ps aux | grep 'SCREEN.*crools_gomuks_matrix' | grep -v grep)"
+if [ "$proc" == "" ]
+then
+	echo "[*] starting gomuks"
+	screen -AmdS crools_gomuks_matrix /usr/bin/gomuks
+fi
+
+screen_cmd="screen -r"
+eval "$screen_cmd crools_gomuks_matrix"
