@@ -14,6 +14,7 @@ declare -A Packages=(
 	[clang-format-12]='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-f3a37dd2/clang-format-12_linux-amd64'
 	[clang-format-13]='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-f3a37dd2/clang-format-13_linux-amd64'
 	[clang-format-14]='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-f3a37dd2/clang-format-14_linux-amd64'
+	[gomuks]='https://github.com/tulir/gomuks/releases/download/v0.3.0/gomuks-linux-amd64'
 	[term-ux]='https://github.com/chillerbot/chillerbot-ux/releases/download/v0.0.3/term-ux-linux'
 )
 
