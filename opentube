@@ -116,7 +116,8 @@ done < $conf
 inputfile="$1"
 inputfile_base="$(basename "$inputfile")"
 viddir="$OPENTUBE_ROOT/videos/saved"
-url="https://tube.$host/video.php?t=$inputfile_base"
+base_url="https://tube.$host"
+url="$base_url/video.php?t=$inputfile_base"
 user=''
 if [ "$2" == "--unlisted" ]
 then
@@ -144,6 +145,27 @@ then
     echo "Error filetype has to be ISO Media or WebM"
     exit 1
 fi
+
+echo -n "[*] checking auth ... "
+token_code="$(curl -o /dev/null -s -w "%{http_code}\\n" "$base_url/test_token.php?username=$user&token=$OPENTUBE_TOKEN")"
+if [ "$token_code" != "200" ]
+then
+	echo "ERROR (status code: $token_code)"
+	echo "       generate new token here:"
+	echo "       https://tube.zillyhuhn.com/php/profile.php"
+	exit 1
+fi
+token_msg="$(curl "$base_url/test_token.php?username=$user&token=$OPENTUBE_TOKEN")"
+if [ "$token_msg" != "OK" ]
+then
+	echo "ERROR: $token_msg"
+	echo "       generate new token here:"
+	echo "       https://tube.zillyhuhn.com/php/profile.php"
+	exit 1
+fi
+echo "OK"
+exit 0
+
 found="$(curl -o /dev/null -s -w "%{http_code}\\n" "$url")"
 if [ "$found" != "404" ]
 then
