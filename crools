@@ -104,6 +104,15 @@ fi
             ./setup.sh
         fi
     fi
+    if [ -d ../dotfiles-private ] && [ -f ../dotfiles-private/setup.sh ]
+    then
+        cd ../dotfiles-private || exit 1
+        if git remote -v | grep -Eq '^origin.*ChillerDragon/dotfiles-private( |.git)'
+        then
+            git_save_pull dotfiles-private
+            ./setup.sh
+        fi
+    fi
 )
 
 if is_func pullpw
