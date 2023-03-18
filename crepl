@@ -1,11 +1,15 @@
 #!/bin/bash
 
-# a creppy C repl
+# a creppy C lang repl
+# REPL as in READ EVALUATE PRINT LOOP
+# trying to to mimic pythons interactive shell or rubys irb
+# for the C programming language
 
 tmp_src_file="$(mktemp /tmp/tmp.crepl.entry_XXXXXXXXXXXXX.c)" # entry file for compliation
 tmp_src_file_main="$(mktemp /tmp/tmp.crepl.main_XXXXXXXXXXXXX.c)" # main func body
 tmp_src_file_test_main="$(mktemp /tmp/tmp.crepl.test_main_XXXXXXXXXXXXX.c)" # test if it compiles before persisting
 tmp_src_file_functions="$(mktemp /tmp/tmp.crepl.functions_XXXXXXXXXXXXX.c)" # define function above main
+tmp_src_file_test_functions="$(mktemp /tmp/tmp.crepl.test_functions_XXXXXXXXXXXXX.c)" # test if func compiles before persisiting
 tmp_src_file_tmp="$(mktemp /tmp/tmp.crepl.tmp_XXXXXXXXXXXXX.c)" # run only once never persist (if eval is a print for example)
 tmp_src_file_tmp_reply="$(mktemp /tmp/tmp.crepl.tmp_reply_XXXXXXXXXXXXX.c)" # print(eval)
 tmp_src_file_out="$(mktemp /tmp/tmp.crepl.bin_XXXXXXXXXXXXX.c)" # output binary
@@ -17,6 +21,7 @@ cat << EOF > "$tmp_src_file"
 #include <stdio.h>
 
 #include "$tmp_src_file_functions"
+#include "$tmp_src_file_test_functions"
 
 int main()
 {
@@ -46,6 +51,7 @@ crepl_build() {
 	if compiler "$tmp_src_file" -o "$tmp_src_file_out"
 	then
 		cat "$tmp_src_file_test_main" >> "$tmp_src_file_main"
+		cat "$tmp_src_file_test_functions" >> "$tmp_src_file_functions"
 	fi
 }
 
@@ -56,10 +62,32 @@ crepl_run() {
 c_var_pattern='[a-zA-Z_][a-zA-Z_0-9]*'
 c_stmt_pattern='[^;]+' # TODO: do this better ; can be part of a for loop and of a string for example
 
+# TODO: func pattern doesnt match
+c_type_pattern='(void|int|char|long|long long|float|double|short|int64_t|time_t)'
+c_single_line_func_pattern='(const\ *)?'"$c_type_pattern"'\ *\*?\ *'"$c_var_pattern"'\ *\(.*\)\ *{.*}'
+
+tab_complete() {
+	# p<tab> works but this is ugly use compgen to generate that stuff
+	[[ ${#READLINE_LINE} -eq 0 ]] && READLINE_LINE=$(fc -l -n -1 | xargs)
+	if [ "$READLINE_LINE" == "p" ]
+	then
+		READLINE_LINE="printf("
+		READLINE_POINT="${#READLINE_LINE}"
+	fi
+}
+
 mkdir -p ~/.config/crools
 
 history -r ~/.config/crools/crepl_history
 set -o emacs
+
+# shellcheck disable=SC2128
+if [ "${BASH_VERSINFO}" -ge 4 ]
+then
+	bind -x '"\t":"tab_complete"'
+else
+	echo "Warning: your bash is too old for autocompletion"
+fi
 
 while read -e -r -p "> " input
 do
@@ -72,6 +100,9 @@ do
 		# print int assignment result to stdout
 		printf '%s\n' "$input" > "$tmp_src_file_test_main"
 		printf 'printf("=> %%d\\n", %s);\n' "${BASH_REMATCH[1]}" > "$tmp_src_file_tmp"
+	elif [[ "$input" =~ $c_single_line_func_pattern ]]
+	then
+		printf '%s\n' "$input" > "$tmp_src_file_test_functions"
 	else
 		printf '%s\n' "$input" > "$tmp_src_file_test_main"
 	fi
