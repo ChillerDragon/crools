@@ -297,7 +297,7 @@ do
 		arg_select=1
 	elif [ "${arg::1}" == "-" ]
 	then
-		echo "error: unknown argument '$arg'"
+		echo "error: unknown option '$arg'"
 		echo "       see '$(tput bold)$(basename "$0") --help$(tput sgr0)' for help"
 		exit 1
 	elif [ "$arg_is_file" == "1" ] && [ "$arg_file" == "" ]
@@ -309,6 +309,10 @@ do
 			exit 1
 		fi
 		cp "$arg_file" "$picpath" || exit 1
+	else
+		echo "Error: unkown argument '$arg'"
+		echo "       see '$(tput bold)$(basename "$0") --help$(tput sgr0)' for help"
+		exit 1
 	fi
 done
 
