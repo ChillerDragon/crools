@@ -25,6 +25,7 @@ then
 fi
 
 function listen() {
+	clear
 	bat --paging=never "$@"
 	while true
 	do
