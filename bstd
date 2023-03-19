@@ -38,8 +38,12 @@ then
         exit
     fi
 fi
-echo "$buffer" > "/tmp/bstd_$USER.tmp"
-paste=$(cstd "/tmp/bstd_$USER.tmp")
+
+mkdir -p /tmp/crools-"$USER"/bstd/
+tmp_file="$(mktemp /tmp/crools-"$USER"/bstd/clipboard_XXXXXXXXXXXXX.txt)"
+
+echo "$buffer" > "$tmp_file"
+paste=$(cstd "$tmp_file")
 echo "$paste"
 os_copy "$paste"
 

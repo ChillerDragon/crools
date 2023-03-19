@@ -16,6 +16,8 @@ picdir=/var/www/html/cs
 histfile="$conf_dir/crapshot_history"
 histsize=5
 
+mkdir -p /tmp/crools-"$USER"/crapshot/
+
 function is_arch() {
     if [ -f /etc/arch-release ] && uname -r | grep -q arch
     then
@@ -172,7 +174,7 @@ function read_conf() {
         host="$(echo "$remote" | cut -d'@' -f2)"
         ts="$(date +%s)"
         picname="crapshot_$ts.png"
-        picpath="/tmp/$picname"
+        picpath="/tmp/crools-$USER/crapshot/$picname"
         break
     done < $conf
 }

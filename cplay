@@ -7,7 +7,7 @@
 version="v.0003"
 ts_file=$(date "+%Y-%m-%d_%H:%M:%S.c")
 filename=$ts_file
-filepath=/tmp/"$USER"/cplay
+filepath=/tmp/crools-"$USER"/cplay
 
 mkdir -p "$filepath"
 local_dir=$(pwd)
@@ -26,7 +26,7 @@ function do_local() {
 function list_options() {
 	echo "Options:"
 	echo "-h, --help        show help"
-	echo "-L, --local       do not change current working dir to /tmp/cplay"
+	echo "-L, --local       do not change current working dir to $filepath"
 	echo "-+, --cpp         C++ instead of C"
 	echo "-l, --list        show recently edited files"
 	echo "-m, --makefile    create makefile first"

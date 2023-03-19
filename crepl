@@ -5,14 +5,16 @@
 # trying to to mimic pythons interactive shell or rubys irb
 # for the C programming language
 
-tmp_src_file="$(mktemp /tmp/tmp.crepl.entry_XXXXXXXXXXXXX.c)" # entry file for compliation
-tmp_src_file_main="$(mktemp /tmp/tmp.crepl.main_XXXXXXXXXXXXX.c)" # main func body
-tmp_src_file_test_main="$(mktemp /tmp/tmp.crepl.test_main_XXXXXXXXXXXXX.c)" # test if it compiles before persisting
-tmp_src_file_functions="$(mktemp /tmp/tmp.crepl.functions_XXXXXXXXXXXXX.c)" # define function above main
-tmp_src_file_test_functions="$(mktemp /tmp/tmp.crepl.test_functions_XXXXXXXXXXXXX.c)" # test if func compiles before persisiting
-tmp_src_file_tmp="$(mktemp /tmp/tmp.crepl.tmp_XXXXXXXXXXXXX.c)" # run only once never persist (if eval is a print for example)
-tmp_src_file_tmp_reply="$(mktemp /tmp/tmp.crepl.tmp_reply_XXXXXXXXXXXXX.c)" # print(eval)
-tmp_src_file_out="$(mktemp /tmp/tmp.crepl.bin_XXXXXXXXXXXXX.c)" # output binary
+mkdir -p /tmp/crools-"$USER"/crepl/
+
+tmp_src_file="$(mktemp /tmp/crools-"$USER"/crepl/entry_XXXXXXXXXXXXX.c)" # entry file for compliation
+tmp_src_file_main="$(mktemp /tmp/crools-"$USER"/crepl/main_XXXXXXXXXXXXX.c)" # main func body
+tmp_src_file_test_main="$(mktemp /tmp/crools-"$USER"/crepl/test_main_XXXXXXXXXXXXX.c)" # test if it compiles before persisting
+tmp_src_file_functions="$(mktemp /tmp/crools-"$USER"/crepl/functions_XXXXXXXXXXXXX.c)" # define function above main
+tmp_src_file_test_functions="$(mktemp /tmp/crools-"$USER"/crepl/test_functions_XXXXXXXXXXXXX.c)" # test if func compiles before persisiting
+tmp_src_file_tmp="$(mktemp /tmp/crools-"$USER"/crepl/tmp_XXXXXXXXXXXXX.c)" # run only once never persist (if eval is a print for example)
+tmp_src_file_tmp_reply="$(mktemp /tmp/crools-"$USER"/crepl/tmp_reply_XXXXXXXXXXXXX.c)" # print(eval)
+tmp_src_file_out="$(mktemp /tmp/crools-"$USER"/crepl/bin_XXXXXXXXXXXXX.c)" # output binary
 
 chmod +x "$tmp_src_file_out"
 
