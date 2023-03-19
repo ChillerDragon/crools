@@ -25,15 +25,14 @@ then
 fi
 
 function listen() {
-	bat "$@"
+	bat --paging=never "$@"
 	while true
 	do
-		while read j
+		while read -r
 		do
 			clear
-			# bat "$filename"
-			bat "$@"
-		done < <(inotifywait -q -e modify "$@")
+			bat --paging=never "$@"
+		done < <(inotifywait -q -e modify -r .)
 		# done < <(inotifywait -q -e modify "$filename")
 	done
 }
@@ -42,15 +41,27 @@ if [ "$#" -eq "0" ]
 then
 	echo "usage: batch [FILE..]"
 	echo "description: watch file contents"
+	echo "example: batch *.c"
 	exit 1
 fi
 
 for f in "$@"
 do
-	[[ -f "$f" ]] && continue
-
-	echo "Error: file not found $f"
-	exit 1
+	if [[ ! -f "$f" ]]
+	then
+		echo "Error: file not found $f"
+		exit 1
+	fi
+	if [[ "${f::1}" == "/" ]]
+	then
+		echo "Error: file can not be absolute '$f'"
+		exit 1
+	fi
+	if [[ "${f::2}" == ".." ]]
+	then
+		echo "Error: file can not be above current dir '$f'"
+		exit 1
+	fi
 done
 
 listen "$@"
