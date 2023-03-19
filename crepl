@@ -8,12 +8,13 @@
 mkdir -p /tmp/crools-"$USER"/crepl/
 
 tmp_src_file="$(mktemp /tmp/crools-"$USER"/crepl/entry_XXXXXXXXXXXXX.c)" # entry file for compliation
+tmp_src_file_test_includes="$(mktemp /tmp/crools-"$USER"/crepl/test_includes_XXXXXXXXXXXXX.c)" # do not add includes that do not compile
+tmp_src_file_includes="$(mktemp /tmp/crools-"$USER"/crepl/includes_XXXXXXXXXXXXX.c)" # #includes added by user on top
 tmp_src_file_main="$(mktemp /tmp/crools-"$USER"/crepl/main_XXXXXXXXXXXXX.c)" # main func body
 tmp_src_file_test_main="$(mktemp /tmp/crools-"$USER"/crepl/test_main_XXXXXXXXXXXXX.c)" # test if it compiles before persisting
 tmp_src_file_functions="$(mktemp /tmp/crools-"$USER"/crepl/functions_XXXXXXXXXXXXX.c)" # define function above main
 tmp_src_file_test_functions="$(mktemp /tmp/crools-"$USER"/crepl/test_functions_XXXXXXXXXXXXX.c)" # test if func compiles before persisiting
 tmp_src_file_tmp="$(mktemp /tmp/crools-"$USER"/crepl/tmp_XXXXXXXXXXXXX.c)" # run only once never persist (if eval is a print for example)
-tmp_src_file_tmp_reply="$(mktemp /tmp/crools-"$USER"/crepl/tmp_reply_XXXXXXXXXXXXX.c)" # print(eval)
 tmp_src_file_out="$(mktemp /tmp/crools-"$USER"/crepl/bin_XXXXXXXXXXXXX.c)" # output binary
 
 chmod +x "$tmp_src_file_out"
@@ -21,6 +22,9 @@ chmod +x "$tmp_src_file_out"
 :>"$tmp_src_file"
 cat << EOF > "$tmp_src_file"
 #include <stdio.h>
+
+#include "$tmp_src_file_includes"
+#include "$tmp_src_file_test_includes"
 
 #include "$tmp_src_file_functions"
 #include "$tmp_src_file_test_functions"
@@ -36,8 +40,11 @@ EOF
 cleanup() {
 	echo "exit(0)"
 	rm "$tmp_src_file"
+	rm "$tmp_src_file_test_includes"
+	rm "$tmp_src_file_includes"
 	rm "$tmp_src_file_main"
 	rm "$tmp_src_file_test_main"
+	rm "$tmp_src_file_test_functions"
 	rm "$tmp_src_file_functions"
 	rm "$tmp_src_file_tmp"
 	rm "$tmp_src_file_out"
@@ -54,6 +61,7 @@ crepl_build() {
 	then
 		cat "$tmp_src_file_test_main" >> "$tmp_src_file_main"
 		cat "$tmp_src_file_test_functions" >> "$tmp_src_file_functions"
+		cat "$tmp_src_file_test_includes" >> "$tmp_src_file_includes"
 	fi
 }
 
@@ -91,7 +99,7 @@ else
 	echo "Warning: your bash is too old for autocompletion"
 fi
 
-while read -e -r -p "> " input
+while IFS= read -e -r -p "> " input
 do
 	history -s "$input"
 	if [[ "$input" =~ ^[:space:]*(puts|printf)\( ]]
@@ -105,14 +113,20 @@ do
 	elif [[ "$input" =~ $c_single_line_func_pattern ]]
 	then
 		printf '%s\n' "$input" > "$tmp_src_file_test_functions"
+	elif [[ "$input" =~ ^#include(\ |\"|<) ]]
+	then
+		# use space/tab in front of #include in the repl
+		# to not add it at the top of the program
+		# but inside of main
+		printf '%s\n' "$input" > "$tmp_src_file_test_includes"
 	else
 		printf '%s\n' "$input" > "$tmp_src_file_test_main"
 	fi
 	crepl_build
 	crepl_run
 
+	:>"$tmp_src_file_test_includes"
 	:>"$tmp_src_file_test_main"
-	:>"$tmp_src_file_tmp_reply"
 	:>"$tmp_src_file_tmp"
 done
 
