@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# batch - bat + watch
+# yea its a weird name
+# its basically a file content monitor
+# similar to what vscode and others do out of the box
+
+if [ ! -x "$(command -v bat)" ]
+then
+	echo "Error: please install bat into your PATH"
+	exit 1
+fi
+if ! bat -h | grep -q "cat.*clone with wings"
+then
+	echo "Error: did not find a suitable bat tool"
+	exit 1
+fi
+if [ ! -x "$(command -v inotifywait)" ]
+then
+	echo "Error: please install inotifywait"
+	echo ""
+	echo "       sudo pacman -Sy inotify-tools"
+	echo ""
+	exit 1
+fi
+
+function listen() {
+	bat "$@"
+	while true
+	do
+		while read j
+		do
+			clear
+			# bat "$filename"
+			bat "$@"
+		done < <(inotifywait -q -e modify "$@")
+		# done < <(inotifywait -q -e modify "$filename")
+	done
+}
+
+if [ "$#" -eq "0" ]
+then
+	echo "usage: batch [FILE..]"
+	echo "description: watch file contents"
+	exit 1
+fi
+
+for f in "$@"
+do
+	[[ -f "$f" ]] && continue
+
+	echo "Error: file not found $f"
+	exit 1
+done
+
+listen "$@"
+
