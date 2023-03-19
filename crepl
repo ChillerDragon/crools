@@ -99,6 +99,43 @@ else
 	echo "Warning: your bash is too old for autocompletion"
 fi
 
+parse_args() {
+	while true
+	do
+		[[ "$#" -gt "0" ]] || break
+
+		arg="$1"
+		shift
+
+		if [ "$arg" == "-h" ]
+		then
+			echo "usage: crepl [OPTION..]"
+			echo "options:"
+			echo "  --cplay <filename>     quickstart with cplay file"
+			exit 0
+		elif [ "$arg" == "--cplay" ]
+		then
+			local filename
+			filename="$1"
+			shift
+			if [ "$filename" == "" ]
+			then
+				echo "usage: crepl --cplay <filename>"
+				exit 1
+			fi
+			cplay_include="#include \"/tmp/crools-$USER/cplay/$filename\""
+			echo "> $cplay_include"
+			printf '%s\n' "$cplay_include" > "$tmp_src_file_test_includes"
+			crepl_build
+			crepl_run
+
+			:>"$tmp_src_file_test_includes"
+		fi
+	done
+}
+
+parse_args "$@"
+
 while IFS= read -e -r -p "> " input
 do
 	history -s "$input"

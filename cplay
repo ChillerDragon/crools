@@ -130,6 +130,8 @@ read -rd '' c_template << EOF
 	C playground by ChillerDragon
 	press <F4> to compile
 	File: $filename
+
+	crepl --cplay $filename
 */
 #include "stdio.h"
 
