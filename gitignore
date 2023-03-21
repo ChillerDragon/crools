@@ -1,0 +1,4 @@
+#!/bin/bash
+
+lang="$(curl -sfL https://www.gitignore.io/api/list | tr "," "\n" | fzf)"
+curl -sfL "https://www.toptal.com/developers/gitignore/api/$lang"
