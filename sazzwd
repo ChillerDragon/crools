@@ -1,0 +1,23 @@
+#!/bin/bash
+# fuzzy pass wrapper - show mode
+
+if [ ! -x "$(command -v fzf)" ]
+then
+	echo "Error: fzf not installed"
+	exit 1
+fi
+
+PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
+path="$1"
+
+val="$(while IFS= read -r pass
+do
+	if [ -f "$pass.gpg" ]
+	then
+		echo "${pass#$PREFIX/$path}"
+	fi
+done < <(find "$PREFIX/$path" | sed -E 's/\.gpg(\x1B\[[0-9]+m)?( ->|$)/\1\2/g') | fzf)"
+
+
+pass show "$val"
+
