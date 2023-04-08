@@ -1,0 +1,45 @@
+#!/bin/bash
+#
+# fuzzy wireshark wrapper
+# i should probably build a more generic
+#
+# f (app)
+#
+# alias.. but yea.
+# watever
+
+
+if ! fd -h | grep -q "A program to find entries in your filesystem"
+then
+	echo "Error: please install 'fd' the rust 'find' alternative"
+	exit 1
+fi
+
+if [ ! -x "$(command -v fzf)" ]
+then
+	echo "Error: missing fzf"
+	exit 1
+fi
+
+if [ ! -x "$(command -v wireshark)" ]
+then
+	echo "Error: missing wireshark"
+	exit 1
+fi
+
+pcap="$(fd -tf -e pcap -e pcapng -e dump | fzf)"
+
+if [ "$pcap" == "" ]
+then
+	echo "Aborting ..."
+	exit 1
+fi
+
+if [ ! -f "$pcap" ]
+then
+	echo "Error: file not found '$pcap'"
+	exit 1
+fi
+
+wireshark "$pcap"
+
