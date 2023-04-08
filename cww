@@ -1,0 +1,125 @@
+#!/bin/bash
+#
+# a wrapper around wrappers
+#
+# recommend a crools tool based on current context
+#
+# Sounds stupid but could actually be the one to rule them all.
+# There are so many crools scripts i create in 10min and never use because i forget they exists.
+#
+# So one tool that checks your current environment (pwd and files in dir, history etc) and then recommends a crool tool would be nice.
+# So for example running ``cww`` in a ddnet/teeworlds code base recommends the tools ``ddlint``, ``build`` etc
+
+if ! fd -h | grep -q "A program to find entries in your filesystem"
+then
+	echo "Error: please install 'fd' the rust 'find' alternative"
+	exit 1
+fi
+
+if [ ! -x "$(command -v fzf)" ]
+then
+	echo "Error: missing fzf"
+	exit 1
+fi
+
+if [ ! -x "$(command -v wireshark)" ]
+then
+	echo "Error: missing wireshark"
+	exit 1
+fi
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+if [ ! -d "$SCRIPT_DIR" ]
+then
+	echo "Error: failed to get script dir"
+	exit 1
+fi
+
+detect_tw_code() {
+	[ -f CMakeLists.txt ] || return 1
+	[ -d src ] || return 1
+	return 0
+}
+
+detect_pcaps() {
+	if [ "$(fd -e pcap -e pcapng)" != "" ]
+	then
+		return 0
+	fi
+	return 1
+}
+
+detect_videos() {
+	if [ "$(fd -e mp4 -e mkv)" != "" ]
+	then
+		return 0
+	fi
+	return 1
+}
+
+detect_rust_code_base() {
+	[ -f Cargo.toml ] || return 1
+	return 0
+}
+
+tools=()
+
+if detect_tw_code
+then
+	tools+=(build
+		ctidy
+		ddlint
+		wjup)
+fi
+if detect_pcaps
+then
+	tools+=(fireshark tshark)
+fi
+if detect_videos
+then
+	tools+=(opentube)
+fi
+if detect_rust_code_base
+then
+	tools+=(ws_install_rs_plugin)
+fi
+
+if [ -d .git ] && [ ! -f .gitignore ]
+then
+	tools+=(gitignore)
+fi
+
+if [ "$PWD" == "$HOME" ]
+then
+	# recommend unspecific tools
+	# when in home folder
+	# (as close to no folder as it gets)
+	tools+=(fazzwd)
+	tools+=(bstd)
+	tools+=(cplay)
+	tools+=(cpplay)
+	tools+=(crackman)
+	tools+=(matrix)
+	tools+=(irc)
+fi
+
+dump_tools() {
+	for tool in "${tools[@]}"
+	do
+		echo "$tool"
+	done
+}
+
+if [ "${#tools[@]}" == "0" ]
+then
+	echo "Error: I can not recommend any tools"
+	echo "       for this current context"
+	exit 1
+fi
+
+echo "Based on your current context"
+echo "I can recommend those tools:"
+echo ""
+dump_tools
+
