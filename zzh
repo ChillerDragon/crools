@@ -15,6 +15,15 @@ function edit_cnf() {
 		exit 1
 	fi
 	crools_find_editor $conf || { echo "Error: failed to edit config"; exit 1; }
+	echo ""
+	echo "TODO: make this message better and check symlink"
+	echo "but dont forget to"
+	tput bold
+	echo "  cd ~/Desktop/git/dotfiles-private"
+	echo "  git add . && git commit -m update && git push"
+	tput sgr0
+	echo ""
+	echo ""
 }
 function check_conf() {
 	if [ ! -f $conf ]
