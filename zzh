@@ -9,123 +9,123 @@ pattern=""
 arg_search=0
 arg_num=""
 function edit_cnf() {
-    if [ ! -f $conf ]
-    then
-        echo "Error: could not edit config (not found)."
-        exit 1
-    fi
-    crools_find_editor $conf || { echo "Error: failed to edit config"; exit 1; }
+	if [ ! -f $conf ]
+	then
+		echo "Error: could not edit config (not found)."
+		exit 1
+	fi
+	crools_find_editor $conf || { echo "Error: failed to edit config"; exit 1; }
 }
 function check_conf() {
-    if [ ! -f $conf ]
-    then
-        echo "config file not found!"
-        echo "Do you want to create one? [y/N]"
-        read -r -n 1 yn
-        echo ""
-        if [[ ! "$yn" =~ [yY] ]]
-        then
-            return
-        fi
-        mkdir -p $conf_dir
-        {
-            echo "# zzh - config"
-            echo "# store your fav ssh commands here"
-            echo "ssh crools@localhost"
-            echo "ssh chillerdragon@149.202.127.134"
-        } >> $conf
-        edit_cnf
-    fi
+	if [ ! -f $conf ]
+	then
+		echo "config file not found!"
+		echo "Do you want to create one? [y/N]"
+		read -r -n 1 yn
+		echo ""
+		if [[ ! "$yn" =~ [yY] ]]
+		then
+			return
+		fi
+		mkdir -p $conf_dir
+		{
+			echo "# zzh - config"
+			echo "# store your fav ssh commands here"
+			echo "ssh crools@localhost"
+			echo "ssh chillerdragon@149.202.127.134"
+		} >> $conf
+		edit_cnf
+	fi
 }
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
-    echo "usage: $(tput bold)$(basename "$0") [OPTION]...$(tput sgr0)"
-    echo "description:"
-    echo "  quick select ssh connections"
-    echo "options:"
-    echo "  $(tput bold)--edit$(tput sgr0)          edit config"
-    echo "  $(tput bold)--host <number>$(tput sgr0) get hostname by number"
-    echo "  $(tput bold)--help$(tput sgr0)          show this help"
-    echo "  $(tput bold)--mosh$(tput sgr0)          use mosh instead of ssh"
-    echo "  $(tput bold)--print$(tput sgr0)         print instead of runing the command"
-    echo "  $(tput bold)<number>$(tput sgr0)        skip menu and go to number"
-    echo "  $(tput bold)/<pattern>$(tput sgr0)      chose first entry matching <pattern>"
-    echo "  $(tput bold)/$(tput sgr0)               open fuzzy search if fzf is installed"
-    exit 0
+	echo "usage: $(tput bold)$(basename "$0") [OPTION]...$(tput sgr0)"
+	echo "description:"
+	echo "  quick select ssh connections"
+	echo "options:"
+	echo "  $(tput bold)--edit$(tput sgr0)          edit config"
+	echo "  $(tput bold)--host <number>$(tput sgr0) get hostname by number"
+	echo "  $(tput bold)--help$(tput sgr0)          show this help"
+	echo "  $(tput bold)--mosh$(tput sgr0)          use mosh instead of ssh"
+	echo "  $(tput bold)--print$(tput sgr0)         print instead of runing the command"
+	echo "  $(tput bold)<number>$(tput sgr0)        skip menu and go to number"
+	echo "  $(tput bold)/<pattern>$(tput sgr0)      chose first entry matching <pattern>"
+	echo "  $(tput bold)/$(tput sgr0)               open fuzzy search if fzf is installed"
+	exit 0
 elif [ "$1" == "--host" ]
 then
-    ishost=1
-    shift
-    if ! [[ "$1" =~ ^[1-9][0-9]*$ ]]
-    then
-        echo "usage: $(basename "$0") --host <number>"
-        exit 1
-    fi
+	ishost=1
+	shift
+	if ! [[ "$1" =~ ^[1-9][0-9]*$ ]]
+	then
+		echo "usage: $(basename "$0") --host <number>"
+		exit 1
+	fi
 elif [ "$1" == "--edit" ] || [ "$1" == "-e" ]
 then
-    edit_cnf
-    exit 0
+	edit_cnf
+	exit 0
 fi
 
 for arg in "$@"
 do
-    if [ "${arg:0:1}" == "/" ]
-    then
-        pattern="${arg:1}"
-        arg_search=1
-    elif [ "$arg" == "--print" ] || [ "$arg" == "-p" ]
-    then
-        arg_print=1
-    elif [ "$arg" == "--mosh" ]
-    then
-        ismosh=1
-    elif [[ "$arg" =~ ^[1-9][0-9]*$ ]]
-    then
-        arg_num="$arg"
-        arg_num="$((arg_num-1))"
-    else
-        echo "[zzh] Error: invalid argument '$arg'"
-        echo "[zzh]        try $(basename "$0") --help"
-        exit 1
-    fi
+	if [ "${arg:0:1}" == "/" ]
+	then
+		pattern="${arg:1}"
+		arg_search=1
+	elif [ "$arg" == "--print" ] || [ "$arg" == "-p" ]
+	then
+		arg_print=1
+	elif [ "$arg" == "--mosh" ]
+	then
+		ismosh=1
+	elif [[ "$arg" =~ ^[1-9][0-9]*$ ]]
+	then
+		arg_num="$arg"
+		arg_num="$((arg_num-1))"
+	else
+		echo "[zzh] Error: invalid argument '$arg'"
+		echo "[zzh]        try $(basename "$0") --help"
+		exit 1
+	fi
 done
 
 check_conf
 if [ ! -f $conf ]
 then
-    echo "Error: config missing"
-    exit 1
+	echo "Error: config missing"
+	exit 1
 fi
 
 function cat_conf() {
-    if [ "$ismosh" == "1" ]
-    then
-        sed 's/^ssh /mosh /' "$conf"
-    else
-        cat "$conf"
-    fi
+	if [ "$ismosh" == "1" ]
+	then
+		sed 's/^ssh /mosh /' "$conf"
+	else
+		cat "$conf"
+	fi
 }
 
 options=()
 lines=0
 while IFS= read -r line
 do
-    if [ "${line:0:1}" == "#" ]
-    then
-        continue
-    elif [ "$line" == "" ]
-    then
-        continue
-    fi
-    options+=("$line")
-    lines=$((lines+1))
+	if [ "${line:0:1}" == "#" ]
+	then
+		continue
+	elif [ "$line" == "" ]
+	then
+		continue
+	fi
+	options+=("$line")
+	lines=$((lines+1))
 done < <(cat_conf)
 
 # only one entry
 if [ $lines -eq 1 ]
 then
-    eval "${options[0]}"
-    exit 0
+	eval "${options[0]}"
+	exit 0
 fi
 
 # https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Bash
@@ -162,87 +162,87 @@ fi
 # }
 
 function print_options() {
-    for entry in "${options[@]}"
-    do
-        echo "$entry"
-    done
+	for entry in "${options[@]}"
+	do
+		echo "$entry"
+	done
 }
 
 # match entry
 if [ "$arg_search" == "1" ] && [ "$pattern" == "" ] && [ -x "$(command -v fzf)" ]
 then
-    # fuzzy find using fzf
-    entry="$(print_options | fzf)"
-    echo "[zzh] matched '$entry'"
-    eval "$entry"
-    exit 0
+	# fuzzy find using fzf
+	entry="$(print_options | fzf)"
+	echo "[zzh] matched '$entry'"
+	eval "$entry"
+	exit 0
 elif [ "$pattern" != "" ]
 then
-    for entry in "${options[@]}"
-    do
-        if [[ "${entry,,}" =~ ${pattern,,} ]]
-        then
-            echo "[zzh] matched '$entry'"
-            eval "$entry"
-            exit 0
-        fi
-    done
+	for entry in "${options[@]}"
+	do
+		if [[ "${entry,,}" =~ ${pattern,,} ]]
+		then
+			echo "[zzh] matched '$entry'"
+			eval "$entry"
+			exit 0
+		fi
+	done
 	# fuzzy find using levenshtein string distance
-    # slow and wrong af :/
-    # top_lev=100
-    # top_lev_entry='test'
-    # for entry in "${options[@]}"
-    # do
-    #     lev="$(levenshtein "$entry" "$pattern")"
-    #     echo "$pattern $entry $lev"
-    #     if [ "$lev" -lt "$top_lev" ]
-    #     then
-    #         top_lev="$lev"
-    #         top_lev_entry="$top_lev_entry"
-    #     fi
-    # done
-    # if [ "$top_lev" -lt "4" ]
-    # then
-    #     echo "[zzh] matched '$top_lev_entry'"
-    #     eval "$top_lev_entry"
-    #     exit 0
-    # fi
-    echo "pattern not found"
-    exit 1
+	# slow and wrong af :/
+	# top_lev=100
+	# top_lev_entry='test'
+	# for entry in "${options[@]}"
+	# do
+	#     lev="$(levenshtein "$entry" "$pattern")"
+	#     echo "$pattern $entry $lev"
+	#     if [ "$lev" -lt "$top_lev" ]
+	#     then
+	#         top_lev="$lev"
+	#         top_lev_entry="$top_lev_entry"
+	#     fi
+	# done
+	# if [ "$top_lev" -lt "4" ]
+	# then
+	#     echo "[zzh] matched '$top_lev_entry'"
+	#     eval "$top_lev_entry"
+	#     exit 0
+	# fi
+	echo "pattern not found"
+	exit 1
 fi
 
 # arg_num entry
 if [ "$arg_num" != "" ]
 then
-    if [ "${#options[@]}" -lt "$arg_num" ]
-    then
-        echo "Error: selected item $arg_num out of ${#options[@]}"
-        exit 1
-    fi
-    if [ "$arg_print" == "1" ]
-    then
-        echo "${options[$arg_num]}" | cut -d'#' -f1
-    elif [ "$ishost" == "1" ]
-    then
-        echo "${options[$arg_num]}" | cut -d' ' -f2
-    else
-        eval "${options[$arg_num]}"
-    fi
-    exit 0
+	if [ "${#options[@]}" -lt "$arg_num" ]
+	then
+		echo "Error: selected item $arg_num out of ${#options[@]}"
+		exit 1
+	fi
+	if [ "$arg_print" == "1" ]
+	then
+		echo "${options[$arg_num]}" | cut -d'#' -f1
+	elif [ "$ishost" == "1" ]
+	then
+		echo "${options[$arg_num]}" | cut -d' ' -f2
+	else
+		eval "${options[$arg_num]}"
+	fi
+	exit 0
 fi
 
 # select entry
 PS3='Select ssh connection: '
 select opt in "${options[@]}"
 do
-    for o in "${options[@]}"
-    do
-        if [[ "$o" == "$opt" ]]
-        then
-            eval "$opt"
-            exit 0
-        fi
-    done
-    echo "invalid option $REPLY"
+	for o in "${options[@]}"
+	do
+		if [[ "$o" == "$opt" ]]
+		then
+			eval "$opt"
+			exit 0
+		fi
+	done
+	echo "invalid option $REPLY"
 done
 
