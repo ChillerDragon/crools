@@ -21,6 +21,7 @@ function edit_cnf() {
 	if [ -L "$conf" ] && readlink "$conf" | grep -q dotfiles-private
 	then
 		echo ""
+		echo "TODO: make this auto pull commit and push"
 		echo "do not forget to:"
 		echo ""
 		tput bold
