@@ -16,14 +16,18 @@ function edit_cnf() {
 	fi
 	crools_find_editor $conf || { echo "Error: failed to edit config"; exit 1; }
 	echo ""
-	echo "TODO: make this message better and check symlink"
-	echo "but dont forget to"
-	tput bold
-	echo "  cd ~/Desktop/git/dotfiles-private"
-	echo "  git add . && git commit -m update && git push"
-	tput sgr0
-	echo ""
-	echo ""
+	# if conf is a symlink
+	# warn about it not being auto synced
+	if [ -L "$conf" ] && readlink "$conf" | grep -q dotfiles-private
+	then
+		tput bold
+		echo "  do not forget to"
+		echo "  cd ~/Desktop/git/dotfiles-private"
+		echo "  git add . && git commit -m update && git push"
+		tput sgr0
+		echo ""
+		echo ""
+	fi
 }
 function check_conf() {
 	if [ ! -f $conf ]
