@@ -63,6 +63,12 @@ detect_rust_code_base() {
 	return 0
 }
 
+is_ddnet_build() {
+	[[ -d ./CMakeFiles ]] || return 1
+	[[ -f ./CMakeCache.txt ]] || return 1
+	return 0
+}
+
 tools=()
 
 if detect_tw_code
@@ -70,7 +76,12 @@ then
 	tools+=(build
 		ctidy
 		ddlint
+		asan
 		wjup)
+fi
+if is_ddnet_build
+then
+	tools+=(asan)
 fi
 if detect_pcaps
 then
