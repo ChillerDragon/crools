@@ -14,21 +14,39 @@ function edit_cnf() {
 		echo "Error: could not edit config (not found)."
 		exit 1
 	fi
+	if [ -L "$conf" ] && \
+		[ -d ~/Desktop/git/dotfiles-private ] && \
+		readlink "$conf" | grep -q dotfiles-private
+	then
+		cd ~/Desktop/git/dotfiles-private || exit 1
+		if ! git pull
+		then
+			echo "Update priv dotfiles repo failed try manually"
+			echo ""
+			tput bold
+			echo "  cd ~/Desktop/git/dotfiles-private"
+			echo "  git pull"
+			tput sgr0
+		fi
+	fi
 	crools_find_editor $conf || { echo "Error: failed to edit config"; exit 1; }
 	echo ""
-	# if conf is a symlink
-	# warn about it not being auto synced
-	if [ -L "$conf" ] && readlink "$conf" | grep -q dotfiles-private
+	if [ -L "$conf" ] && \
+		[ -d ~/Desktop/git/dotfiles-private ] && \
+		readlink "$conf" | grep -q dotfiles-private
 	then
-		echo ""
-		echo "TODO: make this auto pull commit and push"
-		echo "do not forget to:"
-		echo ""
-		tput bold
-		echo "  cd ~/Desktop/git/dotfiles-private"
-		echo "  git add . && git commit -m update && git push"
-		tput sgr0
-		echo ""
+		cd ~/Desktop/git/dotfiles-private || exit 1
+		git add .
+		git commit -m "Update"
+		if ! git push
+		then
+			echo "Update priv dotfiles repo failed try manually"
+			echo ""
+			tput bold
+			echo "  cd ~/Desktop/git/dotfiles-private"
+			echo "  git add . && git commit -m update && git push"
+			tput sgr0
+		fi
 	fi
 }
 function check_conf() {
