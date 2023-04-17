@@ -67,14 +67,16 @@ _nproc() {
 }
 
 _cat() {
-	if bat -h | grep -q "clone with wings" &>/dev/null; then
+	if bat -h | grep -qE "(clone with wings|cat\(1\) clone)" &>/dev/null; then
 		bat "$1"
 		return
 	fi
-	if batcat -h | grep -q "clone with wings" &>/dev/null; then
+	if batcat -h | grep -qE "(clone with wings|cat\(1\) clone)" &>/dev/null; then
 		batcat "$1"
 		return
 	fi
+	batcat -h
+	batcat -h | grep "clone with wings"
 	echo "file: $1"
 	awk '{ print "  " $0 }' "$1"
 }
