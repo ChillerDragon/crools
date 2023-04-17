@@ -71,8 +71,12 @@ _cat() {
 		bat "$1"
 		return
 	fi
+	if batcat -h | grep -q "clone with wings" &>/dev/null; then
+		batcat "$1"
+		return
+	fi
 	echo "file: $1"
-	awk "$1" '{ print "  " $0 }'
+	awk '{ print "  " $0 }' "$1"
 }
 
 setup_env() {
