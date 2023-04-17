@@ -89,6 +89,12 @@ setup_env() {
 			export LSAN_OPTIONS=suppressions=./lsan.supp
 		EOF
 	fi
+	echo "Maybe you would like to run this:"
+	tput bold
+	echo "  rm -rf *"
+	echo "  CC=clang CXX=clang++ CXXFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer" CFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer"  cmake .. -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -DCURSES_CLIENT=ON"
+	echo ""
+	tput sgr0
 	_cat asan.cmd
 	echo "source asan.cmd"
 }
