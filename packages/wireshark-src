@@ -6,6 +6,48 @@ CM_SRC_PATH="$HOME/.config/crools/crackman/src"
 mkdir -p "$CM_BIN_PATH"
 mkdir -p "$CM_SRC_PATH"
 
+# https://aur.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=wireshark-git
+arch_deps=(
+        'c-ares'
+        'glib2'
+        'libcap'
+        'libpcap'
+        'lua52'
+        'libmaxminddb'
+        'pcre2'
+
+        # wireshark-qt dependencies
+        'qt6-multimedia'
+        'qt6-tools'
+        'qt6-svg'               # for SVG icons in the Qt GUI
+        'qt6-5compat'
+        # for post-installation hook
+        'desktop-file-utils'
+
+        # optional dependencies for improved dissection or features
+        'gnutls'                # for SSL decryption using RSA keys
+        'krb5'
+        #'libsmi'
+        'libnghttp2'            # for HTTP/2 dissector
+        'minizip'               # for profile zip files in Qt
+        'sbc'                   # Bluetooth audio codec in RTP player
+        'snappy' 'lz4'          # for cql dissector
+        'brotli'                # brotli decompression in HTTP/HTTP2 dissectors
+        'zstd'                  # for Zstd support in Kafka dissector
+        'spandsp'               # for G.722/G.726 codec support in RTP player
+        #'bcg729'               # for G.729 codec support in RTP player
+        'opus'                  # for Opus codec support in RTP player
+        #'libilbc'              # for iLBC codec support in RTP player
+
+        # extcap (sshdump, etc.)
+        'libssh'
+
+	# make deps
+	'cmake'
+	'git'
+	'ninja'
+	'python'
+)
 
 if [ "$1" == "description" ]
 then
@@ -34,10 +76,11 @@ then
 		exit 0
 	fi
 else
-	distro="$(cat /etc/os-release | grep "^ID=" | cut -d'=' -f2)"
-	if [ "$distro" != "debian" ]
+	distro="$(grep "^ID=" /etc/os-release | cut -d'=' -f2)"
+	if [ "$distro" != "debian" ] && [ "$distro" != "arch" ]
 	then
 		echo "Error: wireshark is only supported on debian"
+		echo "       you are running '$distro'"
 		exit 1
 	fi
 	if [ ! -x "$(command -v fzf)" ]
@@ -60,14 +103,24 @@ else
 		exit 1
 	fi
 
-	sudo apt install \
-		qttools5-dev \
-		qtmultimedia5-dev \
-		flex \
-		libc-ares-dev \
-		libgcrypt20-dev \
-		libcrypto++-dev \
-		libpcap-dev
+	if [ "$distro" == "debian" ]
+	then
+		sudo apt install \
+			qttools5-dev \
+			qtmultimedia5-dev \
+			flex \
+			libc-ares-dev \
+			libgcrypt20-dev \
+			libcrypto++-dev \
+			libpcap-dev
+	elif [ "$distro" == "arch" ]
+	then
+		sudo pacman -S --needed \
+			"${arch_deps[@]}"
+	else
+		echo "Error: unsupported distro '$distro'"
+		exit 1
+	fi
 
 	cd "$CM_SRC_PATH" || exit 1
 	if [ ! -d "wireshark" ]
@@ -87,7 +140,7 @@ else
 	mkdir build
 	cd build || exit 1
 	cmake .. || exit 1
-	make -j$(nproc) || exit 1
+	make -j"$(nproc)" || exit 1
 	sudo make install || exit 1
 fi
 
