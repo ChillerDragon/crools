@@ -1,5 +1,28 @@
 #!/bin/bash
 
+
+
+
+
+
+
+
+# THIS IS DEPRECATED
+# REPLACED BY
+#
+# crackman install wireshark-src
+
+
+
+
+
+
+
+
+
+
+
+
 # I am not sure if i want wireshark in my path
 # nor if i want this script at all
 # so I decided to go back to the crools origin and do some crap script
@@ -44,6 +67,15 @@ function install_wireshark() {
 		echo "Value: ${aGitRemotes[$key]}"
 	done
 	echo "TODO: implement"
+	local dir
+	dir="${aSrcDirs[0]}"
+	if [ -d "$dir" ]
+	then
+		echo "Error: dir alr exists $dir"
+		exit 1
+	fi
+	git clone --recursive git@gitlab.com:wireshark/wireshark.git "$dir" || exit 1
+	cd "$dir" || exit 1
 }
 
 function goto_wireshark_dir() {
