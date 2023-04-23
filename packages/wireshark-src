@@ -128,7 +128,7 @@ else
 		git clone --recursive git@gitlab.com:wireshark/wireshark.git
 	fi
 	cd wireshark || exit 1
-	tag="$(git tag | grep wireshark | sort | tail -n 10 | tac | fzf)"
+	tag="$(git tag | grep '^v' | sort -V | tail -n 10 | tac | fzf)"
 	if [ "$tag" == "" ]
 	then
 		echo "Error: invalid tag"
