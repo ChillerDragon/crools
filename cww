@@ -75,6 +75,7 @@ if detect_tw_code
 then
 	tools+=(build
 		ctidy
+		ddnet_tests
 		ddlint
 		asan
 		wjup)

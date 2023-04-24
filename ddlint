@@ -1,25 +1,58 @@
 #!/bin/bash
 
+RESET="\e[0m"
+GREEN="\e[1;32m"
+RED="\033[1;91m"
+BG_RED="\033[0;101m"
+
+err() {
+	local msg="$1"
+	printf '%b%s%b%b%s%b\n' "$BG_RED" "[ERROR]" "$RESET" "$RED" "$msg" "$RESET"
+	errors="$((errors+1))"
+}
+
+fatal() {
+	local msg="$1"
+	printf '❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌\n'
+	printf '%b%s%b%b%s%b\n' "$BG_RED" "[FATAL FAILURE]" "$RESET" "$RED" " Error: $msg" "$RESET"
+	printf '❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌\n'
+	exit 1
+}
+
+ok() {
+	local msg="$1"
+	printf "\n%b%s%b\n" "$GREEN" "$msg" "$RESET"
+}
+
 echo "ddnet code base linter"
 echo "runs similiar stuff like the CI"
 
-ctidy || exit 1
-./scripts/fix_style.py --dry-run || exit 1
-./scripts/check_header_guards.py || exit 1
-find . -type f -name '*.sh' -not -path './build*' -print0 | xargs -0 shellcheck || exit 1
+ctidy || fatal ctidy
+ddnet_tests || fatal tests
+./scripts/fix_style.py --dry-run || fatal style
+./scripts/check_header_guards.py || fatal guards
+find . -type f -name '*.sh' -not -path './build*' -print0 | xargs -0 shellcheck || fatal shellcheck
 if grep -Eqr '(msg|Print).*\(.*"[Ee]rror:' src/;
 then
 	echo "Expected log errors to be in this format 'ERROR: error message'"
 	echo "Found these non uppercased log errors:"
 	grep -Er '(msg|Print).*\(.*"[Ee]rror:' src/
-	exit 1
+	fatal "log format"
 fi
-find . -type f -name "*.py" -not -path './ddnet-libs/*' -not -path './googletest-src/*' -print0 | xargs -0 pylint || exit 1
-find src -name '*.h' | while read -r i; do grep -r -q "$(basename "$i")" || (echo "Header file $i is unused" && exit 1); done
+find . -type f -name "*.py" -not -path './ddnet-libs/*' -not -path './googletest-src/*' -print0 | xargs -0 pylint || fatal pylint
+find src -name '*.h' | while read -r i; do grep -r -q "$(basename "$i")" || error "Header file $i is unused"; done
 
 echo "[*] Check absolute includes"
 
 if grep --exclude-dir rust-bridge -rE '^#include "(antibot|base|engine|game|steam|test)/' src/
 then
-	echo "[-] Error: see wrong includes above ^"
+	error "see wrong includes above ^"
 fi
+
+if [ "$errors" -eq "0" ]
+then
+	ok "✅ all tests passed."
+else
+	fatal "There are $errors failures"
+fi
+

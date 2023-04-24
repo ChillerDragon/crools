@@ -1,0 +1,63 @@
+#!/bin/bash
+
+echo "[-----------------------------------------------------------------]"
+echo "[---] ddnet run tests helper (gtest && headless integration)  [---]"
+echo "[-----------------------------------------------------------------]"
+echo ""
+
+function check_dir() {
+	local dir="$1"
+	if [ ! -d "$dir" ]
+	then
+		echo "Error: $dir dir not found!"
+		echo "       make sure you are at the root of a ddnet repo"
+		exit 1
+	fi
+}
+
+function check_bin() {
+	local bin="$1"
+	if [ ! -x "$(command -v "$bin")" ]
+	then
+		echo "Error: you need $bin installed in your PATH"
+		exit 1
+	fi
+}
+
+check_dir .git
+check_dir cmake
+check_dir src
+
+check_bin clang
+check_bin ninja
+check_bin cmake
+check_bin valgrind
+
+if [ ! -f CMakeLists.txt ]
+then
+	echo "Error: CMakeLists.txt not found!"
+	echo "       make sure your are at the root of a ddnet repo"
+	exit 1
+fi
+
+mkdir -p build-integration-tests
+cd build-integration-tests || exit 1
+
+if [ ! -f Makefile ]
+then
+	cmake -G Ninja \
+		-DDOWNLOAD_GTEST=ON \
+		-DHEADLESS_CLIENT=ON \
+		-DCMAKE_BUILD_TYPE=Debug \
+		-Werror=dev ..
+fi
+
+# cmake --build . --config Debug --target everything -- -k 0
+
+cmake --build . --config Debug --target run_tests || exit 1
+
+# needed for integration tests
+cp chillerbot-ux DDNet
+
+./integration_test.sh --valgrind-memcheck || exit 1
+
