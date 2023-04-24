@@ -54,10 +54,13 @@ fi
 
 # cmake --build . --config Debug --target everything -- -k 0
 
+cmake --build . --config Debug || exit 1
+
 cmake --build . --config Debug --target run_tests || exit 1
 
 # needed for integration tests
 cp chillerbot-ux DDNet
+# cp term-ux DDNet
 
 ./integration_test.sh --valgrind-memcheck || exit 1
 
