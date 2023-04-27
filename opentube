@@ -166,8 +166,6 @@ then
 	echo "       https://tube.zillyhuhn.com/php/profile.php"
 	exit 1
 fi
-echo "OK"
-exit 0
 
 found="$(curl -o /dev/null -s -w "%{http_code}\\n" "$url")"
 if [ "$found" != "404" ]
