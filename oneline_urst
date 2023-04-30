@@ -1,0 +1,16 @@
+#!/bin/bash
+
+code="$*"
+if [ "$#" == 0 ]
+then
+	read -r -i 'fn main() { println!("{}", 2);}' -e code
+fi
+
+mkdir -p /tmp/oneline_rust
+
+cd /tmp/oneline_rust || exit 1
+
+echo "$code" > main.rs
+rustc main.rs || exit 1
+./main
+
