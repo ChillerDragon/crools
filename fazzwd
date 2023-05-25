@@ -18,6 +18,6 @@ do
 	fi
 done < <(find "$PREFIX/$path" | sed -E 's/\.gpg(\x1B\[[0-9]+m)?( ->|$)/\1\2/g') | fzf)"
 
-
+echo "$val"
 crasswd "$val"
 
