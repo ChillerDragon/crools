@@ -64,5 +64,11 @@ then
     exit 0
 fi
 
+if [ "$TERM" == "st-256color" ]
+then
+	echo "[*] patching suckless term to more compatible xterm"
+	export TERM=xterm
+fi
+
 ssh -t "$(zzh --host "$arg_host")" "$screen_cmd irc"
 
