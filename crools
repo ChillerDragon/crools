@@ -150,6 +150,9 @@ then
 		cd ~/.lib-crash/lib-teeworlds || exit 1
 		git_save_pull
 	)
+else
+	mkdir -p ~/.lib-crash
+	git clone git@github.com:lib-crash/lib-teeworlds.git ~/.lib-crash/lib-teeworlds
 fi
 
 function add_to_rc() {
