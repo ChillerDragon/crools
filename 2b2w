@@ -12,6 +12,7 @@ then
 	_2B2W_HOST=https://2b2w.zillyhuhn.com/
 	_2B2W_PASS=plsnohackme
 	EOF
+	edit_secrets
 fi
 
 source ~/.config/crools/secrets.sh
