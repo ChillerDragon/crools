@@ -92,7 +92,10 @@ setup_env() {
 	echo "Maybe you would like to run this:"
 	tput bold
 	echo "  rm -rf *"
-	echo '  CC=clang CXX=clang++ CXXFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer" CFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer"  cmake .. -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -DCURSES_CLIENT=ON'
+	sans=address,undefined
+	echo "  CC=clang CXX=clang++ CXXFLAGS='-fsanitize=$sans -fsanitize-recover=$sans -fno-omit-frame-pointer' CFLAGS='-fsanitize=$sans -fsanitize-recover=$sans -fno-omit-frame-pointer'  cmake .. -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -DCURSES_CLIENT=ON"
+	sans=memory,undefined
+	echo "  CC=clang CXX=clang++ CXXFLAGS='-fsanitize=$sans -fsanitize-recover=$sans -fno-omit-frame-pointer' CFLAGS='-fsanitize=$sans -fsanitize-recover=$sans -fno-omit-frame-pointer'  cmake .. -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -DCURSES_CLIENT=ON"
 	echo ""
 	tput sgr0
 	_cat asan.cmd
