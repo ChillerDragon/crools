@@ -8,11 +8,24 @@
 # alias.. but yea.
 # watever
 
+fdbin=fd
 
-if ! fd -h | grep -q "A program to find entries in your filesystem"
+if ! fd -h | grep -q "A program to find entries in your filesystem" &> /dev/null
 then
-	echo "Error: please install 'fd' the rust 'find' alternative"
-	exit 1
+	if fdfind -h | grep -q "A program to find entries in your filesystem"
+	then
+		fdbin=fdfind
+	else
+		echo "Error: please install 'fd' the rust 'find' alternative"
+		source /etc/os-release
+		if [ "$ID" == "debian" ]
+		then
+			echo ""
+			echo "   sudo apt install fd-find"
+			echo ""
+		fi
+		exit 1
+	fi
 fi
 
 if [ ! -x "$(command -v fzf)" ]
@@ -27,7 +40,7 @@ then
 	exit 1
 fi
 
-pcap="$(fd -tf -e pcap -e pcapng -e dump | fzf)"
+pcap="$($fdbin -tf -e pcap -e pcapng -e dump | fzf)"
 
 if [ "$pcap" == "" ]
 then
