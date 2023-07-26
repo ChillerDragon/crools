@@ -52,7 +52,7 @@ function update_generic() {
 	git submodule update || exit 1
 	git push || exit 1
 	git checkout "$branch" || exit 1
-	git merge "$upstream_remote" || exit 1
+	git merge --no-edit "$upstream_remote" || exit 1
 	git submodule update || exit 1
 }
 
