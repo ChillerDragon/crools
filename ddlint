@@ -31,6 +31,7 @@ ctidy || fatal ctidy
 ddnet_tests || fatal tests
 ./scripts/fix_style.py --dry-run || fatal style
 ./scripts/check_header_guards.py || fatal guards
+./scripts/check_config_variables.py || fatal cfg_vars
 find . -type f -name '*.sh' -not -path './build*' -print0 | xargs -0 shellcheck || fatal shellcheck
 if grep -Eqr '(msg|Print).*\(.*"[Ee]rror:' src/;
 then
