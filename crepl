@@ -57,7 +57,7 @@ compiler() {
 }
 
 crepl_build() {
-	if compiler "$tmp_src_file" -o "$tmp_src_file_out"
+	if compiler "$tmp_src_file" -o "$tmp_src_file_out" -I"$PWD"
 	then
 		cat "$tmp_src_file_test_main" >> "$tmp_src_file_main"
 		cat "$tmp_src_file_test_functions" >> "$tmp_src_file_functions"
