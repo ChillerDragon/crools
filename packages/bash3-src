@@ -1,0 +1,40 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+
+if [ "$1" == "description" ]
+then
+	echo "bash shell version 3.2 built from source"
+elif [ "$1" == "delete" ]
+then
+	rm -rf "$CM_SRC_PATH"/bash-3.2
+	sudo rm /usr/local/bin/bash3
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -f /usr/local/bin/bash3 ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	cd "$CM_SRC_PATH" || exit 1
+	if [ ! -d "bash-3.2" ]
+	then
+		[[ -f bash-3.2.tar.gz ]] && rm bash-3.2.tar.gz
+		wget https://ftp.gnu.org/gnu/bash/bash-3.2.tar.gz
+		tar xvf bash-3.2.tar.gz
+	fi
+	cd bash-3.2 || exit 1
+	./configure
+	make
+	sudo cp ./bash /usr/local/bin/bash3
+fi
+
