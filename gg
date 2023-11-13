@@ -90,6 +90,23 @@ function update_ux() {
 	fi
 }
 
+function update_ddnet_insta() {
+	cd ~/Desktop/git/ddnet-insta || exit 1
+	local commit
+	commit="$(git rev-parse HEAD)"
+	update_generic \
+		upstream_remote=upstream \
+		upstream_branch=master \
+		branch=insta \
+		origin=ddnet-insta
+	if [ "$(git rev-parse HEAD)" != "$commit" ]
+	then
+		echo "[*] new commit $commit -> $(git rev-parse HEAD) (building)"
+		cd build || exit 1
+		make -j"$(nproc)" || exit 1
+	fi
+}
+
 function update_ddnetpp() {
 	cd ~/Desktop/git/DDNetPP || exit 1
 	local commit
@@ -129,6 +146,12 @@ function parse_args() {
 			then
 				update_ux
 			fi
+		elif [[ "$arg" == "di" ]] || [[ "$arg" == "ddnet-insta" ]]
+		then
+			if [[ "$dry" != "dry" ]]
+			then
+				update_ddnet_insta
+			fi
 		elif [[ "$arg" == "ddpp" ]] || [[ "$arg" == "ddnetpp" ]] || [[ "$arg" == "ddnet++" ]] || [[ "$arg" == "DDNetPP (ddnet++)" ]]
 		then
 			if [[ "$dry" != "dry" ]]
@@ -148,6 +171,7 @@ then
 	then
 		repos="chillerbot-zx\n"
 		repos+="chillerbot-ux\n"
+		repos+="ddnet-insta\n"
 		repos+="DDNetPP (ddnet++)"
 		repo="$(echo -e "$repos" | fzf)"
 		parse_args wet "$repo"
