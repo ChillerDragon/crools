@@ -10,6 +10,26 @@ cat << 'LOGO'
 
 LOGO
 
+readonly reset="\e[0m"
+# readonly black="\e[0;30m";   
+# readonly red="\e[0;31m";     
+# readonly green="\e[0;32m";   
+# readonly yellow="\e[0;33m";  
+# readonly blue="\e[0;34m";    
+# readonly magenta="\e[0;35m";
+# readonly cyan="\e[0;36m";    
+# readonly white="\e[0;37m";   
+
+# readonly BLACK="\e[1;30m"
+# readonly RED="\e[1;31m"
+# readonly GREEN="\e[1;32m"
+# readonly YELLOW="\e[1;33m"
+# readonly BLUE="\e[1;34m"
+# readonly MAGENTA="\e[1;35m"
+# readonly CYAN="\e[1;36m"
+readonly WHITE="\e[1;37m"
+
+
 
 function usage() {
 	echo "usage: gg <repo>"
@@ -18,7 +38,17 @@ function usage() {
 	echo "respos:"
 	echo "  zx|chillerbot-zx"
 	echo "  ux|chillerbot-ux"
+	echo "  di|ddnet-insta"
 	echo "  ddpp|ddnetpp|ddnet++"
+}
+
+function err() {
+	printf "[-] Error: %b\n" "$1" 1>&2
+}
+
+function fail() {
+	err "$1"
+	exit 1
 }
 
 function update_generic() {
@@ -44,84 +74,72 @@ function update_generic() {
 		echo "not $origin remote"
 		return
 	fi
-	git checkout "$branch" || exit 1
-	git pull || exit 1
-	git fetch "$upstream_remote" || exit 1
-	git checkout "$upstream_remote" || exit 1
-	git reset --hard "$upstream_remote/$upstream_branch" || exit 1
-	git submodule update || exit 1
-	git push || exit 1
-	git checkout "$branch" || exit 1
-	git merge --no-edit "$upstream_remote" || exit 1
-	git submodule update || exit 1
+	git checkout "$branch" || fail "${WHITE}git checkout $branch${reset} failed"
+	git pull || fail "${WHITE}git pull${reset} failed"
+	git fetch "$upstream_remote" || fail "${WHITE}git fetch $upstream_remote${reset} failed"
+	if ! git checkout "$upstream_remote"
+	then
+		err "You need a local branch that matches the upstream remote name"
+		err "In your case you need a branch called $WHITE$upstream_remote"
+		fail "${WHITE}git checkout $upstream_remote${reset} failed"
+	fi
+	git reset --hard "$upstream_remote/$upstream_branch" || fail "${WHITE}git reset --hard $upstream_remote/$upstream_branch${reset} failed"
+	git submodule update || fail "${WHITE}git submodule update${reset} failed"
+	git push || fail "${WHITE}git push${reset} failed"
+	git checkout "$branch" || fail "${WHITE}git checkout $branch${reset} failed"
+	git merge --no-edit "$upstream_remote" || fail "${WHITE}git merge --no-edit $upstream_remote${reset} failed"
+	git submodule update || fail "${WHITE}git submodule update${reset} failed"
+}
+
+function update_generic_tw() {
+	local commit
+	if ! commit="$(git rev-parse HEAD)"
+	then
+		echo "Error: failed to get commit"
+	fi
+	update_generic "$@"
+	if [ "$(git rev-parse HEAD)" != "$commit" ]
+	then
+		echo "[*] new commit $commit -> $(git rev-parse HEAD) (building)"
+		cd build || exit 1
+		make -j"$(nproc)" || exit 1
+	fi
 }
 
 function update_zx() {
 	cd ~/Desktop/git/chillerbot-zx || exit 1
-	local commit
-	commit="$(git rev-parse HEAD)"
-	update_generic \
+	update_generic_tw \
 		upstream_remote=ux \
 		upstream_branch=chillerbot \
 		branch=zx \
 		origin=chillerbot-zx
-	if [ "$(git rev-parse HEAD)" != "$commit" ]
-	then
-		echo "[*] new commit $commit -> $(git rev-parse HEAD) (building)"
-		cd build || exit 1
-		make -j"$(nproc)" || exit 1
-	fi
 }
 
 function update_ux() {
 	cd ~/Desktop/git/chillerbot-ux || exit 1
-	local commit
-	commit="$(git rev-parse HEAD)"
-	update_generic \
+	update_generic_tw \
 		upstream_remote=ddnet \
 		upstream_branch=master \
 		branch=chillerbot \
 		origin=chillerbot-ux
-	if [ "$(git rev-parse HEAD)" != "$commit" ]
-	then
-		echo "[*] new commit $commit -> $(git rev-parse HEAD) (building)"
-		cd build || exit 1
-		make -j"$(nproc)" || exit 1
-	fi
 }
 
 function update_ddnet_insta() {
 	cd ~/Desktop/git/ddnet-insta || exit 1
-	local commit
-	commit="$(git rev-parse HEAD)"
-	update_generic \
-		upstream_remote=upstream \
+	update_generic_tw \
+		upstream_remote=ddnet \
 		upstream_branch=master \
 		branch=insta \
 		origin=ddnet-insta
-	if [ "$(git rev-parse HEAD)" != "$commit" ]
-	then
-		echo "[*] new commit $commit -> $(git rev-parse HEAD) (building)"
-		cd build || exit 1
-		make -j"$(nproc)" || exit 1
-	fi
 }
 
 function update_ddnetpp() {
 	cd ~/Desktop/git/DDNetPP || exit 1
-	local commit
-	commit="$(git rev-parse HEAD)"
-	update_generic \
+	update_generic_tw \
 		upstream_remote=ddnet \
 		upstream_branch=master \
 		branch=master \
 		origin=DDNetPP
-	if [ "$(git rev-parse HEAD)" != "$commit" ]
-	then
-		echo "[*] new commit $commit -> $(git rev-parse HEAD) (building)"
-		cd build || exit 1
-		make -j"$(nproc)" || exit 1
-	fi
 }
 
 function parse_args() {
