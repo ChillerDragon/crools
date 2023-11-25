@@ -179,6 +179,6 @@ then
 	echo "$c_template" > "$filename"
 fi
 
-echo "opening $PWD$filename"
+echo "opening $PWD/$filename"
 vim "$filename"
 
