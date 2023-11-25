@@ -93,7 +93,7 @@ setup_env() {
 	tput bold
 	echo "  rm -rf *"
 	sans=address,undefined
-	echo "  CC=clang CXX=clang++ CXXFLAGS='-fsanitize=$sans -fsanitize-recover=$sans -fno-omit-frame-pointer' CFLAGS='-fsanitize=$sans -fsanitize-recover=$sans -fno-omit-frame-pointer'  cmake .. -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -DCURSES_CLIENT=ON"
+	echo "  CC=clang CXX=clang++ CXXFLAGS='-fsanitize=$sans -fno-omit-frame-pointer' CFLAGS='-fsanitize=$sans -fsanitize-recover=$sans -fno-omit-frame-pointer'  cmake .. -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -DCURSES_CLIENT=ON"
 	echo ""
 	tput sgr0
 	_cat asan.cmd
