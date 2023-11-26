@@ -27,11 +27,11 @@ ok() {
 echo "ddnet code base linter"
 echo "runs similiar stuff like the CI"
 
-ctidy || fatal ctidy
-ddnet_tests || fatal tests
 ./scripts/fix_style.py --dry-run || fatal style
 ./scripts/check_header_guards.py || fatal guards
 ./scripts/check_config_variables.py || fatal cfg_vars
+ctidy || fatal ctidy
+ddnet_tests || fatal tests
 find . -type f -name '*.sh' -not -path './build*' -print0 | xargs -0 shellcheck || fatal shellcheck
 if grep -Eqr '(msg|Print).*\(.*"[Ee]rror:' src/;
 then
