@@ -1,0 +1,52 @@
+#!/bin/bash
+
+echo "crools mutt wrapper"
+
+dep() {
+	[[ ! -x "$(command -v "$1")" ]] || return
+
+	echo "Error: missing depdency $1"
+	exit 1
+}
+
+dep mutt
+dep fzf
+
+if [ ! -d ~/.mutt ]
+then
+	echo "Error: missing ~/.mutt with accounts in it"
+	exit 1
+fi
+
+
+cd ~/.mutt || exit 1
+
+acc_name="$(find . -name 'account.*' | cut -d'.' -f3- | fzf)"
+if [ "$acc_name" == "" ]
+then
+	echo "aborting .."
+	exit 1
+fi
+
+acc_file="$HOME/.mutt/account.$acc_name"
+if [ ! -f "$acc_file" ]
+then
+	echo "Error: file not found $acc_file"
+	exit 1
+fi
+
+is_neo=0
+
+if [ "$1" == neo* ] || [ "$1" == "-n" ]
+then
+	is_neo=1
+	dep neomutt
+fi
+
+if [ "$is_neo" == "1" ]
+then
+	neomutt -F "$acc_file"
+else
+	mutt -F "$acc_file"
+fi
+
