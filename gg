@@ -38,6 +38,7 @@ function usage() {
 	echo "respos:"
 	echo "  zx|chillerbot-zx"
 	echo "  ux|chillerbot-ux"
+	echo "  cg|CarryGores"
 	echo "  di|ddnet-insta"
 	echo "  ddpp|ddnetpp|ddnet++"
 }
@@ -124,6 +125,15 @@ function update_ux() {
 		origin=chillerbot-ux
 }
 
+function update_carrygores() {
+	cd ~/Desktop/git/CarryGores || exit 1
+	update_generic_tw \
+		upstream_remote=ddnet \
+		upstream_branch=master \
+		branch=master \
+		origin=CarryGores
+}
+
 function update_ddnet_insta() {
 	cd ~/Desktop/git/ddnet-insta || exit 1
 	update_generic_tw \
@@ -164,6 +174,12 @@ function parse_args() {
 			then
 				update_ux
 			fi
+		elif [[ "$arg" == "cg" ]] || [[ "${arg,,}" == "carrygores" ]]
+		then
+			if [[ "$dry" != "dry" ]]
+			then
+				update_carrygores
+			fi
 		elif [[ "$arg" == "di" ]] || [[ "$arg" == "ddnet-insta" ]]
 		then
 			if [[ "$dry" != "dry" ]]
@@ -189,6 +205,7 @@ then
 	then
 		repos="chillerbot-zx\n"
 		repos+="chillerbot-ux\n"
+		repos+="CarryGores\n"
 		repos+="ddnet-insta\n"
 		repos+="DDNetPP (ddnet++)"
 		repo="$(echo -e "$repos" | fzf)"
