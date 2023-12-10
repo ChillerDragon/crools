@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# wrapper around every fakin converter tool there is
+# take ffmpge styled -i in out args
+# then look at filename and extensions and even file headers
+# if it is ambiguous open fzf menu with source type and dest type
+#
+# planned features:
+# ffmpog -i foo.png foo.jpg
+# ffmpog -i foo.wav foo.mp3
+# ffmpog -i teeworlds.map teeworlds.json
+# ffmpog -i teeworlds.map teeworlds.map (suggests map_convert_07 or twmap_6to7.py)
+# ffmpog -i teeworlds.map preview.pdf
+# ffmpog -i teeworlds.demo teeworlds.mp4
+# ffmpog -i foo.zip dir/
+# ffmpog -i dir/ foo.zip
+# ffmpog -i foo.tar.xv.bz.brotli.gz2.br out/
+
+ffmpeg "$@"
