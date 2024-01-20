@@ -17,9 +17,15 @@ then
 fi
 if [ ! -x "$(command -v inotifywait)" ]
 then
+	distro="$(cat /etc/os-release | grep '^NAME="' | cut -d'"' -f2 | awk '{ print $1 }')"
 	echo "Error: please install inotifywait"
 	echo ""
-	echo "       sudo pacman -Sy inotify-tools"
+	if [ "$distro" == "Debian" ]
+	then
+		echo "       sudo apt-get install -y inotify-tools"
+	else
+		echo "       sudo pacman -Sy inotify-tools"
+	fi
 	echo ""
 	exit 1
 fi
