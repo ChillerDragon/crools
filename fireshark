@@ -10,7 +10,7 @@
 
 fdbin=fd
 
-if ! fd -h | grep -q "A program to find entries in your filesystem" &> /dev/null
+if ! fd -h 2>&1 | grep -q "A program to find entries in your filesystem" &> /dev/null
 then
 	if fdfind -h | grep -q "A program to find entries in your filesystem"
 	then
@@ -54,5 +54,6 @@ then
 	exit 1
 fi
 
+echo '(((!(tw7.msg == "sys.input")) && !(tw7.msg == "sys.snap_single")) && !(tw7.msg == "sys.input_timing")) && !(tw7.msg == "sys.snap_empty")'
 wireshark "$pcap"
 
