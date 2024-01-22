@@ -54,6 +54,6 @@ then
 	exit 1
 fi
 
-echo '(((!(tw7.msg == "sys.input")) && !(tw7.msg == "sys.snap_single")) && !(tw7.msg == "sys.input_timing")) && !(tw7.msg == "sys.snap_empty")'
+echo '!(((tw7.packet.num_chunks == 2) && (tw7.msg == "sys.input_timing") && (tw7.msg == "sys.snap_empty")) || ((tw7.packet.num_chunks == 2) && (tw7.msg == "sys.input_timing") && (tw7.msg == "sys.snap_single")) || ((tw7.packet.num_chunks == 1) && (tw7.msg == "sys.input")) || ((tw7.packet.num_chunks == 1) && (tw7.msg == "sys.snap_empty")) || ((tw7.packet.num_chunks == 1) && (tw7.msg == "sys.snap_single")))'
 wireshark "$pcap"
 
