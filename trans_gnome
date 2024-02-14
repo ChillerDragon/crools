@@ -1,0 +1,129 @@
+#!/bin/bash
+# credits go to @hikarin522
+# https://github.com/hikarin522/GlassIt-VSC/issues/20#issuecomment-720251659
+# https://github.com/hikarin522/GlassIt-VSC/blob/v0.2.2/extension.js#L80
+
+if [ ! -x "$(command -v xprop)" ]
+then
+	echo "Error: xprop not found"
+	echo "       make sure you are on X11 and have xprop installed"
+	exit 1
+fi
+
+is_verbose=0
+force=0
+opacity=235
+pids=()
+targets=()
+
+function dbg() {
+	if [ "$is_verbose" == "0" ]
+	then
+		return
+	fi
+	printf "[*] %s\n" "$1"
+}
+
+function update_ids() {
+	local app_name="$1"
+	read -r -a codeIds <<< "$(pgrep "$app_name")"
+
+	dbg "codeIds: ${codeIds[*]}"
+
+	IFS=', '
+	windowIds="$(xprop -root | grep '_NET_CLIENT_LIST(WINDOW)')"
+	read -r -a windowIds <<< "${windowIds#*#}"
+	dbg "windowIds : ${windowIds[*]}"
+
+	for wid in "${windowIds[@]}"
+	do
+		pid="$(xprop -id "${wid}" _NET_WM_PID)"
+		pid="${pid#*= }"
+		pids+=("$pid")
+		for code in "${codeIds[@]}"
+		do
+			if [[ "$pid" == "$code" ]]
+			then
+				targets+=("$wid")
+			fi
+		done
+	done
+
+	dbg "pids : ${pids[*]}"
+	dbg "targets : ${targets[*]}"
+
+	current="$(xprop -id "${targets[0]}" _NET_WM_WINDOW_OPACITY | cut -d' ' -f3)"
+}
+
+function set_opacity() {
+	local value="$1"
+	xprop \
+		-id "${targets[0]}" \
+		-f _NET_WM_WINDOW_OPACITY 32c \
+		-set _NET_WM_WINDOW_OPACITY $(( 0xffffffff * value / 256 ))
+}
+
+function animate() {
+	local i
+	while true
+	do
+		# for i in {4..50} {50..4}
+		# do
+		# 	update_ids
+		# 	set_opacity "$((i * 5))"
+		# 	sleep 0.1
+		# done
+		for i in {100..230} {230..100}
+		do
+			update_ids
+			set_opacity "$i"
+			sleep 0.001
+		done
+	done
+}
+
+app_name="$1"
+shift
+
+for arg in "$@"
+do
+	if [ "$arg" == "--verbose" ]
+	then
+		is_verbose=1
+	elif [ "$arg" == "on" ]
+	then
+		force="on"
+	elif [ "$arg" == "off" ]
+	then
+		force="off"
+	elif [ "$arg" == "animate" ]
+	then
+		animate
+	elif [[ "$arg" =~ ^[0-9]+$ ]]
+	then
+		force="custom"
+		opacity="$arg"
+	else
+		echo "usage: trans_gnome app_name [--verbose] [on|off|opacity 0-256|animate]"
+		echo "description:"
+		echo "  toggles gnome windows transparency"
+		echo "  requires X11 and xprop"
+		exit 0
+	fi
+done
+
+update_ids "$app_name"
+
+if [ "$force" == "custom" ]
+then
+	echo "[+] transparency $opacity!"
+elif [[ ( "$current" == "not"  ||  "$current" == "4294967295"  ||  "$force" == "on"  ) &&  "$force" != "off" ]]
+then
+	echo "[+] transparency ON!"
+else
+	echo "[-] transparency OFF!"
+	opacity=256
+fi
+
+set_opacity "$opacity"
+
