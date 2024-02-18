@@ -102,7 +102,7 @@ install_bash_completion
 help_page "$@"
 pass_path="$1"
 os_copy "$(pass show "$pass_path" | awk 'NF{p=$0}END{print p}')"
-if [[ "$pass_path" = *"-2fa" ]]
+if [[ "$pass_path" = *"-2fa" ]] || [[ "$pass_path" = *"-otp" ]]
 then
 	pass otp "$pass_path" | awk 'NF{p=$0}END{print p}'
 	os_copy "$(pass otp "$pass_path" | awk 'NF{p=$0}END{print p}')"
