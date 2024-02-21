@@ -84,7 +84,7 @@ function animate() {
 		# done
 		for i in {100..230} {230..100}
 		do
-			update_ids
+			update_ids "$app_name"
 			set_opacity "$i"
 			sleep 0.001
 		done
