@@ -13,8 +13,10 @@ fi
 is_verbose=0
 force=0
 opacity=235
+arg_pids=''
 pids=()
 targets=()
+app_name=''
 
 function dbg() {
 	if [ "$is_verbose" == "0" ]
@@ -26,7 +28,14 @@ function dbg() {
 
 function update_ids() {
 	local app_name="$1"
-	read -r -a codeIds <<< "$(pgrep "$app_name")"
+	dbg "app name: $app_name"
+	if [ "$arg_pids" != "" ]
+	then
+		dbg "set ids to fixed value because got --pids"
+		read -r -a codeIds <<< "$arg_pids"
+	else
+		read -r -a codeIds <<< "$(pgrep "$app_name")"
+	fi
 
 	dbg "codeIds: ${codeIds[*]}"
 
@@ -82,42 +91,65 @@ function animate() {
 	done
 }
 
-app_name="$1"
-shift
+usage() {
+	echo "usage: trans_gnome app_name [--verbose|--pids PID..] [on|off|opacity 0-256|animate]"
+	echo "flags:"
+	echo "  --pids PID..         replaces lookup based on app_name"
+	echo "  --verbose            verbose output"
+	echo "description:"
+	echo "  toggles gnome windows transparency"
+	echo "  requires X11 and xprop"
+}
 
-for arg in "$@"
+if [ "$#" -eq 0 ]
+then
+	usage
+	exit 1
+fi
+
+while :
 do
-	if [ "$arg" == "--verbose" ]
+	[ "$#" -gt 0 ] || break
+
+	arg="$1"
+	shift
+
+	if [ "$arg" = "--verbose" ]
 	then
 		is_verbose=1
-	elif [ "$arg" == "on" ]
+	elif [ "$arg" = "--pids" ]
+	then
+		arg_pids="$arg"
+		echo "got pods: $arg_pids"
+		shift
+	elif [ "$arg" = "on" ]
 	then
 		force="on"
-	elif [ "$arg" == "off" ]
+	elif [ "$arg" = "off" ]
 	then
 		force="off"
-	elif [ "$arg" == "animate" ]
+	elif [ "$arg" = "animate" ]
 	then
 		animate
 	elif [[ "$arg" =~ ^[0-9]+$ ]]
 	then
 		force="custom"
 		opacity="$arg"
+	elif [ "$app_name" = "" ]
+	then
+		app_name="$arg"
 	else
-		echo "usage: trans_gnome app_name [--verbose] [on|off|opacity 0-256|animate]"
-		echo "description:"
-		echo "  toggles gnome windows transparency"
-		echo "  requires X11 and xprop"
+		usage
 		exit 0
 	fi
 done
 
 update_ids "$app_name"
 
-if [ "$force" == "custom" ]
+if [ "$force" = "custom" ]
 then
 	echo "[+] transparency $opacity!"
-elif [[ ( "$current" == "not"  ||  "$current" == "4294967295"  ||  "$force" == "on"  ) &&  "$force" != "off" ]]
+elif [[ ( "$current" = "not"  ||  "$current" = "4294967295"  ||  "$force" = "on"  ) &&  "$force" != "off" ]]
 then
 	echo "[+] transparency ON!"
 else

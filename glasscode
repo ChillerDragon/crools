@@ -1,4 +1,4 @@
 #!/bin/bash
 
-trans_code code "$@"
+trans_gnome code "$@"
 
