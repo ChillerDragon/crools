@@ -10,6 +10,9 @@ dbg() {
 
 	printf '[DEBUG] %s\n' "$1"
 }
+log() {
+	printf '[*] %s\n' "$1"
+}
 
 # if the user input does not end with semicolon
 # append one so it compiles correctly
@@ -17,6 +20,8 @@ dbg() {
 # this will conflict with a possible future multi line support
 # where the input keeps consuming even on newlines until a semicolon is hit
 ARG_AUTO_SEMICOLON=1
+
+ARG_COMPILER="${CC:-g++}"
 
 mkdir -p /tmp/crools-"$USER"/crepl/
 
@@ -67,7 +72,7 @@ cleanup() {
 trap cleanup EXIT
 
 compiler() {
-	g++ "$@"
+	"$ARG_COMPILER" "$@"
 }
 
 crepl_build() {
@@ -201,6 +206,8 @@ is_math_statement() {
 	printf 'printf("=> %%d\\n", %s);\n' "$math_expr" > "$tmp_src_file_tmp"
 	return 0
 }
+
+log "compiler=$ARG_COMPILER (overwrite with env CC)"
 
 while IFS= read -e -r -p "> " input
 do
