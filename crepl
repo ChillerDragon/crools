@@ -22,6 +22,7 @@ chmod +x "$tmp_src_file_out"
 :>"$tmp_src_file"
 cat << EOF > "$tmp_src_file"
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "$tmp_src_file_includes"
 #include "$tmp_src_file_test_includes"
