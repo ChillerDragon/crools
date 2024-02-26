@@ -207,7 +207,7 @@ is_math_statement() {
 	return 0
 }
 
-log "compiler=$ARG_COMPILER (overwrite with env CC)"
+log "CC=$ARG_COMPILER"
 
 while IFS= read -e -r -p "> " input
 do
