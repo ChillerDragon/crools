@@ -11,6 +11,13 @@ dbg() {
 	printf '[DEBUG] %s\n' "$1"
 }
 
+# if the user input does not end with semicolon
+# append one so it compiles correctly
+#
+# this will conflict with a possible future multi line support
+# where the input keeps consuming even on newlines until a semicolon is hit
+ARG_AUTO_SEMICOLON=1
+
 mkdir -p /tmp/crools-"$USER"/crepl/
 
 tmp_src_file="$(mktemp /tmp/crools-"$USER"/crepl/entry_XXXXXXXXXXXXX.c)" # entry file for compliation
@@ -196,6 +203,13 @@ is_math_statement() {
 
 while IFS= read -e -r -p "> " input
 do
+	if [ "$ARG_AUTO_SEMICOLON" = "1" ]
+	then
+		if ! printf '%s' "$input" | grep -q ';$'
+		then
+			input="$input;"
+		fi
+	fi
 	history -s -- "$input"
 	if [[ "$input" =~ ^[:space:]*(puts|printf)\( ]]
 	then
