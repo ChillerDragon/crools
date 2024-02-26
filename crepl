@@ -79,6 +79,11 @@ crepl_run() {
 c_var_pattern='[a-zA-Z_][a-zA-Z_0-9]*'
 c_func_name_pattern="$c_var_pattern"
 c_stmt_pattern='[^;]+' # TODO: do this better ; can be part of a for loop and of a string for example
+c_int_value_pattern='[-+~]?([0-9]|0x[0-9a-fA-F]+)+'
+# c_float_value_pattern="$c_int_value_pattern\.?[0-9]+f?"
+c_math_operators_pattern='[\/\+-\*^|&]'
+c_math_expr_pattern="($c_int_value_pattern${c_math_operators_pattern})+($c_int_value_pattern)"
+c_int_value_or_math_pattern="(($c_math_expr_pattern)|$c_int_value_pattern)"
 
 # TODO: func pattern doesnt match
 c_type_pattern='(void|int|char|long|long long|float|double|short|int64_t|time_t)'
@@ -170,9 +175,28 @@ is_int_func_call() {
 	return 0
 }
 
+is_math_statement() {
+	local input="$1"
+	if ! [[ "$input" =~ ^\ *(${c_int_value_or_math_pattern})\;+$ ]]
+	then
+		return 1
+	fi
+	local math_expr
+	if ! math_expr="${BASH_REMATCH[1]}"
+	then
+		return 1
+	fi
+	[[ "$math_expr" = "" ]] && return 1
+	dbg "got math expression '$math_expr'"
+	# print math expression value to stdout
+	printf '%s\n' "$input" > "$tmp_src_file_test_main"
+	printf 'printf("=> %%d\\n", %s);\n' "$math_expr" > "$tmp_src_file_tmp"
+	return 0
+}
+
 while IFS= read -e -r -p "> " input
 do
-	history -s "$input"
+	history -s -- "$input"
 	if [[ "$input" =~ ^[:space:]*(puts|printf)\( ]]
 	then
 		printf '%s\n' "$input" > "$tmp_src_file_tmp"
@@ -184,6 +208,9 @@ do
 	elif is_int_func_call "$input"
 	then
 		test # handled in is_int_func_call()
+	elif is_math_statement "$input"
+	then
+		test # handled in is_math_statement()
 	elif [[ "$input" =~ $c_single_line_func_pattern ]]
 	then
 		printf '%s\n' "$input" > "$tmp_src_file_test_functions"
