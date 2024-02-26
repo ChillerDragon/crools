@@ -5,6 +5,12 @@
 # trying to to mimic pythons interactive shell or rubys irb
 # for the C programming language
 
+dbg() {
+	[[ "$DEBUG" != "" ]] || return
+
+	printf '[DEBUG] %s\n' "$1"
+}
+
 mkdir -p /tmp/crools-"$USER"/crepl/
 
 tmp_src_file="$(mktemp /tmp/crools-"$USER"/crepl/entry_XXXXXXXXXXXXX.c)" # entry file for compliation
@@ -71,6 +77,7 @@ crepl_run() {
 }
 
 c_var_pattern='[a-zA-Z_][a-zA-Z_0-9]*'
+c_func_name_pattern="$c_var_pattern"
 c_stmt_pattern='[^;]+' # TODO: do this better ; can be part of a for loop and of a string for example
 
 # TODO: func pattern doesnt match
@@ -137,17 +144,46 @@ parse_args() {
 
 parse_args "$@"
 
+is_int_func_call() {
+	local input="$1"
+	if ! [[ "$input" =~ ^\ *(${c_func_name_pattern})\((${c_stmt_pattern})\)\;+$ ]]
+	then
+		return 1
+	fi
+	local func_name
+	local func_arg
+	if ! func_name="${BASH_REMATCH[1]}"
+	then
+		return 1
+	fi
+	[[ "$func_name" = "" ]] && return 1
+	func_arg="${BASH_REMATCH[2]}"
+	if ! man -P cat "$func_name" 2>/dev/null | grep -q "int $func_name("
+	then
+		return 1
+	fi
+	dbg "got single method call to '$func_name' which returns int"
+	dbg "func arg=$func_arg"
+	# print int return value to stdout
+	printf '%s\n' "$input" > "$tmp_src_file_test_main"
+	printf 'printf("=> %%d\\n", %s);\n' "$func_name($func_arg)" > "$tmp_src_file_tmp"
+	return 0
+}
+
 while IFS= read -e -r -p "> " input
 do
 	history -s "$input"
 	if [[ "$input" =~ ^[:space:]*(puts|printf)\( ]]
 	then
 		printf '%s\n' "$input" > "$tmp_src_file_tmp"
-	elif [[ "$input" =~ ^\ *int\ +${c_var_pattern}\ *=(${c_stmt_pattern}) ]]
+	elif [[ "$input" =~ ^\ *int\ +${c_var_pattern}\ *=(${c_stmt_pattern})\;+$ ]]
 	then
 		# print int assignment result to stdout
 		printf '%s\n' "$input" > "$tmp_src_file_test_main"
 		printf 'printf("=> %%d\\n", %s);\n' "${BASH_REMATCH[1]}" > "$tmp_src_file_tmp"
+	elif is_int_func_call "$input"
+	then
+		test # handled in is_int_func_call()
 	elif [[ "$input" =~ $c_single_line_func_pattern ]]
 	then
 		printf '%s\n' "$input" > "$tmp_src_file_test_functions"
