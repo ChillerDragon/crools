@@ -184,7 +184,7 @@ is_int_func_call() {
 	dbg "func arg=$func_arg"
 	# print int return value to stdout
 	printf '%s\n' "$input" > "$tmp_src_file_test_main"
-	printf 'printf("=> %%d\\n", %s);\n' "$func_name($func_arg)" > "$tmp_src_file_tmp"
+	printf 'printf("%%%%d => %%d\\n", %s);\n' "$func_name($func_arg)" > "$tmp_src_file_tmp"
 	return 0
 }
 
@@ -203,7 +203,7 @@ is_math_statement() {
 	dbg "got math expression '$math_expr'"
 	# print math expression value to stdout
 	printf '%s\n' "$input" > "$tmp_src_file_test_main"
-	printf 'printf("=> %%d\\n", %s);\n' "$math_expr" > "$tmp_src_file_tmp"
+	printf 'printf("%%%%d => %%d\\n", %s);\n' "$math_expr" > "$tmp_src_file_tmp"
 	return 0
 }
 
@@ -226,7 +226,12 @@ do
 	then
 		# print int assignment result to stdout
 		printf '%s\n' "$input" > "$tmp_src_file_test_main"
-		printf 'printf("=> %%d\\n", %s);\n' "${BASH_REMATCH[1]}" > "$tmp_src_file_tmp"
+		printf 'printf("%%%%d => %%d\\n", %s);\n' "${BASH_REMATCH[1]}" > "$tmp_src_file_tmp"
+	elif [[ "$input" =~ ^\ *unsigned\ int\ +${c_var_pattern}\ *=(${c_stmt_pattern})\;+$ ]]
+	then
+		# print int assignment result to stdout
+		printf '%s\n' "$input" > "$tmp_src_file_test_main"
+		printf 'printf("%%%%u => %%u\\n", %s);\n' "${BASH_REMATCH[1]}" > "$tmp_src_file_tmp"
 	elif is_int_func_call "$input"
 	then
 		test # handled in is_int_func_call()
