@@ -288,11 +288,11 @@ do
 		# print int assignment result to stdout
 		printf '%s\n' "$input" > "$tmp_src_file_test_main"
 		printf 'printf("%s\\n", %s);\n' "$(fmt_int_value signed)" "${BASH_REMATCH[1]}" > "$tmp_src_file_tmp"
-	elif [[ "$input" =~ ^\ *unsigned\ int\ +${c_var_pattern}\ *=(${c_stmt_pattern})\;+$ ]]
+	elif [[ "$input" =~ ^\ *unsigned(\ int)?\ +${c_var_pattern}\ *=(${c_stmt_pattern})\;+$ ]]
 	then
 		# print int assignment result to stdout
 		printf '%s\n' "$input" > "$tmp_src_file_test_main"
-		printf 'printf("%s\\n", %s);\n' "$(fmt_int_value unsigned)" "${BASH_REMATCH[1]}" > "$tmp_src_file_tmp"
+		printf 'printf("%s\\n", %s);\n' "$(fmt_int_value unsigned)" "${BASH_REMATCH[2]}" > "$tmp_src_file_tmp"
 	elif is_int_func_call "$input"
 	then
 		test # handled in is_int_func_call()
