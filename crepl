@@ -191,28 +191,45 @@ fmt_int_value() {
 }
 
 # takes in the full prompt
-# and prints only the last word
+# and prints only the word at the current cursor
 # that should be used for auto completion
-# for example:
+# for example if the cursor is at the end of the line:
 # 	in:  unsigned int a 2;pr
 # 	out: pr
 line_to_autocomplete_word() {
+	# TODO: this code is horrible
 	local line="$1"
 	local tokens
 	IFS=')(",; ' read -ra tokens <<< "$line"
-	printf '%s' "${tokens[-1]}"
+	local token
+	local distance=0
+	for token in "${tokens[@]}"
+	do
+		local tl="${#token}"
+		distance=$((distance+tl+1))
+		if [ "$distance" -ge "$READLINE_POINT" ]
+		then
+			printf '%s' "$token"
+			break
+		fi
+	done
+}
+
+insert_at_cursor() {
+	local str="$1"
+	READLINE_LINE="${READLINE_LINE::$READLINE_POINT}$str${READLINE_LINE:$READLINE_POINT}"
 }
 
 key_open_parenthesis() {
-	READLINE_LINE+="()"
+	insert_at_cursor '()'
 	READLINE_POINT=$((READLINE_POINT+1))
 }
 key_open_curly() {
-	READLINE_LINE+="{}"
+	insert_at_cursor '{}'
 	READLINE_POINT=$((READLINE_POINT+1))
 }
 key_open_bracket() {
-	READLINE_LINE+="[]"
+	insert_at_cursor '[]'
 	READLINE_POINT=$((READLINE_POINT+1))
 }
 
@@ -248,9 +265,10 @@ tab_complete() {
 	local current_word_len="${#word_to_complete}"
 	local append_str
 	append_str="${wanted_word:$current_word_len}"
+	local append_str_len="${#append_str}"
 
-	READLINE_LINE+="$append_str"
-	READLINE_POINT="${#READLINE_LINE}"
+	insert_at_cursor "$append_str"
+	READLINE_POINT=$((READLINE_POINT+append_str_len))
 }
 
 mkdir -p ~/.config/crools
