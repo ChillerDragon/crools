@@ -17,6 +17,7 @@
 ARG_AUTO_SEMICOLON="${ARG_AUTO_SEMICOLON:-1}"
 
 # insert closing parenthesis automatically if one is opend
+# also convering square brackets and curly braces
 ARG_SMART_PARENTHESIS="${ARG_SMART_PARENTHESIS:-1}"
 
 ARG_COMPILER="${CC:-g++}"
@@ -206,6 +207,14 @@ key_open_parenthesis() {
 	READLINE_LINE+="()"
 	READLINE_POINT=$((READLINE_POINT+1))
 }
+key_open_curly() {
+	READLINE_LINE+="{}"
+	READLINE_POINT=$((READLINE_POINT+1))
+}
+key_open_bracket() {
+	READLINE_LINE+="[]"
+	READLINE_POINT=$((READLINE_POINT+1))
+}
 
 tab_complete() {
 	# p<tab> works but this is ugly use compgen to generate that stuff
@@ -256,6 +265,8 @@ then
 	if [ "$ARG_SMART_PARENTHESIS" = "1" ]
 	then
 		bind -x '"(":"key_open_parenthesis"'
+		bind -x '"{ ":"key_open_curly"'
+		bind -x '"[":"key_open_bracket"'
 	fi
 else
 	echo "Warning: your bash is too old for autocompletion"
