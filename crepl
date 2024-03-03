@@ -376,6 +376,8 @@ log "CC=$ARG_COMPILER"
 
 while IFS= read -e -r -p "> " input
 do
+	[ "$input" = "" ] && continue
+
 	history -s -- "$input"
 	if [ "$ARG_AUTO_SEMICOLON" = "1" ]
 	then
