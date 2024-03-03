@@ -5,6 +5,24 @@
 # trying to to mimic pythons interactive shell or rubys irb
 # for the C programming language
 
+# -----------------------------------------------
+# user options
+# confirgurable via environment variables
+
+# if the user input does not end with semicolon
+# append one so it compiles correctly
+#
+# this will conflict with a possible future multi line support
+# where the input keeps consuming even on newlines until a semicolon is hit
+ARG_AUTO_SEMICOLON="${ARG_AUTO_SEMICOLON:-1}"
+
+# insert closing parenthesis automatically if one is opend
+ARG_SMART_PARENTHESIS="${ARG_SMART_PARENTHESIS:-1}"
+
+ARG_COMPILER="${CC:-g++}"
+
+# -----------------------------------------------
+
 COL_RESET=''
 COL_BLACK=''
 # COL_RED=''
@@ -77,16 +95,6 @@ then
 	err "       https://www.shellcheck.net/wiki/SC2207"
 	exit 1
 fi
-
-
-# if the user input does not end with semicolon
-# append one so it compiles correctly
-#
-# this will conflict with a possible future multi line support
-# where the input keeps consuming even on newlines until a semicolon is hit
-ARG_AUTO_SEMICOLON=1
-
-ARG_COMPILER="${CC:-g++}"
 
 mkdir -p /tmp/crools-"$USER"/crepl/
 
@@ -194,6 +202,11 @@ line_to_autocomplete_word() {
 	printf '%s' "${tokens[-1]}"
 }
 
+key_open_parenthesis() {
+	READLINE_LINE+="()"
+	READLINE_POINT=$((READLINE_POINT+1))
+}
+
 tab_complete() {
 	# p<tab> works but this is ugly use compgen to generate that stuff
 	[[ ${#READLINE_LINE} -eq 0 ]] && READLINE_LINE=$(fc -l -n -1 | xargs)
@@ -240,6 +253,10 @@ set -o emacs
 if [ "${BASH_VERSINFO}" -ge 4 ]
 then
 	bind -x '"\t":"tab_complete"'
+	if [ "$ARG_SMART_PARENTHESIS" = "1" ]
+	then
+		bind -x '"(":"key_open_parenthesis"'
+	fi
 else
 	echo "Warning: your bash is too old for autocompletion"
 fi
