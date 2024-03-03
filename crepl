@@ -437,7 +437,7 @@ do
 	fi
 
 	history -s -- "$input"
-	if [ "$ARG_AUTO_SEMICOLON" = "1" ] && [[ ! "$input" = '#include'* ]]
+	if [ "$ARG_AUTO_SEMICOLON" = "1" ] && [[ ! "$input" = '#'* ]]
 	then
 		if ! printf '%s' "$input" | grep -q ';$'
 		then
