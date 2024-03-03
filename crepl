@@ -204,10 +204,13 @@ tab_complete() {
 		class compl concept const consteval constexpr constinit const_cast continue
 		co_await co_return co_yield decltype default delete double dynamic_cast else
 		enum explicit export extern false float for friend goto int inline long mutable
-		namespace new noexcept not not_eq nullptr operator or_eq private protected public
+		new noexcept not not_eq nullptr namespace operator or_eq
 		reflexpr register reinterpret_cast requires return short signed sizeof static
 		static_assert static_cast struct switch template this throw true try typedef
 		typeid typename unsigned union virtual void volatile wchar_t while
+	)
+	local libc_functions=(
+		printf puts atoi
 	)
 	local word_to_complete
 	word_to_complete="$(line_to_autocomplete_word "$READLINE_LINE")"
@@ -216,7 +219,7 @@ tab_complete() {
 	local completions
 	# we set IFS= for the read call we currently are in
 	# so we have to enable IFS word splitting again for compgen to work
-	mapfile -t completions < <(IFS=$' \t\n' compgen -W "$(printf "'%s' " "${cpp_keywords[@]}")" -- "$word_to_complete")
+	mapfile -t completions < <(IFS=$' \t\n' compgen -W "$(printf "'%s' " "${cpp_keywords[@]}" "${libc_functions[@]}")" -- "$word_to_complete")
 	[ "${#completions[@]}" -eq 0 ] && return
 
 	local wanted_word="${completions[0]}"
