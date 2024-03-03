@@ -283,7 +283,7 @@ then
 	if [ "$ARG_SMART_PARENTHESIS" = "1" ]
 	then
 		bind -x '"(":"key_open_parenthesis"'
-		bind -x '"{ ":"key_open_curly"'
+		bind -x '"{":"key_open_curly"'
 		bind -x '"[":"key_open_bracket"'
 	fi
 else
