@@ -62,11 +62,12 @@ get_main_remote_path() {
 	num_candidates="$(echo "$candidates" | wc -l)"
 	if [ "$num_candidates" -eq 1 ]
 	then
-		echo "$candidates"
+		echo "${candidates%.git*}"
 		return
 	fi
 	wrn "Warning: multiple remote candidates found"
-	echo "$candidates" | head -n1
+	candidates="$(echo "$candidates" | head -n1)"
+	echo "${candidates%.git*}"
 }
 
 check_ssh_key() {
@@ -124,6 +125,7 @@ main() {
 	gl_remote="git@gitlab-MIRROR:ChillerMirror/$repo_path"
 	local current_gl_remote
 	current_gl_remote="$(git remote -v | grep '^gl[[:space:]]' | awk '{ print $2 }' | head -n1)"
+	current_gl_remote="${current_gl_remote%.git*}"
 	if [ "$current_gl_remote" = "" ]
 	then
 		git remote add gl "$gl_remote"
