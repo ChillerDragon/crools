@@ -85,6 +85,52 @@ check_ssh_key() {
 	exit 1
 }
 
+# depends on "git remote -v"
+# so needs to be in the right git repo
+#
+# @param repo_path
+push_to_gitlab() {
+	local repo_path="$1"
+	local gl_remote
+	gl_remote="git@gitlab-MIRROR:ChillerMirror/$repo_path"
+	local current_gl_remote
+	current_gl_remote="$(git remote -v | grep '^gl[[:space:]]' | awk '{ print $2 }' | head -n1)"
+	current_gl_remote="${current_gl_remote%.git*}"
+	if [ "$current_gl_remote" = "" ]
+	then
+		git remote add gl "$gl_remote"
+	elif [ "$current_gl_remote" != "$gl_remote" ]
+	then
+		err "Error: a remote with the name gl already exists"
+		err "       and it points to something else"
+		err ""
+		err "   expected: $gl_remote"
+		err "        got: $current_gl_remote"
+		err ""
+		exit 1
+	else
+		log "remote was already set"
+	fi
+	if ! git branch | grep -qF '* master'
+	then
+		err "Error: master branch not found"
+		err "       only mirroring master branch"
+		err "       is supported for now"
+		exit 1
+	fi
+	if ! git push gl master
+	then
+		err "Error: failed to push to $gl_remote"
+		exit 1
+	fi
+	log "Code is now backed up to https://gitlab.com/ChillerMirror/$repo_path"
+}
+
+push_to_codeberg() {
+	echo TODO
+	echo "https://codeberg.org/api/swagger#/repository/generateRepo"
+}
+
 main() {
 	if ! is_git_repo
 	then
@@ -121,39 +167,7 @@ main() {
 		exit 1
 	fi
 
-	local gl_remote
-	gl_remote="git@gitlab-MIRROR:ChillerMirror/$repo_path"
-	local current_gl_remote
-	current_gl_remote="$(git remote -v | grep '^gl[[:space:]]' | awk '{ print $2 }' | head -n1)"
-	current_gl_remote="${current_gl_remote%.git*}"
-	if [ "$current_gl_remote" = "" ]
-	then
-		git remote add gl "$gl_remote"
-	elif [ "$current_gl_remote" != "$gl_remote" ]
-	then
-		err "Error: a remote with the name gl already exists"
-		err "       and it points to something else"
-		err ""
-		err "   expected: $gl_remote"
-		err "        got: $current_gl_remote"
-		err ""
-		exit 1
-	else
-		log "remote was already set"
-	fi
-	if ! git branch | grep -qF '* master'
-	then
-		err "Error: master branch not found"
-		err "       only mirroring master branch"
-		err "       is supported for now"
-		exit 1
-	fi
-	if ! git push gl master
-	then
-		err "Error: failed to push to $gl_remote"
-		exit 1
-	fi
-	log "Code is now backed up to https://gitlab.com/ChillerMirror/$repo_path"
+	push_to_gitlab "$repo_path"
 }
 
 main
