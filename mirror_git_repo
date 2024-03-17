@@ -43,6 +43,20 @@ check_ssh_config() {
 	exit 1
 }
 
+check_dep() {
+	local dep="$1"
+	[ -x "$(command -v "$dep")" ] && return
+
+	err "Error: missing dependency '$dep'"
+	exit 1
+}
+
+check_dep jq
+check_dep curl
+check_dep ssh-keygen
+check_dep git
+check_dep awk
+
 # extracts the owner/reponame path from the currently active remote
 # the same repository name will be used for mirroring
 #
@@ -55,6 +69,10 @@ get_main_remote_path() {
 	local candidates
 	candidates="$(git remote -v |
 		grep -v '^gl[[:space:]]' |
+		grep -v '^cb[[:space:]]' |
+		grep -v '^upstream[[:space:]]' |
+		grep -v '^downstream[[:space:]]' |
+		grep -v '^ddnet[[:space:]]' |
 		grep ' (push)$' |
 		awk '{ print $2 }' |
 		cut -d':' -f2)"
@@ -66,7 +84,19 @@ get_main_remote_path() {
 		return
 	fi
 	wrn "Warning: multiple remote candidates found"
-	candidates="$(echo "$candidates" | head -n1)"
+	if git remote -v | grep -Eq '^origin[[:space:]]'
+	then
+		wrn "         assuming origin is the correct one"
+		candidates="$(git remote -v |
+			grep '^origin[[:space:]]' |
+			grep ' (push)$' |
+			awk '{ print $2 }' |
+			cut -d':' -f2 |
+			head -n1)"
+	else
+		wrn "         taking the head -n1 one :shrug:"
+		candidates="$(echo "$candidates" | head -n1)"
+	fi
 	echo "${candidates%.git*}"
 }
 
@@ -85,6 +115,32 @@ check_ssh_key() {
 	exit 1
 }
 
+# @param remote_name
+# @param remote_url
+set_remote() {
+	local remote_name="$1"
+	local remote_url="$2"
+	local current_remote_url
+	current_remote_url="$(git remote -v | grep "^$remote_name[[:space:]]" | awk '{ print $2 }' | head -n1)"
+	current_remote_url="${current_remote_url%.git*}"
+	remote_url="${remote_url%.git*}"
+	if [ "$current_remote_url" = "" ]
+	then
+		git remote add "$remote_name" "$remote_url"
+	elif [ "$current_remote_url" != "$remote_url" ]
+	then
+		err "Error: a remote with the name $remote_name already exists"
+		err "       and it points to something else"
+		err ""
+		err "   expected: $remote_url"
+		err "        got: $current_remote_url"
+		err ""
+		exit 1
+	else
+		log "remote $remote_name was already set"
+	fi
+}
+
 # depends on "git remote -v"
 # so needs to be in the right git repo
 #
@@ -93,24 +149,7 @@ push_to_gitlab() {
 	local repo_path="$1"
 	local gl_remote
 	gl_remote="git@gitlab-MIRROR:ChillerMirror/$repo_path"
-	local current_gl_remote
-	current_gl_remote="$(git remote -v | grep '^gl[[:space:]]' | awk '{ print $2 }' | head -n1)"
-	current_gl_remote="${current_gl_remote%.git*}"
-	if [ "$current_gl_remote" = "" ]
-	then
-		git remote add gl "$gl_remote"
-	elif [ "$current_gl_remote" != "$gl_remote" ]
-	then
-		err "Error: a remote with the name gl already exists"
-		err "       and it points to something else"
-		err ""
-		err "   expected: $gl_remote"
-		err "        got: $current_gl_remote"
-		err ""
-		exit 1
-	else
-		log "remote was already set"
-	fi
+	set_remote gl "$gl_remote"
 	if ! git branch | grep -qF '* master'
 	then
 		err "Error: master branch not found"
@@ -126,9 +165,157 @@ push_to_gitlab() {
 	log "Code is now backed up to https://gitlab.com/ChillerMirror/$repo_path"
 }
 
+# depends on env var CODEBERG_TOKEN to be set
+# and it needs scope repository:write and user:write
+#
+# @param repo_path
+#
+# prints ssh_url to stdout
+# or errors to stderr
+create_codeberg_repo() {
+	local repo_path="$1"
+	local repo_owner=ChillerMirror
+	if [ "$CODEBERG_TOKEN" = "" ]
+	then
+		err "Error: CODEBERG_TOKEN not set"
+		err "       you can get one from here https://codeberg.org/user/settings/applications"
+		err "       add this to your shellrc:"
+		err ""
+		err " export CODEBERG_TOKEN=42af..."
+		err ""
+		return
+	fi
+
+	local response
+	response="$(curl \
+		--silent \
+		-H 'Content-Type: application/json' \
+		-H "Authorization: Bearer $CODEBERG_TOKEN" \
+		"https://codeberg.org/api/v1/repos/$repo_owner/$repo_path")"
+	local errors
+	errors="$(jq .errors <<< "$response")"
+	if [ "$errors" != "" ] && [ "$errors" != null ]
+	then
+		err "Error: got errors"
+		jq . <<< "$response" 1>&2
+	fi
+	local message
+	message="$(jq .message <<< "$response")"
+	if [ "$message" = "The target couldnt be found." ]
+	then
+		test
+	fi
+	local ssh_url
+	ssh_url="$(jq -r .ssh_url <<< "$response")"
+	if [ "$ssh_url" != "" ] && [ "$ssh_url" != null ]
+	then
+		# codeberg repo already exists
+		printf "%s" "$ssh_url"
+		return
+	fi
+
+	local json_payload
+	# https://codeberg.org/api/swagger#/repository/generateRepo
+	# json_payload="$(jq -n \
+	# 	--arg avatar false \
+	# 	--arg default_branch master \
+	# 	--arg description "" \
+	# 	--arg git_content false \
+	# 	--arg git_hooks false \
+	# 	--arg labels false \
+	# 	--arg name "$repo_name" \
+	# 	--arg owner "$repo_owner" \
+	# 	--arg private true \
+	# 	--arg protected_branch false \
+	# 	--arg topics false \
+	# 	--arg webhooks false
+	# 	'$ARGS.named')"
+	# https://codeberg.org/api/swagger#/repository/createCurrentUserRepo
+	if ! json_payload="$(jq -n \
+		--arg auto_init false \
+		--arg default_branch master \
+		--arg description "" \
+		--arg name "$repo_path" \
+		--arg private true \
+		--arg trust_model default \
+		'$ARGS.named' | sed -e 's/"true"/true/g' -e 's/"false"/false/g')"
+	then
+		err "Error: failed to build json for codeberge repo creation"
+		err "       failed to create repo at path $repo_path"
+		exit 1
+	fi
+	if ! printf '%s' "$json_payload" | jq . >/dev/null
+	then
+		err "Error: generated invalid json for codeberg repo creation"
+		err "       failed to create repo at path $repo_path"
+		exit 1
+	fi
+	response="$(curl \
+		--silent \
+		-X POST \
+		-H 'Content-Type: application/json' \
+		-H "Authorization: Bearer $CODEBERG_TOKEN" \
+		--data "$json_payload" \
+		'https://codeberg.org/api/v1/user/repos')"
+
+	local message
+	message="$(jq .message <<< "$response")"
+	if [ "$message" = "The repository with the same name already exists." ]
+	then
+		err "Error: repository already exists."
+		err "       this should not happen because we check for existance before"
+		err "       maybe this was a race condition please try again"
+		exit 1
+	fi
+
+	local repo_id
+	repo_id="$(jq .id <<< "$response")"
+	if [ "$repo_id" = null ] || [ "$repo_id" = "" ]
+	then
+		err "Error: failed to get repository id. Codeberg repo creation failed."
+		err "       failed to create repo at path $repo_path"
+		jq . <<< "$response" 1>&2
+		exit 1
+	fi
+	local ssh_url
+	ssh_url="$(jq -r .ssh_url <<< "$response")"
+	if [ "$ssh_url" = null ] || [ "$ssh_url" = "" ]
+	then
+		err "Error: failed to get repository ssh_url. Codeberg repo creation failed."
+		err "       failed to create repo at path $repo_path"
+		jq . <<< "$response" 1>&2
+		exit 1
+	fi
+	printf '%s' "$ssh_url"
+}
+
+
+# @param repo_path
 push_to_codeberg() {
-	echo TODO
-	echo "https://codeberg.org/api/swagger#/repository/generateRepo"
+	local repo_path="$1"
+	if ! ssh_url="$(create_codeberg_repo "$repo_path")"
+	then
+		exit 1
+	fi
+	if [ "$ssh_url" = "" ]
+	then
+		exit 1
+	fi
+	ssh_url="git@codeberg-MIRROR:$(printf '%s' "$ssh_url" | cut -d':' -f2-)"
+	set_remote cb "$ssh_url"
+	if ! git branch | grep -qF '* master'
+	then
+		err "Error: master branch not found"
+		err "       only mirroring master branch"
+		err "       is supported for now"
+		exit 1
+	fi
+	if ! git push cb master
+	then
+		err "Error: failed to push to cb remote"
+		exit 1
+	fi
+	log "Code is now backed up to https://codeberg.org/ChillerMirror/$repo_path"
 }
 
 main() {
@@ -168,6 +355,7 @@ main() {
 	fi
 
 	push_to_gitlab "$repo_path"
+	push_to_codeberg "$repo_path"
 }
 
 main
