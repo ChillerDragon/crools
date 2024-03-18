@@ -25,6 +25,30 @@ ALLOWED_OWNERS=(
 	yeet-farm
 )
 
+# @param repo_owner
+# @param repo_name
+get_main_branch() {
+	if [ "$repo_owner" = chillerbot ]
+	then
+		if [ "$repo_path" = chillerbot-ux ]
+		then
+			printf ux
+			return
+		fi
+		if [ "$repo_path" = chillerbot-zx ]
+		then
+			printf zx
+			return
+		fi
+	fi
+	if [ "$repo_owner/$repo_path" = ZillyInsta/ddnet-insta ]
+	then
+		printf insta
+		return
+	fi
+	printf master
+}
+
 help() {
 	cat <<-EOF
 	usage: mirror_git_repo
@@ -403,7 +427,8 @@ main() {
 		repo_owner=ChillerMirror
 	fi
 
-	main_branch=master
+	local main_branch
+	main_branch="$(get_main_branch "$repo_owner" "$repo_path")"
 
 	push_to_gitlab "$repo_owner" "$repo_path" "$main_branch"
 	push_to_codeberg "$repo_owner" "$repo_path" "$main_branch"
