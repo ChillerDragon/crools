@@ -187,7 +187,7 @@ push_to_gitlab() {
 	fi
 	if ! git push gl "$main_branch"
 	then
-		err "Error: failed to push to $gl_remote"
+		err "Error: failed to push $main_branch to $gl_remote"
 		exit 1
 	fi
 	log "Code is now backed up to https://gitlab.com/$repo_owner/$repo_path"
