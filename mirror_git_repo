@@ -171,20 +171,21 @@ set_remote() {
 #
 # @param repo_owner
 # @param repo_path
+# @param main_branch
 push_to_gitlab() {
 	local repo_owner="$1"
 	local repo_path="$2"
+	local main_branch="$3"
 	local gl_remote
 	gl_remote="git@gitlab-MIRROR:$repo_owner/$repo_path"
 	set_remote gl "$gl_remote"
-	if ! git branch | grep -qF '* master'
+	if ! git branch | grep -qF "* $main_branch"
 	then
-		err "Error: master branch not found"
-		err "       only mirroring master branch"
-		err "       is supported for now"
+		err "Error: expected '$main_branch' to be the active branch"
+		err "       only mirroring the active branch is supported for now"
 		exit 1
 	fi
-	if ! git push gl master
+	if ! git push gl "$main_branch"
 	then
 		err "Error: failed to push to $gl_remote"
 		exit 1
@@ -197,12 +198,14 @@ push_to_gitlab() {
 #
 # @param repo_owner
 # @param repo_path
+# @param main_branch
 #
 # prints ssh_url to stdout
 # or errors to stderr
 create_codeberg_repo() {
 	local repo_owner="$1"
 	local repo_path="$2"
+	local main_branch="$3"
 	if [ "$CODEBERG_TOKEN" = "" ]
 	then
 		err "Error: CODEBERG_TOKEN not set"
@@ -246,7 +249,7 @@ create_codeberg_repo() {
 	# https://codeberg.org/api/swagger#/repository/createCurrentUserRepo
 	if ! json_payload="$(jq -n \
 		--arg auto_init false \
-		--arg default_branch master \
+		--arg default_branch "$main_branch" \
 		--arg description "" \
 		--arg name "$repo_path" \
 		--arg private true \
@@ -312,10 +315,12 @@ create_codeberg_repo() {
 
 # @param repo_owner
 # @param repo_path
+# @param main_branch
 push_to_codeberg() {
 	local repo_owner="$1"
 	local repo_path="$2"
-	if ! ssh_url="$(create_codeberg_repo "$repo_owner" "$repo_path")"
+	local main_branch="$3"
+	if ! ssh_url="$(create_codeberg_repo "$repo_owner" "$repo_path" "$main_branch")"
 	then
 		exit 1
 	fi
@@ -325,16 +330,15 @@ push_to_codeberg() {
 	fi
 	ssh_url="git@codeberg-MIRROR:$(printf '%s' "$ssh_url" | cut -d':' -f2-)"
 	set_remote cb "$ssh_url"
-	if ! git branch | grep -qF '* master'
+	if ! git branch | grep -qF "* $main_branch"
 	then
-		err "Error: master branch not found"
-		err "       only mirroring master branch"
-		err "       is supported for now"
+		err "Error: expected '$main_branch' to be the active branch"
+		err "       only mirroring the active branch is supported for now"
 		exit 1
 	fi
-	if ! git push cb master
+	if ! git push cb "$main_branch"
 	then
-		err "Error: failed to push to cb remote"
+		err "Error: failed to push $main_branch to cb remote"
 		exit 1
 	fi
 	log "Code is now backed up to https://codeberg.org/$repo_owner/$repo_path"
@@ -398,8 +402,10 @@ main() {
 		repo_owner=ChillerMirror
 	fi
 
-	push_to_gitlab "$repo_owner" "$repo_path"
-	push_to_codeberg "$repo_owner" "$repo_path"
+	main_branch=master
+
+	push_to_gitlab "$repo_owner" "$repo_path" "$main_branch"
+	push_to_codeberg "$repo_owner" "$repo_path" "$main_branch"
 }
 
 main
