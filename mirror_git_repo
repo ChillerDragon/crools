@@ -1,5 +1,12 @@
 #!/bin/bash
 
+set -u
+
+ALLOWED_OWNERS=(
+	ChillerDragon
+	chillavanilla
+)
+
 help() {
 	cat <<-EOF
 	usage: mirror_git_repo
@@ -23,7 +30,8 @@ wrn() {
 	printf '[!] %s\n' "$1" 1>&2
 }
 
-if [ "$1" == "-h" ] || [ "$1" == "--help" ]
+arg="${1:-}"
+if [ "${arg}" == "-h" ] || [ "$arg" == "--help" ]
 then
 	help
 	exit 0
@@ -144,11 +152,13 @@ set_remote() {
 # depends on "git remote -v"
 # so needs to be in the right git repo
 #
+# @param repo_owner
 # @param repo_path
 push_to_gitlab() {
-	local repo_path="$1"
+	local repo_owner="$1"
+	local repo_path="$2"
 	local gl_remote
-	gl_remote="git@gitlab-MIRROR:ChillerMirror/$repo_path"
+	gl_remote="git@gitlab-MIRROR:$repo_owner/$repo_path"
 	set_remote gl "$gl_remote"
 	if ! git branch | grep -qF '* master'
 	then
@@ -162,19 +172,20 @@ push_to_gitlab() {
 		err "Error: failed to push to $gl_remote"
 		exit 1
 	fi
-	log "Code is now backed up to https://gitlab.com/ChillerMirror/$repo_path"
+	log "Code is now backed up to https://gitlab.com/$repo_owner/$repo_path"
 }
 
 # depends on env var CODEBERG_TOKEN to be set
-# and it needs scope repository:write and user:write
+# and it needs scope repository:write, user:write and organization:write
 #
+# @param repo_owner
 # @param repo_path
 #
 # prints ssh_url to stdout
 # or errors to stderr
 create_codeberg_repo() {
-	local repo_path="$1"
-	local repo_owner=ChillerMirror
+	local repo_owner="$1"
+	local repo_path="$2"
 	if [ "$CODEBERG_TOKEN" = "" ]
 	then
 		err "Error: CODEBERG_TOKEN not set"
@@ -215,21 +226,6 @@ create_codeberg_repo() {
 	fi
 
 	local json_payload
-	# https://codeberg.org/api/swagger#/repository/generateRepo
-	# json_payload="$(jq -n \
-	# 	--arg avatar false \
-	# 	--arg default_branch master \
-	# 	--arg description "" \
-	# 	--arg git_content false \
-	# 	--arg git_hooks false \
-	# 	--arg labels false \
-	# 	--arg name "$repo_name" \
-	# 	--arg owner "$repo_owner" \
-	# 	--arg private true \
-	# 	--arg protected_branch false \
-	# 	--arg topics false \
-	# 	--arg webhooks false
-	# 	'$ARGS.named')"
 	# https://codeberg.org/api/swagger#/repository/createCurrentUserRepo
 	if ! json_payload="$(jq -n \
 		--arg auto_init false \
@@ -250,13 +246,20 @@ create_codeberg_repo() {
 		err "       failed to create repo at path $repo_path"
 		exit 1
 	fi
+	# ChillerDragon -> ChillerMirror user
+	# all others are assumed to be orgs with the same name
+	local post_url="https://codeberg.org/api/v1/orgs/$repo_owner/repos"
+	if [ "$repo_owner" = ChillerDragon ] || [ "$repo_owner" = ChillerMirror ]
+	then
+		post_url='https://codeberg.org/api/v1/user/repos'
+	fi
 	response="$(curl \
 		--silent \
 		-X POST \
 		-H 'Content-Type: application/json' \
 		-H "Authorization: Bearer $CODEBERG_TOKEN" \
 		--data "$json_payload" \
-		'https://codeberg.org/api/v1/user/repos')"
+		"$post_url")"
 
 	local message
 	message="$(jq .message <<< "$response")"
@@ -290,10 +293,12 @@ create_codeberg_repo() {
 }
 
 
+# @param repo_owner
 # @param repo_path
 push_to_codeberg() {
-	local repo_path="$1"
-	if ! ssh_url="$(create_codeberg_repo "$repo_path")"
+	local repo_owner="$1"
+	local repo_path="$2"
+	if ! ssh_url="$(create_codeberg_repo "$repo_owner" "$repo_path")"
 	then
 		exit 1
 	fi
@@ -315,7 +320,23 @@ push_to_codeberg() {
 		err "Error: failed to push to cb remote"
 		exit 1
 	fi
-	log "Code is now backed up to https://codeberg.org/ChillerMirror/$repo_path"
+	log "Code is now backed up to https://codeberg.org/$repo_owner/$repo_path"
+}
+
+# check if the owner is in the ALLOWED_OWNERS list
+# usage:
+#
+# is_whitelisted_owner FOOBAR && echo whitelisted
+#
+# @param owner - the github name of the user or org
+is_whitelisted_owner() {
+	local owner="$1"
+	local whitelisted
+	for whitelisted in "${ALLOWED_OWNERS[@]}"
+	do
+		[ "$whitelisted" = "$owner" ] && return 0
+	done
+	return 1
 }
 
 main() {
@@ -330,13 +351,13 @@ main() {
 	remote_path="$(get_main_remote_path)"
 	local remote_owner
 	remote_owner="$(echo "$remote_path" | cut -d'/' -f1)"
-	if [ "$remote_owner" != ChillerDragon ]
+	if ! is_whitelisted_owner "$remote_owner"
 	then
-		err "Error: this repository is not owned by ChillerDragon"
-		err "       currently only mirroring from ChillerDragon owned repos"
+		err "Error: this repository is not owned by one of the whitelisted owners"
+		err "       currently only mirroring from whitlisted groups/users owned repos"
 		err "       is supported"
 		err ""
-		err "    expected: ChillerDragon"
+		err "    expected: ${ALLOWED_OWNERS[*]}"
 		err "         got: $remote_owner"
 		err ""
 		exit 1
@@ -354,8 +375,14 @@ main() {
 		exit 1
 	fi
 
-	push_to_gitlab "$repo_path"
-	push_to_codeberg "$repo_path"
+	local repo_owner="$remote_owner"
+	if [ "$repo_owner" = ChillerDragon ]
+	then
+		repo_owner=ChillerMirror
+	fi
+
+	push_to_gitlab "$repo_owner" "$repo_path"
+	push_to_codeberg "$repo_owner" "$repo_path"
 }
 
 main
