@@ -5,6 +5,23 @@ set -u
 ALLOWED_OWNERS=(
 	ChillerDragon
 	chillavanilla
+	discord-irc
+	DDNetPP
+	TeeworldsDB
+	chillerbot
+	ChillerData
+	ChillerTW
+	TwDemosMain
+	TwDemosDDrace
+	TwDemosMisc
+	fddrace
+	chidraqul
+	chichilku
+	OpenTube
+	TeeCaptcha
+	ZillyWoods
+	ZillyInsta
+	ZillyFly
 )
 
 help() {
