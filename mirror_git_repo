@@ -32,7 +32,7 @@ get_main_branch() {
 	then
 		if [ "$repo_path" = chillerbot-ux ]
 		then
-			printf ux
+			printf chillerbot
 			return
 		fi
 		if [ "$repo_path" = chillerbot-zx ]
