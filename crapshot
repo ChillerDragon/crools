@@ -338,7 +338,7 @@ then
 fi
 os_copy "crapshot in progress"
 os_say crapshot
-cmd="scp $picpath $remote:$picdir/.$ts.png"
+cmd="scp -v $picpath $remote:$picdir/.$ts.png"
 echo "$cmd"
 eval "$cmd"
 add_history ".$ts.png"
