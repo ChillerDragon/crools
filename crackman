@@ -8,12 +8,16 @@ CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
 CM_INSTALLED_PATH="$HOME/.config/crools/crackman/installed"
 CM_TMP_PATH="$HOME/.config/crools/crackman/tmp"
 
+clang_release_base_url='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-8f72ab3c'
+
 declare -A Packages=(
-	[clang-format-10]='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-f3a37dd2/clang-format-10_linux-amd64'
-	[clang-format-11]='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-f3a37dd2/clang-format-11_linux-amd64'
-	[clang-format-12]='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-f3a37dd2/clang-format-12_linux-amd64'
-	[clang-format-13]='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-f3a37dd2/clang-format-13_linux-amd64'
-	[clang-format-14]='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-f3a37dd2/clang-format-14_linux-amd64'
+	[clang-format-10]="$clang_release_base_url/clang-format-10_linux-amd64"
+	[clang-format-11]="$clang_release_base_url/clang-format-11_linux-amd64"
+	[clang-format-12]="$clang_release_base_url/clang-format-12_linux-amd64"
+	[clang-format-13]="$clang_release_base_url/clang-format-13_linux-amd64"
+	[clang-format-14]="$clang_release_base_url/clang-format-14_linux-amd64"
+	[clang-tidy-14]="$clang_release_base_url/clang-tidy-14_linux-amd64"
+	[clang-tidy-17]="$clang_release_base_url/clang-tidy-17_linux-amd64"
 	[gomuks]='https://github.com/tulir/gomuks/releases/download/v0.3.0/gomuks-linux-amd64'
 	[term-ux]='https://github.com/chillerbot/chillerbot-ux/releases/download/v0.0.3/term-ux-linux'
 )
