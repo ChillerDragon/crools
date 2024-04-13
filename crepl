@@ -240,6 +240,20 @@ fmt_int_value() {
 	fi
 }
 
+# produces a format string for c printf
+# including a %lu placeholder
+# that has to be filled
+fmt_size_t_value() {
+	printf '%b(%bsize_t%b)%b%%lu%b' "$COL_BLACK" "$COL_BLUE" "$COL_BLACK" "$COL_YELLOW" "$COL_RESET"
+}
+
+# produces a format string for c printf
+# including a %zd placeholder
+# that has to be filled
+fmt_ssize_t_value() {
+	printf '%b(%bssize_t%b)%b%%zd%b' "$COL_BLACK" "$COL_BLUE" "$COL_BLACK" "$COL_YELLOW" "$COL_RESET"
+}
+
 # takes in the full prompt
 # and prints only the word at the current cursor
 # that should be used for auto completion
@@ -391,7 +405,7 @@ is_int_func_call() {
 	fi
 	[[ "$func_name" = "" ]] && return 1
 	func_arg="${BASH_REMATCH[2]}"
-	if ! man -P cat "$func_name" 2>/dev/null | grep -q "int $func_name("
+	if ! man -P cat "$func_name" 2>/dev/null | grep -q "^[[:space:]]*int $func_name("
 	then
 		return 1
 	fi
@@ -400,6 +414,64 @@ is_int_func_call() {
 	# print int return value to stdout
 	printf '%s\n' "$input" > "$tmp_src_file_test_main"
 	printf 'printf("%s\\n", %s);\n' "$(fmt_int_value signed)" "$func_name($func_arg)" > "$tmp_src_file_tmp"
+	return 0
+}
+
+is_size_t_func_call() {
+	local input="$1"
+	if ! [[ "$input" =~ ^\ *(${c_func_name_pattern})\((${c_stmt_pattern})\)\;+$ ]]
+	then
+		return 1
+	fi
+	local func_name
+	local func_arg
+	if ! func_name="${BASH_REMATCH[1]}"
+	then
+		return 1
+	fi
+	[[ "$func_name" = "" ]] && return 1
+	func_arg="${BASH_REMATCH[2]}"
+	if [ "$func_name" = sizeof ]
+	then
+		dbg "got compiler internal sizeof"
+		dbg "skipping man page check"
+	else
+		if ! man -P cat "$func_name" 2>/dev/null | grep -q "^[[:space:]]*size_t $func_name("
+		then
+			return 1
+		fi
+	fi
+	dbg "got single method call to '$func_name' which returns size_t"
+	dbg "func arg=$func_arg"
+	# print int return value to stdout
+	printf '%s\n' "$input" > "$tmp_src_file_test_main"
+	printf 'printf("%s\\n", %s);\n' "$(fmt_size_t_value)" "$func_name($func_arg)" > "$tmp_src_file_tmp"
+	return 0
+}
+
+is_ssize_t_func_call() {
+	local input="$1"
+	if ! [[ "$input" =~ ^\ *(${c_func_name_pattern})\((${c_stmt_pattern})\)\;+$ ]]
+	then
+		return 1
+	fi
+	local func_name
+	local func_arg
+	if ! func_name="${BASH_REMATCH[1]}"
+	then
+		return 1
+	fi
+	[[ "$func_name" = "" ]] && return 1
+	func_arg="${BASH_REMATCH[2]}"
+	if ! man -P cat "$func_name" 2>/dev/null | grep -q "^[[:space:]]*ssize_t $func_name("
+	then
+		return 1
+	fi
+	dbg "got single method call to '$func_name' which returns ssize_t"
+	dbg "func arg=$func_arg"
+	# print int return value to stdout
+	printf '%s\n' "$input" > "$tmp_src_file_test_main"
+	printf 'printf("%s\\n", %s);\n' "$(fmt_ssize_t_value)" "$func_name($func_arg)" > "$tmp_src_file_tmp"
 	return 0
 }
 
@@ -460,6 +532,12 @@ do
 	elif is_int_func_call "$input"
 	then
 		test # handled in is_int_func_call()
+	elif is_size_t_func_call "$input"
+	then
+		test # handled in is_size_t_func_call()
+	elif is_ssize_t_func_call "$input"
+	then
+		test # handled in is_ssize_t_func_call()
 	elif is_math_statement "$input"
 	then
 		test # handled in is_math_statement()
