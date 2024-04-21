@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# tt - teeworlds table
+
+cat << EOF | fzf
+uuid=245e5097-9fe0-39d6-bf7d-9a29e1691e4c type=65536 name=what-is@ddnet.tw
+uuid=6954847e-2e87-3603-b562-36da29ed1aca type=65537 name=it-is@ddnet.tw
+uuid=416911b5-7973-33bf-8d52-7bf01e519cf0 type=65538 name=i-dont-know@ddnet.tw
+uuid=12810e1f-a1db-3378-b4fb-164ed6505926 type=65539 name=rcon-type@ddnet.tw
+uuid=f9117b3c-8039-3416-9fc0-aef2bcb75c03 type=65540 name=map-details@ddnet.tw
+uuid=f621a5a1-f585-3775-8e73-41beee79f2b2 type=65541 name=capabilities@ddnet.tw
+uuid=8c001304-8461-3e47-8787-f672b3835bd4 type=65542 name=clientver@ddnet.tw
+uuid=bcb43bf5-427c-36d8-b5b8-7975c8c06aa1 type=65543 name=ping@ddnet.tw
+uuid=d8295530-14a7-3a0a-b02e-b2cee08d2033 type=65544 name=pong@ddnet.tw
+uuid=60a7cef1-2ecc-3ed4-b138-00fd0c8f5994 type=65545 name=checksum-request@ddnet.tw
+uuid=88fc61ec-5a3c-3fc3-8dfa-fd3b715db9e0 type=65546 name=checksum-response@ddnet.tw
+uuid=090960d1-4000-3fd5-9670-4976ae702a6a type=65547 name=checksum-error@ddnet.tw
+uuid=4efe406a-7774-33f1-bfde-1806ff6d1528 type=65548 name=redirect@ddnet.org
+uuid=85f67ffe-f1b1-3af3-98c4-26dbf77111b7 type=65549 name=rcon-cmd-group-start@ddnet.org
+uuid=5e02c980-6ca1-3c99-a9af-4650ae956252 type=65550 name=rcon-cmd-group-end@ddnet.org
+uuid=6bb8ba88-0f0b-382e-8dae-dbf4052b8b7d type=65551 name=teehistorian-test@ddnet.tw
+uuid=41b49541-f26f-325d-8715-9baf4b544ef9 type=65552 name=teehistorian-ddnetver-old@ddnet.tw
+uuid=1397b63e-ee4e-3919-b86a-b058887fcaf5 type=65553 name=teehistorian-ddnetver@ddnet.tw
+uuid=60daba5c-52c4-3aeb-b8ba-b2953fb55a17 type=65554 name=teehistorian-auth-init@ddnet.tw
+uuid=37ecd3b8-9218-3bb9-a71b-a935b86f6a81 type=65555 name=teehistorian-auth-login@ddnet.tw
+uuid=d4f5abe8-edd2-3fb9-abd8-1c8bb84f4a63 type=65556 name=teehistorian-auth-logout@ddnet.tw
+uuid=1899a382-71e3-36da-937d-c9de6bb95b1d type=65557 name=teehistorian-joinver6@ddnet.tw
+uuid=59239b05-0540-318d-bea4-9aa1e80e7d2b type=65558 name=teehistorian-joinver7@ddnet.tw
+uuid=5de9b633-49cf-3e99-9a25-d4a78e9717d7 type=65559 name=teehistorian-player-swap@ddnet.tw
+uuid=4560c756-da29-3036-81d4-90a50f0182cd type=65560 name=teehistorian-save-success@ddnet.tw
+uuid=b29901d5-1244-3bd0-bbde-23d04b1f7ba9 type=65561 name=teehistorian-save-failure@ddnet.tw
+uuid=e05408d3-a313-33df-9eb3-ddb990ab954a type=65562 name=teehistorian-load-success@ddnet.tw
+uuid=ef8905a2-c695-3591-a1cd-53d2015992dd type=65563 name=teehistorian-load-failure@ddnet.tw
+uuid=a111c04e-1ea8-38e0-90b1-d7f993ca0da9 type=65564 name=teehistorian-player-team@ddnet.tw
+uuid=5792834e-81d1-34c9-a29b-b5ff25dac3bc type=65565 name=teehistorian-team-practice@ddnet.tw
+uuid=638587c9-3f75-3887-918e-a3c2614ffaa0 type=65566 name=teehistorian-player-ready@ddnet.tw
+uuid=c1e921d5-96f5-37bb-8a45-7a06f163d27e type=65567 name=teehistorian-rejoinver6@ddnet.org
+uuid=866bfdac-fb49-3c0b-a887-5fe1f3ea00b8 type=65568 name=teehistorian-antibot@ddnet.org
+uuid=0dc77a02-bfee-3a53-ac8e-0bb0241bd722 type=65569 name=my-own-object@heinrich5991.de
+uuid=76ce455b-f9eb-3a48-add7-e04b941d045c type=65570 name=character@netobj.ddnet.tw
+uuid=22ca938d-1380-3e2b-9e7b-d2558ea6be11 type=65571 name=player@netobj.ddnet.tw
+uuid=933dea6a-da79-30ea-a98f-8af03689a945 type=65572 name=gameinfo@netobj.ddnet.tw
+uuid=0e6db85c-2b61-386f-bbf2-d0d0471b9272 type=65573 name=projectile@netobj.ddnet.tw
+uuid=29de68a2-6928-31b8-8360-a2307e0d844f type=65574 name=laser@netobj.ddnet.tw
+uuid=6550fbce-f317-3b31-8ffe-d2b37f3ab40e type=65575 name=ddnet-projectile@netobj.ddnet.tw
+uuid=ea5e4a51-58fb-3684-96e4-e0d267f4ca65 type=65576 name=pickup@netobj.ddnet.tw
+uuid=0c4fd27d-47e3-3871-a226-9f417486a311 type=65577 name=my-own-event@heinrich5991.de
+uuid=4b801c74-e24c-3ce0-b92c-b754d02cfc8a type=65578 name=spec-char@netobj.ddnet.tw
+uuid=ec15e669-ce11-3367-ae8e-b90e5b27b9d5 type=65579 name=switch-state@netobj.ddnet.tw
+uuid=2de9aec3-32e4-3986-8f7e-e7459da7f535 type=65580 name=entity-ex@netobj.ddnet.tw
+uuid=1231e484-f607-3722-a89a-bd85db46f5d2 type=65581 name=my-own-message@heinrich5991.de
+uuid=53bb28af-4252-3ac9-8fd3-6ccbc2a603e3 type=65582 name=show-distance@netmsg.ddnet.tw
+uuid=7f264cdd-71a2-3962-bbce-0f94bbd81913 type=65583 name=showothers@netmsg.ddnet.tw
+uuid=a091961a-95e8-3744-bb60-5eac9bd563c6 type=65584 name=teamsstate@netmsg.ddnet.tw
+uuid=5dde8b3c-6f6f-37ac-a72a-bb341fe76de5 type=65585 name=ddrace-time@netmsg.ddnet.tw
+uuid=804f149f-9b53-3b0a-897f-59663a1c4eb9 type=65586 name=record@netmsg.ddnet.tw
+uuid=ee610b6f-909f-311e-93f7-11a95f55a086 type=65587 name=killmsgteam@netmsg.ddnet.tw
+uuid=bfd7f0fc-16d5-3e10-8015-a78380f13870 type=65588 name=yourvote@netmsg.ddnet.org
+uuid=c915ba68-0a49-3324-915a-7a6220cecf33 type=65589 name=racefinish@netmsg.ddnet.org
+uuid=90778f65-1b8f-322a-9713-cf741aa44a05 type=65590 name=commandinfo@netmsg.ddnet.org
+uuid=eb2e77ce-e9a2-35aa-94be-235f523ac1aa type=65591 name=commandinfo-remove@netmsg.ddnet.org
+uuid=969d127c-b768-390d-8879-6104993769fa type=65592 name=sv-vote-option-group-start@netmsg.ddnet.org
+uuid=4f096765-39b1-3766-82dc-61b20ccf589a type=65593 name=sv-vote-option-group-end@netmsg.ddnet.org
+uuid=9e220138-d393-3cb0-90f1-e587c00ab1d0 type=65594 name=sv-commandinfo-group-start@netmsg.ddnet.org
+uuid=054125d8-0062-3891-840b-47462285a01f type=65595 name=sv-commandinfo-group-end@netmsg.ddnet.org
+uuid=746cb54c-6b2b-39a7-8cd8-7c7a1c6c3009 type=65596 name=change-info-cooldown@netmsg.ddnet.org
+uuid=b1ab2186-5ac3-39d9-9fbc-47cf03efdf1e type=65597 name=mapitemtype-test@ddnet.tw
+uuid=3e1b2716-178c-3978-9bd9-b11ae0410dd8 type=65598 name=mapitemtype-automapper-config@ddnet.tw
+uuid=3ab4f84d-d9cc-3c78-b585-0d6ccdb2e25c type=65599 name=mapitemtype-envpoints-bezier@ddnet.tw
+EOF
+
