@@ -68,7 +68,6 @@ uuid=b1ab2186-5ac3-39d9-9fbc-47cf03efdf1e type=65597 name=mapitemtype-test@ddnet
 uuid=3e1b2716-178c-3978-9bd9-b11ae0410dd8 type=65598 name=mapitemtype-automapper-config@ddnet.tw
 uuid=3ab4f84d-d9cc-3c78-b585-0d6ccdb2e25c type=65599 name=mapitemtype-envpoints-bezier@ddnet.tw
 
-
 teeworlds 0.7 snap_item   1 obj_player_input
 teeworlds 0.7 snap_item   2 obj_projectile
 teeworlds 0.7 snap_item   3 obj_laser
@@ -172,6 +171,88 @@ teeworlds 0.7 control   1 NET_CTRLMSG_CONNECT
 teeworlds 0.7 control   2 NET_CTRLMSG_ACCEPT
 teeworlds 0.7 control   4 NET_CTRLMSG_CLOSE
 teeworlds 0.7 control   5 NET_CTRLMSG_TOKEN
+
+teeworlds 0.6 snap_item   1 obj_player_input size=10 Direction TargetX TargetY Jump Fire Hook PlayerFlags WantedWeapon NextWeapon PrevWeapon 
+teeworlds 0.6 snap_item   2 obj_projectile size=6 X Y VelX VelY Type StartTick
+teeworlds 0.6 snap_item   3 obj_laser
+teeworlds 0.6 snap_item   4 obj_pickup
+teeworlds 0.6 snap_item   5 obj_flag
+teeworlds 0.6 snap_item   6 obj_game_info
+teeworlds 0.6 snap_item   7 obj_game_data
+teeworlds 0.6 snap_item   8 obj_character_core
+teeworlds 0.6 snap_item   9 obj_character
+teeworlds 0.6 snap_item   10 obj_player_info
+teeworlds 0.6 snap_item   11 obj_client_info size=17 Name0; Name1; Name2; Name3; Clan0; Clan1; Clan2; Country; Skin0; Skin1; Skin2; Skin3; Skin4; Skin5; UseCustomColor; ColorBody; ColorFeet;
+teeworlds 0.6 snap_item   12 obj_spectator_info size=3 m_SpectatorID; m_X; m_Y;
+teeworlds 0.6 snap_item   13 event_common
+teeworlds 0.6 snap_item   14 event_explosion
+teeworlds 0.6 snap_item   15 event_spawn
+teeworlds 0.6 snap_item   16 event_hammerhit
+teeworlds 0.6 snap_item   17 event_death
+teeworlds 0.6 snap_item   18 event_sound_global
+teeworlds 0.6 snap_item   19 event_sound_world
+teeworlds 0.6 snap_item   20 event_damage_indicator
+
+teeworlds 0.6 system   0   NETMSG_NULL
+teeworlds 0.6 system   1   NETMSG_INFO
+teeworlds 0.6 system   2   NETMSG_MAP_CHANGE
+teeworlds 0.6 system   3   NETMSG_MAP_DATA
+teeworlds 0.6 system   4   NETMSG_CON_READY
+teeworlds 0.6 system   5   NETMSG_SNAP
+teeworlds 0.6 system   6   NETMSG_SNAPEMPTY
+teeworlds 0.6 system   7   NETMSG_SNAPSINGLE
+teeworlds 0.6 system   8   NETMSG_SNAPSMALL
+teeworlds 0.6 system   9   NETMSG_INPUTTIMING
+teeworlds 0.6 system   10  NETMSG_RCON_AUTH_STATUS
+teeworlds 0.6 system   11  NETMSG_RCON_LINE
+teeworlds 0.6 system   12  NETMSG_AUTH_CHALLANGE
+teeworlds 0.6 system   13  NETMSG_AUTH_RESULT
+teeworlds 0.6 system   14  NETMSG_READY
+teeworlds 0.6 system   15  NETMSG_ENTERGAME
+teeworlds 0.6 system   16  NETMSG_INPUT
+teeworlds 0.6 system   17  NETMSG_RCON_CMD
+teeworlds 0.6 system   18  NETMSG_RCON_AUTH
+teeworlds 0.6 system   19  NETMSG_REQUEST_MAP_DATA
+teeworlds 0.6 system   20  NETMSG_AUTH_START
+teeworlds 0.6 system   21  NETMSG_AUTH_RESPONSE
+teeworlds 0.6 system   22  NETMSG_PING
+teeworlds 0.6 system   23  NETMSG_PING_REPLY
+teeworlds 0.6 system   24  NETMSG_ERROR
+teeworlds 0.6 system   25  NETMSG_RCON_CMD_ADD
+teeworlds 0.6 system   26  NETMSG_RCON_CMD_REM
+
+teeworlds 0.6 game   0   NETMSG_INVALID
+teeworlds 0.6 game   1   NETMSGTYPE_SV_MOTD
+teeworlds 0.6 game   2   NETMSGTYPE_SV_BROADCAST
+teeworlds 0.6 game   3   NETMSGTYPE_SV_CHAT
+teeworlds 0.6 game   4   NETMSGTYPE_SV_KILLMSG
+teeworlds 0.6 game   5   NETMSGTYPE_SV_SOUNDGLOBAL
+teeworlds 0.6 game   6   NETMSGTYPE_SV_TUNEPARAMS
+teeworlds 0.6 game   7   NETMSGTYPE_SV_EXTRAPROJECTILE
+teeworlds 0.6 game   8   NETMSGTYPE_SV_READYTOENTER
+teeworlds 0.6 game   9   NETMSGTYPE_SV_WEAPONPICKUP
+teeworlds 0.6 game   10  NETMSGTYPE_SV_EMOTICON
+teeworlds 0.6 game   11  NETMSGTYPE_SV_VOTECLEAROPTIONS
+teeworlds 0.6 game   12  NETMSGTYPE_SV_VOTEOPTIONLISTADD
+teeworlds 0.6 game   13  NETMSGTYPE_SV_VOTEOPTIONADD
+teeworlds 0.6 game   14  NETMSGTYPE_SV_VOTEOPTIONREMOVE
+teeworlds 0.6 game   15  NETMSGTYPE_SV_VOTESET
+teeworlds 0.6 game   16  NETMSGTYPE_SV_VOTESTATUS
+teeworlds 0.6 game   17  NETMSGTYPE_CL_SAY
+teeworlds 0.6 game   18  NETMSGTYPE_CL_SETTEAM
+teeworlds 0.6 game   19  NETMSGTYPE_CL_SETSPECTATORMODE
+teeworlds 0.6 game   20  NETMSGTYPE_CL_STARTINFO
+teeworlds 0.6 game   21  NETMSGTYPE_CL_CHANGEINFO
+teeworlds 0.6 game   22  NETMSGTYPE_CL_KILL
+teeworlds 0.6 game   23  NETMSGTYPE_CL_EMOTICON
+teeworlds 0.6 game   24  NETMSGTYPE_CL_VOTE
+teeworlds 0.6 game   25  NETMSGTYPE_CL_CALLVOTE
+
+teeworlds 0.6 control   0 NET_CTRLMSG_KEEPALIVE
+teeworlds 0.6 control   1 NET_CTRLMSG_CONNECT
+teeworlds 0.6 control   2 NET_CTRLMSG_CONNECTACCEPT
+teeworlds 0.6 control   3 NET_CTRLMSG_ACCEPT
+teeworlds 0.6 control   4 NET_CTRLMSG_CLOSE
 
 EOF
 
