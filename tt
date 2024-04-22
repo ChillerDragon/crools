@@ -68,30 +68,30 @@ uuid=b1ab2186-5ac3-39d9-9fbc-47cf03efdf1e type=65597 name=mapitemtype-test@ddnet
 uuid=3e1b2716-178c-3978-9bd9-b11ae0410dd8 type=65598 name=mapitemtype-automapper-config@ddnet.tw
 uuid=3ab4f84d-d9cc-3c78-b585-0d6ccdb2e25c type=65599 name=mapitemtype-envpoints-bezier@ddnet.tw
 
-teeworlds 0.7 snap_item   1 obj_player_input
-teeworlds 0.7 snap_item   2 obj_projectile
-teeworlds 0.7 snap_item   3 obj_laser
-teeworlds 0.7 snap_item   4 obj_pickup
-teeworlds 0.7 snap_item   5 obj_flag
-teeworlds 0.7 snap_item   6 obj_game_data
-teeworlds 0.7 snap_item   7 obj_game_data_team
-teeworlds 0.7 snap_item   8 obj_game_data_flag
-teeworlds 0.7 snap_item   9 obj_character_core
-teeworlds 0.7 snap_item   10 obj_character
-teeworlds 0.7 snap_item   11 obj_player_info
-teeworlds 0.7 snap_item   12 obj_spectator_info
-teeworlds 0.7 snap_item   13 obj_de_client_info
-teeworlds 0.7 snap_item   14 obj_de_game_info
-teeworlds 0.7 snap_item   15 obj_tune_params
-teeworlds 0.7 snap_item   16 event_common
+teeworlds 0.7 snap_item   1 obj_player_input size=10 m_Direction; m_TargetX; m_TargetY; m_Jump; m_Fire; m_Hook; m_PlayerFlags; m_WantedWeapon; m_NextWeapon; m_PrevWeapon;
+teeworlds 0.7 snap_item   2 obj_projectile size=6 m_X; m_Y; m_VelX; m_VelY; m_Type; m_StartTick;
+teeworlds 0.7 snap_item   3 obj_laser size=5 m_X; m_Y; m_FromX; m_FromY; m_StartTick;
+teeworlds 0.7 snap_item   4 obj_pickup size=3 m_X; m_Y; m_Type;
+teeworlds 0.7 snap_item   5 obj_flag size=3 m_X; m_Y; m_Team;
+teeworlds 0.7 snap_item   6 obj_game_data size=3 m_GameStartTick; m_GameStateFlags; m_GameStateEndTick;
+teeworlds 0.7 snap_item   7 obj_game_data_team size=2 m_TeamscoreRed; m_TeamscoreBlue;
+teeworlds 0.7 snap_item   8 obj_game_data_flag size=4 m_FlagCarrierRed; m_FlagCarrierBlue; m_FlagDropTickRed; m_FlagDropTickBlue;
+teeworlds 0.7 snap_item   9 obj_character_core size=15 m_Tick; m_X; m_Y; m_VelX; m_VelY; m_Angle; m_Direction; m_Jumped; m_HookedPlayer; m_HookState; m_HookTick; m_HookX; m_HookY; m_HookDx; m_HookDy;
+teeworlds 0.7 snap_item   10 obj_character size=22
+teeworlds 0.7 snap_item   11 obj_player_info size=3 m_PlayerFlags; m_Score; m_Latency;
+teeworlds 0.7 snap_item   12 obj_spectator_info size=4 m_SpecMode; m_SpectatorID; m_X; m_Y;
+teeworlds 0.7 snap_item   13 obj_de_client_info size=58 m_Local; m_Team; m_aName[4]; m_aClan[3]; m_Country; m_aaSkinPartNames[6][6]; m_aUseCustomColors[6]; m_aSkinPartColors[6];
+teeworlds 0.7 snap_item   14 obj_de_game_info size=5 m_GameFlags; m_ScoreLimit; m_TimeLimit; m_MatchNum; m_MatchCurrent;
+teeworlds 0.7 snap_item   15 obj_tune_params size=32 m_aTuneParams[32];
+teeworlds 0.7 snap_item   16 event_common size=2 m_X; m_Y;
 teeworlds 0.7 snap_item   17 event_explosion
 teeworlds 0.7 snap_item   18 event_spawn
 teeworlds 0.7 snap_item   19 event_hammerhit
 teeworlds 0.7 snap_item   20 event_death
 teeworlds 0.7 snap_item   21 event_sound_world
 teeworlds 0.7 snap_item   22 event_damage
-teeworlds 0.7 snap_item   23 obj_player_info_race
-teeworlds 0.7 snap_item   24 obj_game_data_race
+teeworlds 0.7 snap_item   23 obj_player_info_race size=1 m_RaceStartTick;
+teeworlds 0.7 snap_item   24 obj_game_data_race size=3 m_BestTime; m_Precision; m_RaceFlags;
 
 teeworlds 0.7 system   0 NETMSG_NULL
 teeworlds 0.7 system   1 NETMSG_INFO
