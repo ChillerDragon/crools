@@ -184,6 +184,15 @@ else
 		done
 	)
 fi
+(
+        cd ~/.config/crools/bashrc.d || exit 1
+        mkdir -p other
+        cd other || exit 1
+        [ -d bashrc-secrets ] && exit 0
+
+	echo "[*] downloading bashrc-secrets ..."
+        git clone git@github.com:ChillerDragon/bashrc-secrets.git
+)
 
 # shellcheck disable=SC2016
 add_to_rc 'for crools_rc in ~/.config/crools/bashrc.d' \
