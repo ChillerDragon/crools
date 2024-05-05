@@ -1,8 +1,8 @@
 #!/bin/bash
 
-echo "[-----------------------------------------------------------------]"
-echo "[---] ddnet run tests helper (gtest && headless integration)  [---]"
-echo "[-----------------------------------------------------------------]"
+echo "[------------------------------------------------------------------]"
+echo "[---] ddnet run tests helper (gtest && gui debug integration)  [---]"
+echo "[------------------------------------------------------------------]"
 echo ""
 
 function check_dir() {
@@ -40,23 +40,19 @@ then
 	exit 1
 fi
 
-mkdir -p build-integration-tests
-cd build-integration-tests || exit 1
+mkdir -p build-integration-tests-gui
+cd build-integration-tests-gui || exit 1
 
 if [ ! -f Makefile ]
 then
 	cmake -G Ninja \
-		-DDOWNLOAD_GTEST=ON \
-		-DHEADLESS_CLIENT=ON \
+		-DDOWNLOAD_GTEST=OFF \
+		-DHEADLESS_CLIENT=OFF \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-Werror=dev ..
 fi
 
-# cmake --build . --config Debug --target everything -- -k 0
-
 cmake --build . --config Debug || exit 1
-
-cmake --build . --config Debug --target run_tests || exit 1
 
 # needed for integration tests
 test -f chillerbot-ux && cp chillerbot-ux DDNet
