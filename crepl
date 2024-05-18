@@ -393,7 +393,7 @@ parse_args "$@"
 
 is_int_func_call() {
 	local input="$1"
-	if ! [[ "$input" =~ ^\ *(${c_func_name_pattern})\((${c_stmt_pattern})\)\;+$ ]]
+	if ! [[ "$input" =~ ^\ *(${c_func_name_pattern})\((${c_stmt_pattern})?\)\;+$ ]]
 	then
 		return 1
 	fi
@@ -405,7 +405,7 @@ is_int_func_call() {
 	fi
 	[[ "$func_name" = "" ]] && return 1
 	func_arg="${BASH_REMATCH[2]}"
-	if ! man -P cat "$func_name" 2>/dev/null | grep -q "^[[:space:]]*int $func_name("
+	if ! man -P cat 3 "$func_name" 2>/dev/null | grep -q "^[[:space:]]*int $func_name("
 	then
 		return 1
 	fi
