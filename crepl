@@ -218,7 +218,7 @@ c_stmt_pattern='[^;]+' # TODO: do this better ; can be part of a for loop and of
 c_numeric_sign_pattern='[-+~]+'
 c_int_value_pattern="(\ *(${c_numeric_sign_pattern}?\()*\ *)*${c_numeric_sign_pattern}?([0-9]|0x[0-9a-fA-F]+)+[ )]*"
 # c_float_value_pattern="$c_int_value_pattern\.?[0-9]+f?"
-c_math_operators_pattern='\ *[\/\+-\*^|&]\ *'
+c_math_operators_pattern='\ *[\/\+-\*^|&%]\ *'
 c_math_expr_pattern="($c_int_value_pattern${c_math_operators_pattern})+($c_int_value_pattern)"
 c_int_value_or_math_pattern="(($c_math_expr_pattern)|$c_int_value_pattern)"
 
