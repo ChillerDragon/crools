@@ -87,6 +87,10 @@ log() {
 err() {
 	printf '[-] %b\n' "$1"
 }
+fail() {
+	err "$1"
+	exit 1
+}
 
 if [ "${BASH_VERSINFO[0]}" -lt 5 ] && [ "${BASH_VERSINFO[1]}" -lt 3 ]
 then
@@ -221,6 +225,18 @@ c_int_value_pattern="(\ *(${c_numeric_sign_pattern}?\()*\ *)*${c_numeric_sign_pa
 c_math_operators_pattern='\ *[\/\+-\*^|&%]\ *'
 c_math_expr_pattern="($c_int_value_pattern${c_math_operators_pattern})+($c_int_value_pattern)"
 c_int_value_or_math_pattern="(($c_math_expr_pattern)|$c_int_value_pattern)"
+# matches only the right side of a math expression
+c_math_expr_right="(${c_math_operators_pattern}$c_int_value_pattern)+"
+# matches only the left side of a math expression
+c_math_expr_left="($c_int_value_pattern${c_math_operators_pattern})+"
+
+[[ -      =~ $c_numeric_sign_pattern ]] || fail "-"
+[[ 2      =~ $c_int_value_pattern ]] || fail "2"
+[[ 2+     =~ $c_math_expr_left ]] || fail "2+"
+[[ 2+2+2+ =~ $c_math_expr_left ]] || fail "2+"
+
+[[ "2+rand()" =~ ^(${c_math_expr_left}|)(${c_func_name_pattern})\(\)$ ]] || fail "2+rand()"
+[[ "2+2+rand()" =~ ^(${c_math_expr_left}|)(${c_func_name_pattern})\(\)$ ]] || fail "2+2+rand()"
 
 # TODO: func pattern doesnt match
 c_type_pattern='(void|int|char|long|long long|float|double|short|int64_t|time_t)'
@@ -393,29 +409,44 @@ parse_args "$@"
 
 is_int_func_call() {
 	local input="$1"
-	if ! [[ "$input" =~ ^\ *(${c_func_name_pattern})\((${c_stmt_pattern})?\)\;+$ ]]
+	local group_offset
+	#  shellcheck disable=SC1003
+	group_offset="$(printf '%s' "$c_math_expr_left" | grep -o .\( | grep -v '\\' | grep -o '(' | wc -l)"
+	if ! [[ "$input" =~ ^\ *(${c_math_expr_left}|)(${c_func_name_pattern})\((${c_stmt_pattern})?\)(${c_math_expr_right})?\;+$ ]]
 	then
 		return 1
 	fi
 	local func_name
 	local func_arg
-	if ! func_name="${BASH_REMATCH[1]}"
+
+	local func_g
+	local arg_g
+	func_g="$((group_offset + 2))"
+	arg_g="$((group_offset + 3))"
+
+	if ! func_name="${BASH_REMATCH[$func_g]}"
 	then
 		return 1
 	fi
 	[[ "$func_name" = "" ]] && return 1
-	func_arg="${BASH_REMATCH[2]}"
+	func_arg="${BASH_REMATCH[$arg_g]}"
 	if ! man -P cat 3 "$func_name" 2>/dev/null | grep -q "^[[:space:]]*int $func_name("
 	then
 		return 1
 	fi
 	dbg "got single method call to '$func_name' which returns int"
 	dbg "func arg=$func_arg"
+	local int_stmt="${BASH_REMATCH[0]}"
+	int_stmt="${int_stmt//;/}"
+	dbg "int statement=$int_stmt"
 	# print int return value to stdout
 	printf '%s\n' "$input" > "$tmp_src_file_test_main"
-	printf 'printf("%s\\n", %s);\n' "$(fmt_int_value signed)" "$func_name($func_arg)" > "$tmp_src_file_tmp"
+	printf 'printf("%s\\n", %s);\n' "$(fmt_int_value signed)" "$int_stmt" > "$tmp_src_file_tmp"
 	return 0
 }
+
+is_int_func_call "2+2+2+rand()-2%2;" || fail "int_func_test"
+is_int_func_call "2+2+2+rand()-2%2 * 666712 + 0xff;" || fail "int_func_test"
 
 is_size_t_func_call() {
 	local input="$1"
