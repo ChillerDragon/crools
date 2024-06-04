@@ -76,7 +76,30 @@ function install_bash_completion() {
 		exit 1
 	fi
 	pushd "$crools_path" > /dev/null || exit 1
-	if [ ! -f /usr/share/bash-completion/completions/crackman ]
+	local completions_dir=/usr/share/bash-completion/completions
+	if is_apple
+	then
+		if [ ! -x "$(command -v brew)" ]
+		then
+			# skip bash completion on macOS
+			# if there is no brew
+			return
+		fi
+		if ! completions_dir="$(brew --prefix)/etc/bash_completion.d/"
+		then
+			err "failed to run brew --prefix for bash completion"
+			return
+		fi
+	fi
+
+	if [ ! -d "$completions_dir" ]
+	then
+		err "error: Missing bash completion directory"
+		err "       expected one at $completions_dir"
+		return
+	fi
+
+	if [ ! -f "$completions_dir/crackman" ]
 	then
 		if [ -f "$comp_file" ]
 		then
@@ -85,12 +108,12 @@ function install_bash_completion() {
 			then
 				cp \
 					"$comp_file" \
-					/usr/share/bash-completion/completions/crackman
+					"$completions_dir/crackman"
 			elif [ -x "$(command -v sudo)" ]
 			then
 				sudo cp \
 					"$comp_file" \
-					/usr/share/bash-completion/completions/crackman
+					"$completions_dir/crackman"
 			else
 				wrn "missing permission to install completion"
 			fi
