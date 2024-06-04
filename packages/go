@@ -6,6 +6,13 @@ CM_SRC_PATH="$HOME/.config/crools/crackman/src"
 mkdir -p "$CM_BIN_PATH"
 mkdir -p "$CM_SRC_PATH"
 
+function is_apple() {
+	if [[ "$OSTYPE" == "darwin"* ]]
+	then
+		return 0
+	fi
+	return 1
+}
 
 if [ "$1" == "description" ]
 then
@@ -28,10 +35,19 @@ else
 	rm -rf tmp-go &>/dev/null
 	mkdir -p tmp-go
 	cd tmp-go || exit 1
+	arch=linux-amd64
+	if is_apple
+	then
+		arch=darwin-arm64
+		if [ "$(uname -m)" = x86_64 ]
+		then
+			arch=darwin-amd64
+		fi
+	fi
 	vers="$(curl \
 		--silent \
 		https://go.dev/dl/ |
-		grep -oE 'go[0-9]+\.[0-9]+[^"]*linux-amd64.tar.gz' |
+		grep -oE 'go[0-9]+\.[0-9]+[^"]*'"${arch}"'.tar.gz' |
 		sort -t "." -k1,1n -k2,2n -k3,3n |
 		uniq |
 		tac |
