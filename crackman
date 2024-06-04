@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # crackman - your favorite unorganized crack manager
 # its like a package manager but its crack
 
