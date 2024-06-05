@@ -1,0 +1,37 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+if [ "$1" == "description" ]
+then
+	echo "php package manager"
+elif [ "$1" == "delete" ]
+then
+	rm "$CM_BIN_PATH/composer"
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -f "$CM_BIN_PATH/composer" ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	mkdir -p /tmp/crackman
+	cd /tmp/crackman || exit 1
+
+	php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+	php composer-setup.php
+	php -r "unlink('composer-setup.php');"
+
+
+	chmod +x composer.phar
+	mv composer.phar "$CM_BIN_PATH"/composer
+fi
+
