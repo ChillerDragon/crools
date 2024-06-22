@@ -69,7 +69,11 @@ function screenshot() {
     file="$1"
     if [ "$2" == "-s" ]
     then
-        if [ -x "$(command -v maim)" ]
+        if is_apple && [ -x "$(command -v screencapture)" ]
+        then
+            screencapture -i "$file"
+            return 0
+        elif [ -x "$(command -v maim)" ]
         then
             if ! maim --select "$file"
             then
@@ -85,7 +89,11 @@ function screenshot() {
             return 1
         fi
     else
-        if [ -x "$(command -v maim)" ]
+        if is_apple && [ -x "$(command -v screencapture)" ]
+        then
+            screencapture "$file"
+            return 0
+        elif [ -x "$(command -v maim)" ]
         then
             if ! maim "$file"
             then
@@ -249,7 +257,7 @@ arg_select=0
 arg_is_file=0
 arg_file=''
 
-if [ ! -x "$(command -v gnome-screenshot)" ]
+if [ ! -x "$(command -v gnome-screenshot)" ] && ! is_apple
 then
     install_tool maim
 fi
