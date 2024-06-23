@@ -135,7 +135,7 @@ else
 
 	if [ "$distro" == "debian" ]
 	then
-		./tools/debian-setup.sh --install-deb-deps || exit 1
+		sudo ./tools/debian-setup.sh --install-deb-deps || exit 1
 	fi
 
 
