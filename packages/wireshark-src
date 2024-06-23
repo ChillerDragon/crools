@@ -148,7 +148,15 @@ else
 		-DCMAKE_INSTALL_LIBDIR=lib \
 		-DENABLE_ILBC=OFF \
 		.. || exit 1
-	ninja || exit 1
+	if ! ninja
+	then
+		echo "[*][crackman] build failed try running this:"
+		echo ""
+		echo "  cd $PWD"
+		echo "  ninja"
+		echo ""
+		exit 1
+	fi
 	sudo ninja install || exit 1
 	# make -j"$(nproc)" || exit 1
 	# sudo make install || exit 1
