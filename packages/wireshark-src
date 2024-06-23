@@ -105,14 +105,8 @@ else
 
 	if [ "$distro" == "debian" ]
 	then
-		sudo apt install \
-			qttools5-dev \
-			qtmultimedia5-dev \
-			flex \
-			libc-ares-dev \
-			libgcrypt20-dev \
-			libcrypto++-dev \
-			libpcap-dev
+		# using wireshark deps script
+		test
 	elif [ "$distro" == "arch" ]
 	then
 		sudo pacman -S --needed \
@@ -137,6 +131,14 @@ else
 	git pull
 	git checkout "$tag" || exit 1
 	git pull
+
+
+	if [ "$distro" == "debian" ]
+	then
+		./tools/debian-setup.sh --install-deb-deps || exit 1
+	fi
+
+
 	mkdir build
 	cd build || exit 1
 	cmake -GNinja \
