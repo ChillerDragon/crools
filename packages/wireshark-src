@@ -135,6 +135,7 @@ else
 
 	if [ "$distro" == "debian" ]
 	then
+		# https://www.wireshark.org/docs/wsdg_html_chunked/ChapterSetup.html#ChSetupUNIXBuildEnvironmentSetup
 		sudo ./tools/debian-setup.sh --install-deb-deps || exit 1
 	fi
 
