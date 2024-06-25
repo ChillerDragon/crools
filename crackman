@@ -5,6 +5,7 @@
 MIRROR=https://zillyhuhn.com/crack
 CM_PKG_PATH="$(dirname "$(realpath "$0")")"/packages
 CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_PYTHON_PACKAGES_PATH="$HOME/.config/crools/crackman/python-packages"
 CM_INSTALLED_PATH="$HOME/.config/crools/crackman/installed"
 CM_TMP_PATH="$HOME/.config/crools/crackman/tmp"
 
@@ -131,6 +132,10 @@ function cm_doctor() {
 	then
 		mkdir -p "$CM_BIN_PATH" || exit 1
 	fi
+	if [ ! -d "$CM_PYTHON_PACKAGES_PATH" ]
+	then
+		mkdir -p "$CM_PYTHON_PACKAGES_PATH" || exit 1
+	fi
 	if [ ! -d "$CM_INSTALLED_PATH" ]
 	then
 		mkdir -p "$CM_INSTALLED_PATH" || exit 1
@@ -152,6 +157,21 @@ function cm_doctor() {
 			exit 1
 		else
 			echo "export PATH=\"\$PATH:$CM_BIN_PATH\"" >> "$shellrc"
+		fi
+	fi
+	if ! echo "$PYTHONPATH" | grep -q "$CM_PYTHON_PACKAGES_PATH" 
+	then
+		shellrc=~/.bashrc
+		if is_apple
+		then
+			shellrc=~/.bash_profile
+		fi
+		if grep -q "$CM_PYTHON_PACKAGES_PATH" "$shellrc"
+		then
+			err "PYTHONPATH error restart your shell"
+			exit 1
+		else
+			echo "export PYTHONPATH=\"\$PYTHONPATH:$CM_PYTHON_PACKAGES_PATH\"" >> "$shellrc"
 		fi
 	fi
 	if [ ! -x "$(command -v wget)" ]

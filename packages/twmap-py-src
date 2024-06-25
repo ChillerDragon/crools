@@ -1,0 +1,58 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+CM_PYTHON_PACKAGES_PATH="$HOME/.config/crools/crackman/python-packages"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+function is_apple() {
+	if [[ "$OSTYPE" == "darwin"* ]]
+	then
+		return 0
+	fi
+	return 1
+}
+
+if [ "$1" == "description" ]
+then
+	echo "the rust teeworlds map library by Patiga wrapped as a python library built from source"
+elif [ "$1" == "delete" ]
+then
+	rm -rf "$CM_SRC_PATH"/twmap-py
+	rm "$CM_PYTHON_PACKAGES_PATH/twmap.so"
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -f "$CM_PYTHON_PACKAGES_PATH/twmap.so" ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	cd "$CM_SRC_PATH" || exit 1
+	if [ ! -d "twmap-py" ]
+	then
+		git clone git@gitlab.com:Patiga/twmap-py.git || exit 1
+	fi
+	cd twmap-py || exit 1
+	git pull
+	cargo build --release || exit 1
+	sofile=target/release/twmap.so
+	if is_apple
+	then
+		sofile=target/release/libtwmap.dylib
+	fi
+	if [ ! -f "$sofile" ]
+	then
+		ls target
+		ls target/release
+		echo "error: so file not found $sofile"
+		exit 1
+	fi
+	mv "$sofile" "$CM_PYTHON_PACKAGES_PATH/twmap.so"
+fi
+
