@@ -254,5 +254,48 @@ teeworlds 0.6 control   2 NET_CTRLMSG_CONNECTACCEPT
 teeworlds 0.6 control   3 NET_CTRLMSG_ACCEPT
 teeworlds 0.6 control   4 NET_CTRLMSG_CLOSE
 
+teeworlds 0.6 SoundId=0  SOUND_GUN_FIRE=0
+teeworlds 0.6 SoundId=1  SOUND_SHOTGUN_FIRE
+teeworlds 0.6 SoundId=2  SOUND_GRENADE_FIRE
+teeworlds 0.6 SoundId=3  SOUND_HAMMER_FIRE
+teeworlds 0.6 SoundId=4  SOUND_HAMMER_HIT
+teeworlds 0.6 SoundId=5  SOUND_NINJA_FIRE
+teeworlds 0.6 SoundId=6  SOUND_GRENADE_EXPLODE
+teeworlds 0.6 SoundId=7  SOUND_NINJA_HIT
+teeworlds 0.6 SoundId=8  SOUND_LASER_FIRE
+teeworlds 0.6 SoundId=9  SOUND_LASER_BOUNCE
+teeworlds 0.6 SoundId=10  SOUND_WEAPON_SWITCH
+teeworlds 0.6 SoundId=11  SOUND_PLAYER_PAIN_SHORT
+teeworlds 0.6 SoundId=12  SOUND_PLAYER_PAIN_LONG
+teeworlds 0.6 SoundId=13  SOUND_BODY_LAND
+teeworlds 0.6 SoundId=14  SOUND_PLAYER_AIRJUMP
+teeworlds 0.6 SoundId=15  SOUND_PLAYER_JUMP
+teeworlds 0.6 SoundId=16  SOUND_PLAYER_DIE
+teeworlds 0.6 SoundId=17  SOUND_PLAYER_SPAWN
+teeworlds 0.6 SoundId=18  SOUND_PLAYER_SKID
+teeworlds 0.6 SoundId=19  SOUND_TEE_CRY
+teeworlds 0.6 SoundId=20  SOUND_HOOK_LOOP
+teeworlds 0.6 SoundId=21  SOUND_HOOK_ATTACH_GROUND
+teeworlds 0.6 SoundId=22  SOUND_HOOK_ATTACH_PLAYER
+teeworlds 0.6 SoundId=23  SOUND_HOOK_NOATTACH
+teeworlds 0.6 SoundId=24  SOUND_PICKUP_HEALTH
+teeworlds 0.6 SoundId=25  SOUND_PICKUP_ARMOR
+teeworlds 0.6 SoundId=26  SOUND_PICKUP_GRENADE
+teeworlds 0.6 SoundId=27  SOUND_PICKUP_SHOTGUN
+teeworlds 0.6 SoundId=28  SOUND_PICKUP_NINJA
+teeworlds 0.6 SoundId=29  SOUND_WEAPON_SPAWN
+teeworlds 0.6 SoundId=30  SOUND_WEAPON_NOAMMO
+teeworlds 0.6 SoundId=31  SOUND_HIT
+teeworlds 0.6 SoundId=32  SOUND_CHAT_SERVER
+teeworlds 0.6 SoundId=33  SOUND_CHAT_CLIENT
+teeworlds 0.6 SoundId=34  SOUND_CHAT_HIGHLIGHT
+teeworlds 0.6 SoundId=35  SOUND_CTF_DROP
+teeworlds 0.6 SoundId=36  SOUND_CTF_RETURN
+teeworlds 0.6 SoundId=37  SOUND_CTF_GRAB_PL
+teeworlds 0.6 SoundId=38  SOUND_CTF_GRAB_EN
+teeworlds 0.6 SoundId=39  SOUND_CTF_CAPTURE
+teeworlds 0.6 SoundId=40  SOUND_MENU
+teeworlds 0.6 SoundId=41  NUM_SOUNDS
+
 EOF
 
