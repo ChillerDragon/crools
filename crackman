@@ -395,7 +395,20 @@ then
 	if [ "$2" == "--help" ]
 	then
 		echo "usage: crackman update"
+		echo "description:"
+		echo " it will update all packages"
 		exit 0
+	fi
+	if [ "$#" != 1 ]
+	then
+		echo "usage: crackman update"
+		echo "description:"
+		echo " it will update all packages"
+		echo " to upgrade individual packages use:"
+		echo ""
+		echo "   $(tput bold)crackman upgrade <package>$(tput sgr0)"
+		echo ""
+		exit 1
 	fi
 	update_all
 elif [ "$1" == "remove" ]
