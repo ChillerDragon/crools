@@ -46,7 +46,7 @@ else
 		git clone git@github.com:neovim/neovim.git
 	fi
 	cd neovim || exit 1
-	tag="$(git tag | fzf)"
+	tag="$( (git tag && printf 'master\n') | fzf)"
 	if [ "$tag" == "" ]
 	then
 		echo "Error: invalid tag"
