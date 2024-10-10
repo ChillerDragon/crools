@@ -19,21 +19,43 @@ fatal() {
 	exit 1
 }
 
-ok() {
+success() {
 	local msg="$1"
 	printf "\n%b%s%b\n" "$GREEN" "$msg" "$RESET"
+}
+
+ok() {
+	local msg="$1"
+	printf "%s .. %bOK%b\n" "$msg" "$GREEN" "$RESET"
 }
 
 echo "ddnet code base linter"
 echo "runs similiar stuff like the CI"
 
 ./scripts/fix_style.py --dry-run || fatal style
+ok "clang format"
 ./scripts/check_header_guards.py || fatal guards
+ok "header guards"
 ./scripts/check_config_variables.py || fatal cfg_vars
-ctidy || fatal ctidy
-ddnet_tests || fatal tests
+ok "config variables"
 find . -type f -name '*.sh' -not -path './build*' -print0 | xargs -0 shellcheck || fatal shellcheck
+ok "shellckeck"
 find . -name "*.sh" -print0 | xargs -0 shfmt -d || fatal shfmt
+ok "shfmt"
+find . -type f -name "*.py" -path './scripts/*' -or -path './datasrc/*' -not -path '*__pycache__*' -print0 | xargs -0 pylint || fatal pylint
+ok "pytest"
+
+if grep --exclude-dir rust-bridge -rE '^#include "(antibot|base|engine|game|steam|test)/' src/
+then
+	error "see wrong includes above ^"
+fi
+ok "absolute includes"
+
+ctidy || fatal ctidy
+ok "clang tidy"
+ddnet_tests || fatal tests
+ok "ddnet tests"
+
 if grep -Eqr '(msg|Print).*\(.*"[Ee]rror:' src/;
 then
 	echo "Expected log errors to be in this format 'ERROR: error message'"
@@ -41,19 +63,14 @@ then
 	grep -Er '(msg|Print).*\(.*"[Ee]rror:' src/
 	fatal "log format"
 fi
-find . -type f -name "*.py" -not -path './ddnet-libs/*' -not -path './googletest-src/*' -print0 | xargs -0 pylint || fatal pylint
+ok "log style"
+
 find src -name '*.h' | while read -r i; do grep -r -q "$(basename "$i")" || error "Header file $i is unused"; done
-
-echo "[*] Check absolute includes"
-
-if grep --exclude-dir rust-bridge -rE '^#include "(antibot|base|engine|game|steam|test)/' src/
-then
-	error "see wrong includes above ^"
-fi
+ok "unused headers"
 
 if [ "$errors" -eq "0" ]
 then
-	ok "✅ all tests passed."
+	success "✅ all tests passed."
 else
 	fatal "There are $errors failures"
 fi
