@@ -1,0 +1,80 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+if [ "$1" == "description" ]
+then
+	echo "Adaptable, fast automation for all"
+elif [ "$1" == "delete" ]
+then
+	sudo rm -rf /opt/gradle
+	rm "$CM_BIN_PATH"/gradle
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -d /opt/gradle ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	if ! tmpdir="$(mktemp -d /tmp/crools_gradle_XXXXXXX)"
+	then
+		echo "failed to make tmp dir"
+		exit 1
+	fi
+	cd "$tmpdir" || exit 1
+
+	downloads_url='https://services.gradle.org'
+
+	if ! curl -q "$downloads_url/distributions/" > versions.html
+	then
+		echo "failed to get gradle version"
+		exit 1
+	fi
+
+	if ! version="$(grep -- '-bin.zip' versions.html | grep -o 'href=".*"' | cut -d '"' -f2 | grep -v '.sha256$' | sort -r | fzf)"
+	then
+		echo "failed to get version"
+		exit 1
+	fi
+
+	dl_url="$downloads_url$version"
+
+	echo "[*] downloading $dl_url ..."
+
+	if ! wget -O gradle.zip "$dl_url"
+	then
+		echo "failed to download gradle"
+		exit 1
+	fi
+
+	sudo unzip -d /opt/gradle gradle.zip
+
+	if ! gradle_dir="$(ls -t /opt/gradle/ | head -n1)"
+	then
+		echo "failed to get gradle dir"
+		exit 1
+	fi
+
+	if [ ! -d "/opt/gradle/$gradle_dir" ] || [ "$gradle_dir" == "" ]
+	then
+		echo "invalid gradle dir '/opt/gradle/$gradle_dir'"
+		exit 1
+	fi
+
+	if ! ln -s /opt/gradle/"$gradle_dir"/bin/gradle "$CM_BIN_PATH"/gradle
+	then
+		echo "failed to symlink gradle binary"
+		exit 1
+	fi
+
+	rm -rf "$tmpdir"
+fi
+
