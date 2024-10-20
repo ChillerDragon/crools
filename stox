@@ -1,7 +1,16 @@
 #!/usr/bin/env ruby
 
-require 'colorize'
-require 'nokogiri'
+def require_or_die(gem)
+  begin
+    require gem
+  rescue LoadError
+    puts "gem install #{gem}"
+    exit 1
+  end
+end
+
+require_or_die 'colorize'
+require_or_die 'nokogiri'
 require 'open-uri'
 
 class Stock
