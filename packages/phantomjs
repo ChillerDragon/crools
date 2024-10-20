@@ -1,0 +1,65 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+if [ "$1" == "description" ]
+then
+	echo "Scriptable Headless Browser"
+elif [ "$1" == "delete" ]
+then
+	rm "$CM_BIN_PATH"/gradle
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -f "$CM_BIN_PATH/phantomjs" ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	if ! tmpdir="$(mktemp -d /tmp/crools_gradle_XXXXXXX)"
+	then
+		echo "failed to make tmp dir"
+		exit 1
+	fi
+	cd "$tmpdir" || exit 1
+
+	version='2.1.1'
+	filename="phantomjs-$version-linux-x86_64"
+	url="https://bitbucket.org/ariya/phantomjs/downloads/$filename.tar.bz2"
+
+	echo "[*] downloading $url ..."
+
+	if ! wget -O "$filename".tar.bz2 "$url"
+	then
+		echo "failed to download archive"
+		exit 1
+	fi
+
+	if ! tar xvf "$filename".tar.bz2
+	then
+		echo "failed to extract $filename.tar.bz2"
+		exit 1
+	fi
+
+	if [ ! -f "$filename/bin/phantomjs" ]
+	then
+		echo "binary not found"
+		exit 1
+	fi
+
+	if ! mv "$filename/bin/phantomjs" "$CM_BIN_PATH"/phantomjs
+	then
+		echo "failed to move binary"
+		exit 1
+	fi
+
+	rm -rf "$tmpdir"
+fi
+
