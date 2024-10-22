@@ -37,6 +37,7 @@ function usage() {
 	echo "  will merge the selected repo with its upstream"
 	echo "respos:"
 	echo "  zx|chillerbot-zx"
+	echo "  zb|chillerbot-zx twbl bots"
 	echo "  ux|chillerbot-ux"
 	echo "  cg|CarryGores"
 	echo "  di|ddnet-insta"
@@ -65,10 +66,17 @@ function update_generic() {
 	upstream_branch="$(echo "$2" | cut -d '=' -f2-)"
 	branch="$(echo "$3" | cut -d '=' -f2-)"
 	origin="$(echo "$4" | cut -d '=' -f2-)"
-	if [ ! -d ./.git/ ] && [ ! -d ../.git/ ]
+	if [ -f .git ]
 	then
-		echo "not a git dir"
-		return
+		echo "[!!!] woah there cowboy found .git file!"
+		echo "[!!!] is this a submodule??"
+		echo "[!!!] i hope you know what you are doing ..."
+	else
+		if [ ! -d ./.git/ ] && [ ! -d ../.git/ ]
+		then
+			echo "not a git dir"
+			return
+		fi
 	fi
 	if ! git remote -v | grep origin | grep -q "$origin"
 	then
@@ -114,6 +122,15 @@ function update_zx() {
 		upstream_branch=chillerbot \
 		branch=zx \
 		origin=chillerbot-zx
+}
+
+function update_zx_twbl() {
+	cd ~/Desktop/git/chillerbot-zx/src/external/chillerbot-twbl || exit 1
+	update_generic_tw \
+		upstream_remote=twbl\
+		upstream_branch=master \
+		branch=master \
+		origin=chillerbot-twbl
 }
 
 function update_ux() {
@@ -168,6 +185,12 @@ function parse_args() {
 			then
 				update_zx
 			fi
+		elif [[ "$arg" == "zb" ]] || [[ "$arg" == "chillerbot-zx twbl bots" ]]
+		then
+			if [[ "$dry" != "dry" ]]
+			then
+				update_zx_twbl
+			fi
 		elif [[ "$arg" == "ux" ]] || [[ "$arg" == "chillerbot-ux" ]]
 		then
 			if [[ "$dry" != "dry" ]]
@@ -204,6 +227,7 @@ then
 	if [ -x "$(command -v fzf)" ]
 	then
 		repos="chillerbot-zx\n"
+		repos="chillerbot-zx twbl bots\n"
 		repos+="chillerbot-ux\n"
 		repos+="CarryGores\n"
 		repos+="ddnet-insta\n"
