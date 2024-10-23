@@ -42,6 +42,7 @@ function usage() {
 	echo "  cg|CarryGores"
 	echo "  di|ddnet-insta"
 	echo "  ddpp|ddnetpp|ddnet++"
+	echo "  ddnet++ twbl bots"
 }
 
 function err() {
@@ -169,6 +170,15 @@ function update_ddnetpp() {
 		origin=DDNetPP
 }
 
+function update_ddpp_twbl() {
+	cd ~/Desktop/git/DDNetPP/src/external/DDNetPP-bots || exit 1
+	update_generic_tw \
+		upstream_remote=twbl\
+		upstream_branch=master \
+		branch=master \
+		origin=DDNetPP-bots
+}
+
 function parse_args() {
 	local arg
 	local dry="$1"
@@ -215,6 +225,12 @@ function parse_args() {
 			then
 				update_ddnetpp
 			fi
+		elif [[ "$arg" == "ddnet++ twbl bots" ]]
+		then
+			if [[ "$dry" != "dry" ]]
+			then
+				update_ddpp_twbl
+			fi
 		else
 			echo "Error: invalid repo '$arg'"
 			exit 1
@@ -231,7 +247,8 @@ then
 		repos+="chillerbot-ux\n"
 		repos+="CarryGores\n"
 		repos+="ddnet-insta\n"
-		repos+="DDNetPP (ddnet++)"
+		repos+="DDNetPP (ddnet++)\n"
+		repos+="ddnet++ twbl bots"
 		repo="$(echo -e "$repos" | fzf)"
 		parse_args wet "$repo"
 	else
