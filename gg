@@ -243,7 +243,7 @@ then
 	if [ -x "$(command -v fzf)" ]
 	then
 		repos="chillerbot-zx\n"
-		repos="chillerbot-zx twbl bots\n"
+		repos+="chillerbot-zx twbl bots\n"
 		repos+="chillerbot-ux\n"
 		repos+="CarryGores\n"
 		repos+="ddnet-insta\n"
