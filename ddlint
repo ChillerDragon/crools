@@ -38,9 +38,9 @@ ok "clang format"
 ok "header guards"
 ./scripts/check_config_variables.py || fatal cfg_vars
 ok "config variables"
-find . -type f -name '*.sh' -not -path './build*' -print0 | xargs -0 shellcheck || fatal shellcheck
+find . -not \( -path "./build*" -type d -prune \) -type f -name '*.sh' -print0 | xargs -0 shellcheck || fatal shellcheck
 ok "shellckeck"
-find . -name "*.sh" -print0 | xargs -0 shfmt -d || fatal shfmt
+find . -not \( -path "./build*" -type d -prune \) -name "*.sh" -print0 | xargs -0 shfmt -d || fatal shfmt
 ok "shfmt"
 find . -type f -name "*.py" -path './scripts/*' -or -path './datasrc/*' -not -path '*__pycache__*' -print0 | xargs -0 pylint || fatal pylint
 ok "pytest"
