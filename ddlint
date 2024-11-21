@@ -47,7 +47,7 @@ ok "pytest"
 
 if grep --exclude-dir rust-bridge -rE '^#include "(antibot|base|engine|game|steam|test)/' src/
 then
-	error "see wrong includes above ^"
+	err "see wrong includes above ^"
 fi
 ok "absolute includes"
 
