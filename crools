@@ -90,6 +90,15 @@ fi
 git_save_pull
 
 (
+if [ -d ~/git/Censorlist ]
+then
+    echo "[*] updating censorlist.txt ..."
+    cd ~/git/Censorlist || exit 1
+    git_save_pull
+fi
+)
+
+(
     if [ -d ../dotfiles ] && [ -f ../dotfiles/setup.sh ]
     then
         cd ../dotfiles || exit 1
