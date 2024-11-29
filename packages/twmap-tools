@@ -1,0 +1,50 @@
+#!/bin/bash
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+function is_apple() {
+	if [[ "$OSTYPE" == "darwin"* ]]
+	then
+		return 0
+	fi
+	return 1
+}
+
+if [ "$1" == "description" ]
+then
+	echo "official twmap cli tools: twmap-edit, twmap-check-ddnet, twmap-automapper, twmap-fix, twmap-extract-files"
+elif [ "$1" == "delete" ]
+then
+	echo "THIS IS NOT A CRACKMAN PACKAGE"
+	echo "INSTALL IT MANUALLY USING CARGO"
+	echo ""
+	tput bold
+	echo " cargo uninstall twmap-tools"
+	tput sgr0
+	echo ""
+	exit 1
+elif [ "$1" == "is_installed?" ]
+then
+	if [ -f ~/.cargo/bin/twmap-edit ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	echo "THIS IS NOT A CRACKMAN PACKAGE"
+	echo "INSTALL IT MANUALLY USING CARGO"
+	echo ""
+	tput bold
+	echo " cargo install twmap-tools"
+	tput sgr0
+	echo ""
+	exit 1
+fi
+
