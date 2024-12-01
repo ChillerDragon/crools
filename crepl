@@ -146,6 +146,16 @@ $(_include_or_print "$resolve" "$tmp_src_file_includes")
 $(_include_or_print "$resolve" "$tmp_src_file_functions")
 #include "$tmp_src_file_test_functions"
 
+// debug print macros
+// int *a;
+// pp(a); // => 0x7f141612bad0
+#define pi(val) printf("%i\n", val);
+#define pf(val) printf("%f\n", val);
+#define px(val) printf("%x\n", val);
+#define pc(val) printf("%c\n", val);
+#define ps(val) printf("%s\n", val);
+#define pp(val) printf("%p\n", val);
+
 int main()
 {
 	$(_include_or_print "$resolve" "$tmp_src_file_main")
@@ -527,6 +537,7 @@ is_math_statement() {
 
 log "CC=$ARG_COMPILER"
 log "to see the current code use '${BOLD}show code${CLEAR_BOLD}'"
+log "available print helpers: pp(pointer), pi(integer), pf(float), ps(string), pc(char)"
 
 while IFS= read -e -r -p "> " input
 do
