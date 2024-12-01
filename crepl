@@ -155,6 +155,7 @@ $(_include_or_print "$resolve" "$tmp_src_file_functions")
 #define pc(val) printf("%c\n", val);
 #define ps(val) printf("%s\n", val);
 #define pp(val) printf("%p\n", val);
+#define pzu(val) printf("%zu\n", val);
 
 int main()
 {
@@ -558,7 +559,7 @@ do
 			input="$input;"
 		fi
 	fi
-	if [[ "$input" =~ ^[:space:]*(puts|printf|pi|pf|px|pc|ps|pp)\( ]]
+	if [[ "$input" =~ ^[:space:]*(puts|printf|pi|pf|px|pc|ps|pp|pzu)\( ]]
 	then
 		printf '%s\n' "$input" > "$tmp_src_file_tmp"
 	elif [[ "$input" =~ ^\ *int\ +${c_var_pattern}\ *=(${c_stmt_pattern})\;+$ ]]
