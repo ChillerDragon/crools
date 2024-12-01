@@ -558,7 +558,7 @@ do
 			input="$input;"
 		fi
 	fi
-	if [[ "$input" =~ ^[:space:]*(puts|printf)\( ]]
+	if [[ "$input" =~ ^[:space:]*(puts|printf|pi|pf|px|pc|ps|pp)\( ]]
 	then
 		printf '%s\n' "$input" > "$tmp_src_file_tmp"
 	elif [[ "$input" =~ ^\ *int\ +${c_var_pattern}\ *=(${c_stmt_pattern})\;+$ ]]
