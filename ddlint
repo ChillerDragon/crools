@@ -1,9 +1,21 @@
 #!/bin/bash
 
+current_dir="$(basename "$(pwd)")"
+if [ "$current_dir" = ddnet_protocol ]
+then
+	if ! _ddnet_protocol_lint
+	then
+		exit 1
+	fi
+	exit 0
+fi
+
 RESET="\e[0m"
 GREEN="\e[1;32m"
 RED="\033[1;91m"
 BG_RED="\033[0;101m"
+
+errors=0
 
 err() {
 	local msg="$1"
