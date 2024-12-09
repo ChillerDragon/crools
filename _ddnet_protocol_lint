@@ -105,6 +105,26 @@ ddproto_ctidy() {
 	return 0
 }
 
+ddproto_no_bloat() {
+	check_dir .git
+	check_dir cmake
+	check_dir src
+	if [ ! -f CMakeLists.txt ]
+	then
+		echo "Error: CMakeLists.txt not found!"
+		echo "       make sure your are at the root of a ddnet repo"
+		return 1
+	fi
+
+	mkdir -p build-nobloat
+	cd build-nobloat|| return 1
+	cmake .. -DBLOAT=OFF || return 1
+	make -j"$(nproc)" || return 1
+
+	cd .. || return 1
+	return 0
+}
+
 ddproto_compile_docs() {
 	check_dir docs
 	check_dir include
@@ -142,6 +162,8 @@ ddproto_ctidy || fatal ctidy
 ok "clang tidy"
 ddproto_tests || fatal tests
 ok "tests"
+ddproto_no_bloat || fatal "bloat off"
+ok "bloat off"
 
 if [ "$errors" -eq "0" ]
 then
