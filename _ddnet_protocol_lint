@@ -145,6 +145,19 @@ ddproto_compile_docs() {
 		lintdown.sh docs/*.md --skip-pattern 'typedef (enum|struct) {' --wrap-main
 }
 
+ddproto_compile_readme() {
+	check_dir docs
+	check_dir include
+
+	cd build || exit 1
+	make || exit 1
+	cd .. || exit 1
+
+	CFLAGS="-DBLOAT" \
+		LDLIBS="-I$(pwd)/include -L$(pwd)/build -lddnet_protocol" \
+		lintdown.sh README.md
+}
+
 echo "ddnet_protocol lib code base linter"
 echo "runs similiar stuff like the CI"
 
@@ -158,6 +171,8 @@ ok "C types"
 ok "generate docs"
 ddproto_compile_docs || fatal "compile docs C code"
 ok "compile docs C code"
+ddproto_compile_readme || fatal "compile README examples"
+ok "compile README examples"
 ddproto_ctidy || fatal ctidy
 ok "clang tidy"
 ddproto_tests || fatal tests
