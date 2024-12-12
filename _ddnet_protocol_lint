@@ -142,7 +142,8 @@ ddproto_compile_docs() {
 	C_INCLUDES+=stdint.h,stddef.h,stdbool.h
 	CFLAGS="-DBLOAT" \
 		LDLIBS="-I$(pwd)/include -L$(pwd)/build -lddnet_protocol" \
-		lintdown.sh docs/*.md --skip-pattern 'typedef (enum|struct) {' --wrap-main
+		lintdown.sh docs/*.md --skip-pattern 'typedef (enum|struct) {' --wrap-main || return 1
+	return 0
 }
 
 ddproto_compile_readme() {
@@ -155,7 +156,22 @@ ddproto_compile_readme() {
 
 	CFLAGS="-DBLOAT" \
 		LDLIBS="-I$(pwd)/include -L$(pwd)/build -lddnet_protocol" \
-		lintdown.sh README.md
+		lintdown.sh README.md || return 1
+	return 0
+}
+
+ddproto_compile_examples() {
+	check_dir docs
+	check_dir include
+
+        gcc examples/huffman.c -o /tmp/huffman -I"$(pwd)"/include -L"$(pwd)"/build -lddnet_protocol || return 1
+        /tmp/huffman || return 1
+        if [ "$(/tmp/huffman)" != foo ]
+	then
+		printf 'Error: expected "foo" but got ^\n';
+		retrun 1;
+	fi
+	return 0
 }
 
 echo "ddnet_protocol lib code base linter"
@@ -173,6 +189,8 @@ ddproto_compile_docs || fatal "compile docs C code"
 ok "compile docs C code"
 ddproto_compile_readme || fatal "compile README examples"
 ok "compile README examples"
+ddproto_compile_examples || fatal "compile examples"
+ok "compile examples"
 ddproto_ctidy || fatal ctidy
 ok "clang tidy"
 ddproto_tests || fatal tests
