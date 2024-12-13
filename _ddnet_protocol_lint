@@ -179,8 +179,10 @@ echo "runs similiar stuff like the CI"
 
 ./scripts/fix_style.sh --dry-run || fatal style
 ok "clang format"
-./scripts/check_standard_headers.sh || fatal headers
+./scripts/check_standard_headers.sh || fatal "standard headers"
 ok "standard headers"
+./scripts/check_public_headers.sh || fatal "public headers"
+ok "public headers"
 ./scripts/check_types.sh || fatal "C types"
 ok "C types"
 ./scripts/docs.rb --dry-run || fatal "generate docs"
