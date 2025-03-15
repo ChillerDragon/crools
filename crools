@@ -193,6 +193,8 @@ fi
         mkdir -p other
         cd other || exit 1
         [ -d bashrc-secrets ] && exit 0
+        # do not load secrets on vps
+        [ ! -d /home/chiller/Pictures ] && exit 0
 
 	echo "[*] downloading bashrc-secrets ..."
         git clone git@github.com:ChillerDragon/bashrc-secrets.git
