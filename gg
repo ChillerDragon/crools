@@ -55,6 +55,12 @@ function fail() {
 	exit 1
 }
 
+function cmd_or_fail() {
+	local cmd="$1"
+	echo -e "[*] ${WHITE}$cmd${reset}"
+	eval "$cmd" || fail "command failed: ${WHITE}$cmd${reset}"
+}
+
 function update_generic() {
 	# upstream remote and local branch need same name
 	# remote (ddnet) should be located on branch (ddnet)
@@ -85,21 +91,21 @@ function update_generic() {
 		echo "not $origin remote"
 		return
 	fi
-	git checkout "$branch" || fail "${WHITE}git checkout $branch${reset} failed"
-	git pull || fail "${WHITE}git pull${reset} failed"
-	git fetch "$upstream_remote" || fail "${WHITE}git fetch $upstream_remote${reset} failed"
+	cmd_or_fail "git checkout $branch"
+	cmd_or_fail "git pull"
+	cmd_or_fail "git fetch $upstream_remote"
 	if ! git checkout "$upstream_remote"
 	then
 		err "You need a local branch that matches the upstream remote name"
 		err "In your case you need a branch called $WHITE$upstream_remote"
 		fail "${WHITE}git checkout $upstream_remote${reset} failed"
 	fi
-	git reset --hard "$upstream_remote/$upstream_branch" || fail "${WHITE}git reset --hard $upstream_remote/$upstream_branch${reset} failed"
-	git submodule update || fail "${WHITE}git submodule update${reset} failed"
-	git push || fail "${WHITE}git push${reset} failed"
-	git checkout "$branch" || fail "${WHITE}git checkout $branch${reset} failed"
-	git merge --no-edit "$upstream_remote" || fail "${WHITE}git merge --no-edit $upstream_remote${reset} failed"
-	git submodule update || fail "${WHITE}git submodule update${reset} failed"
+	cmd_or_fail "git reset --hard $upstream_remote/$upstream_branch"
+	cmd_or_fail "git submodule update"
+	cmd_or_fail "git push"
+	cmd_or_fail "git checkout $branch"
+	cmd_or_fail "git merge --no-edit $upstream_remote"
+	cmd_or_fail "git submodule update"
 }
 
 function update_generic_tw() {
