@@ -39,6 +39,7 @@ function usage() {
 	echo "  zx|chillerbot-zx"
 	echo "  zb|chillerbot-zx twbl bots"
 	echo "  ux|chillerbot-ux"
+	echo "  cc|chillerbot-cc"
 	echo "  cg|CarryGores"
 	echo "  di|ddnet-insta"
 	echo "  ddpp|ddnetpp|ddnet++"
@@ -143,6 +144,15 @@ function update_ux() {
 		origin=chillerbot-ux
 }
 
+function update_cc() {
+	cd ~/Desktop/git/chillerbot-cc || exit 1
+	update_generic_tw \
+		upstream_remote=ux \
+		upstream_branch=chillerbot \
+		branch=cc \
+		origin=chillerbot-cc
+}
+
 function update_carrygores() {
 	cd ~/Desktop/git/CarryGores || exit 1
 	update_generic_tw \
@@ -207,6 +217,12 @@ function parse_args() {
 			then
 				update_ux
 			fi
+		elif [[ "$arg" == "cc" ]] || [[ "$arg" == "chillerbot-cc" ]]
+		then
+			if [[ "$dry" != "dry" ]]
+			then
+				update_cc
+			fi
 		elif [[ "$arg" == "cg" ]] || [[ "${arg,,}" == "carrygores" ]]
 		then
 			if [[ "$dry" != "dry" ]]
@@ -245,6 +261,7 @@ then
 		repos="chillerbot-zx\n"
 		repos+="chillerbot-zx twbl bots\n"
 		repos+="chillerbot-ux\n"
+		repos+="chillerbot-cc\n"
 		repos+="CarryGores\n"
 		repos+="ddnet-insta\n"
 		repos+="DDNetPP (ddnet++)\n"
