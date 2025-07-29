@@ -24,6 +24,7 @@ declare -A Packages=(
 	[clang-tidy-17]="$clang_release_base_url/clang-tidy-17_linux-amd64"
 	[gomuks]='https://github.com/tulir/gomuks/releases/download/v0.3.0/gomuks-linux-amd64'
 	[term-ux]='https://github.com/chillerbot/chillerbot-ux/releases/download/v0.0.3/term-ux-linux'
+	[lintdown.sh]='https://raw.githubusercontent.com/ChillerDragon/lintdown.sh/master/lintdown.sh'
 )
 
 function show_help() {
@@ -186,7 +187,7 @@ function cm_doctor() {
 
 function cm_check_pack() {
 	local pack=$1
-	if [[ ! "$pack" =~ ^[0-9a-zA-Z_-]*$ ]]
+	if [[ ! "$pack" =~ ^[0-9a-zA-Z_\.-]*$ ]]
 	then
 		err "invalid package name '$pack'"
 		exit 1
