@@ -105,26 +105,6 @@ ddproto_ctidy() {
 	return 0
 }
 
-ddproto_no_bloat() {
-	check_dir .git
-	check_dir cmake
-	check_dir src
-	if [ ! -f CMakeLists.txt ]
-	then
-		echo "Error: CMakeLists.txt not found!"
-		echo "       make sure your are at the root of a ddnet repo"
-		return 1
-	fi
-
-	mkdir -p build-nobloat
-	cd build-nobloat|| return 1
-	cmake .. -DBLOAT=OFF || return 1
-	make -j"$(nproc)" || return 1
-
-	cd .. || return 1
-	return 0
-}
-
 ddproto_compile_docs() {
 	check_dir docs
 	check_dir include
@@ -140,7 +120,7 @@ ddproto_compile_docs() {
 		fatal "failed to collect ddnet_protocol header files"
 	fi
 	C_INCLUDES+=stdint.h,stddef.h,stdbool.h
-	CFLAGS="-DBLOAT" \
+	CFLAGS="-DCODE_SPACE=USER_SPACE" \
 		LDLIBS="-I$(pwd)/include -L$(pwd)/build -lddnet_protocol" \
 		lintdown.sh docs/*.md --skip-pattern 'typedef (enum|struct) {' --wrap-main || return 1
 	return 0
@@ -154,7 +134,7 @@ ddproto_compile_readme() {
 	make || exit 1
 	cd .. || exit 1
 
-	CFLAGS="-DBLOAT" \
+	CFLAGS="-DCODE_SPACE=USER_SPACE" \
 		LDLIBS="-I$(pwd)/include -L$(pwd)/build -lddnet_protocol" \
 		lintdown.sh README.md || return 1
 	return 0
@@ -164,13 +144,20 @@ ddproto_compile_examples() {
 	check_dir docs
 	check_dir include
 
-        gcc examples/huffman.c -o /tmp/huffman -I"$(pwd)"/include -L"$(pwd)"/build -lddnet_protocol || return 1
-        /tmp/huffman || return 1
-        if [ "$(/tmp/huffman)" != foo ]
+	mkdir -p build-examples || exit 1
+	cd build-examples || exit 1
+	cmake .. -DEXAMPLES=ON || exit 1
+	make || exit 1
+
+        ./examples/huffman || return 1
+        if [ "$(./examples/huffman)" != foo ]
 	then
 		printf 'Error: expected "foo" but got ^\n';
+		cd .. || exit 1
 		retrun 1;
 	fi
+
+	cd .. || exit 1
 	return 0
 }
 
@@ -197,8 +184,6 @@ ddproto_ctidy || fatal ctidy
 ok "clang tidy"
 ddproto_tests || fatal tests
 ok "tests"
-ddproto_no_bloat || fatal "bloat off"
-ok "bloat off"
 
 if [ "$errors" -eq "0" ]
 then
