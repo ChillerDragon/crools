@@ -68,7 +68,7 @@ parse_args() {
 
 parse_args "$@"
 
-build_dir="build-camel"
+build_dir="build-tidy-context"
 if [ "$ARG_BUILDDIR" != "" ]
 then
 	build_dir="$ARG_BUILDDIR"
