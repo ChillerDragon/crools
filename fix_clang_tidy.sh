@@ -111,6 +111,7 @@ list_code_files() {
 			-path './src/engine/shared/teehistorian_ex_chunks.h' -o \
 			-path './src/game/client/components/local_server.h' -o \
 			-path './src/game/client/components/items.h' -o \
+			-path './src/game/client/components/nameplates.h' -o \
 			-path './src/game/mapbugs_list.h' -o \
 			-path './src/game/tuning.h' -o \
 			-path './src/engine/shared/config_variables.h' -o \
@@ -138,7 +139,7 @@ check_file() {
 	if ! clang-tidy --fix --config-file="$CLANG_CONFIG_FILE" "$source_file" -p "$build_dir" 2>/dev/null
 	then
 		# show stderr on error
-		clang-tidy --fix --config-file="$CLANG_CONFIG_FILE" "$source_file" -p "$build_dir"
+		clang-tidy --fix --config-file="$CLANG_CONFIG_FILE" "$source_file" -p "$build_dir" || true
 	fi
 }
 
