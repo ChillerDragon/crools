@@ -109,6 +109,7 @@ list_code_files() {
 			-path './src/game/mapitems_ex_types.h' -o \
 			-path './src/engine/shared/protocol_ex_msgs.h' -o \
 			-path './src/engine/shared/teehistorian_ex_chunks.h' -o \
+			-path './src/game/client/components/local_server.h' -o \
 			-path './src/game/mapbugs_list.h' -o \
 			-path './src/game/tuning.h' -o \
 			-path './src/engine/shared/config_variables.h' -o \
