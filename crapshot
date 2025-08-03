@@ -212,7 +212,7 @@ function read_conf() {
         fi
         remote="$(echo "$line" | cut -d' ' -f2)"
         host="$(echo "$remote" | cut -d'@' -f2)"
-        ts=uuid
+        ts="$(uuid)"
         picname="crapshot_$ts.png"
         picpath="/tmp/crools-$USER/crapshot/$picname"
         break
