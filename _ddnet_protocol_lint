@@ -161,6 +161,14 @@ ddproto_compile_examples() {
 	return 0
 }
 
+install_typo_checker() {
+	[ -x "$(command -v typos)" ] && return
+
+	cargo install typos-cli || exit 1
+}
+
+install_typo_checker
+
 echo "ddnet_protocol lib code base linter"
 echo "runs similiar stuff like the CI"
 
@@ -180,6 +188,8 @@ ddproto_compile_readme || fatal "compile README examples"
 ok "compile README examples"
 ddproto_compile_examples || fatal "compile examples"
 ok "compile examples"
+typos . || fatal "typos"
+ok "typos"
 ddproto_ctidy || fatal ctidy
 ok "clang tidy"
 ddproto_tests || fatal tests
