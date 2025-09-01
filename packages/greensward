@@ -32,6 +32,7 @@ else
 
 	curl -OL "https://raw.githubusercontent.com/ChillerDragon/teeworlds/f6952ec0a444e4c76ea177c4d60e595d200f5eca/datasrc/skins/greensward.json"
 	curl -OL "https://github.com/ChillerDragon/teeworlds/raw/f6952ec0a444e4c76ea177c4d60e595d200f5eca/datasrc/skins/body/greensward.png"
+	[ -d ~/.teeworlds ] && mkdir -p ~/.teeworlds/skins/body
 	mv greensward.png ~/.teeworlds/skins/body/
 	mv greensward.json ~/.teeworlds/skins/
 
