@@ -62,5 +62,5 @@ cmake --build . --config Debug --target run_tests || exit 1
 test -f chillerbot-ux && cp chillerbot-ux DDNet
 # test -f term-ux && cp term-ux DDNet
 
-./integration_test.sh --valgrind-memcheck || exit 1
+python ../scripts/integration_test.py . || exit 1
 
