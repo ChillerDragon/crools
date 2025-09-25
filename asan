@@ -84,9 +84,9 @@ _cat() {
 setup_env() {
 	if [ ! -f asan.cmd ]; then
 		cat <<-EOF >asan.cmd
-			export UBSAN_OPTIONS=suppressions=./ubsan.supp:log_path=./SAN:print_stacktrace=1:halt_on_errors=0
+			export UBSAN_OPTIONS=suppressions=../ubsan.supp:log_path=./SAN:print_stacktrace=1:halt_on_errors=0
 			export ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=1:halt_on_errors=0
-			export LSAN_OPTIONS=suppressions=./lsan.supp
+			export LSAN_OPTIONS=suppressions=../lsan.supp
 		EOF
 	fi
 	echo "Maybe you would like to run this:"
