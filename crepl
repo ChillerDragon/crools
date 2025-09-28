@@ -251,7 +251,7 @@ c_math_expr_left="($c_int_value_pattern${c_math_operators_pattern})+"
 
 # TODO: func pattern doesnt match
 c_type_pattern='(void|int|char|long|long long|float|double|short|int64_t|time_t)'
-c_single_line_func_pattern='(const\ *)?'"$c_type_pattern"'\ *\*?\ *'"$c_var_pattern"'\ *\(.*\)\ *{.*}'
+c_single_line_func_pattern='(const\ *)?'"$c_type_pattern"'\ *\*?\ *'"$c_var_pattern"'\ *\(.*\)\ *\{.*\}'
 
 # produces a format string for c printf
 # including a %d or %u placeholder
