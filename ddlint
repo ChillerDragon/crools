@@ -12,6 +12,7 @@ fi
 
 RESET="\e[0m"
 GREEN="\e[1;32m"
+YELLOW="\e[1;33m"
 RED="\033[1;91m"
 BG_RED="\033[0;101m"
 
@@ -41,6 +42,39 @@ ok() {
 	printf "%s .. %bOK%b\n" "$msg" "$GREEN" "$RESET"
 }
 
+skip() {
+	local msg="$1"
+	local skip_reason="$2"
+	if [ "$skip_reason" = "" ]
+	then
+		printf "%s .. %bSKIPPED%b\n" "$msg" "$YELLOW" "$RESET"
+	else
+		printf "%s .. %bSKIPPED%b (%s)\n" "$msg" "$YELLOW" "$RESET" "$skip_reason"
+	fi
+}
+
+check_doxygen() {
+	if [[ ! -x "$(command -v doxygen)" ]]
+	then
+		skip doxygen "missing cmd doxygen"
+		return
+	fi
+	if [[ ! -x "$(command -v dot )" ]]
+	then
+		skip doxygen "missing cmd dot (graphviz)"
+		return
+	fi
+	doxygen -q &>/dev/null
+	sed -i -E '/warning: include file .* not found, perhaps you forgot to add its directory to INCLUDE_PATH/d' docs/warn.log
+	if [ -s docs/warn.log ]
+	then
+		echo "[*] doxygen version $(doxygen  --version) warnings:"
+		cat docs/warn.log
+		fatal doxygen
+	fi
+	ok doxygen
+}
+
 echo "ddnet code base linter"
 echo "runs similiar stuff like the CI"
 
@@ -56,6 +90,7 @@ find . -not \( -path "./build*" -type d -prune \) -name "*.sh" -print0 | xargs -
 ok "shfmt"
 find . -type f -name "*.py" -path './scripts/*' -or -path './datasrc/*' -not -path '*__pycache__*' -print0 | xargs -0 pylint || fatal pylint
 ok "pytest"
+check_doxygen
 
 if grep --exclude-dir rust-bridge -rE '^#include "(antibot|base|engine|game|steam|test)/' src/
 then
