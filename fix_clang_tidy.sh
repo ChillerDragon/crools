@@ -30,7 +30,7 @@ usage() {
 parse_args() {
 	while true
 	do
-		[ "$#" -eq 0 ] && break
+		[[ "$#" -eq 0 ]] && break
 		arg="$1"
 		shift
 
@@ -42,7 +42,7 @@ parse_args() {
 				err "error: jobs have to be numeric"
 				exit 1
 			fi
-		elif [ "${arg::1}" = - ]
+		elif [[ "${arg::1}" = - ]]
 		then
 			if [ "$arg" = "-h" ] && [ "$arg" == --help ]
 			then
