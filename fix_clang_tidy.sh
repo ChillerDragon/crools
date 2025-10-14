@@ -3,6 +3,10 @@
 ARG_JOBS=1
 ARG_BUILDDIR=''
 ARG_SKIP=0
+ARG_BUILTIN_CONFIG=0
+ARG_FIX=0
+
+build_dir="build-tidy-context"
 
 read -rd '' CLANG_CONFIG_CONTENT << EOF
 Checks: >
@@ -23,7 +27,15 @@ usage() {
 	cat <<-EOF
 	usage: fix_clang_tidy.sh [OPTION..] [build_dir]
 	options:
-	  -j[jobs]        number of threads (default: 1)
+	  -j[jobs]              number of threads (default: 1)
+	  --builtin-config      use inline clang tidy config defined in the script code (default: look for .clang-tidy)
+	  --skip [offset num]   skip to file at offset (default: 0)
+	  --fix                 pass --fix to clang-tidy so it auto fixes the code (default: off)
+	build_dir:
+	  path to directory with a cmake build
+	  clang-tidy uses that for context when operating in single file mode
+	  if this argument is not passed it will default to $build_dir
+	  if that directory does not exist it will automatically create it and build
 	EOF
 }
 
@@ -44,7 +56,7 @@ parse_args() {
 			fi
 		elif [[ "${arg::1}" = - ]]
 		then
-			if [ "$arg" = "-h" ] && [ "$arg" == --help ]
+			if [ "$arg" = "-h" ] || [ "$arg" == --help ]
 			then
 				usage
 				exit 0
@@ -52,6 +64,12 @@ parse_args() {
 			then
 				ARG_SKIP="$1"
 				shift
+			elif [ "$arg" = --builtin-config ]
+			then
+				ARG_BUILTIN_CONFIG=1
+			elif [ "$arg" = --fix ]
+			then
+				ARG_FIX=1
 			else
 				err "error: invalid argument '$arg'"
 				exit 1
@@ -68,7 +86,6 @@ parse_args() {
 
 parse_args "$@"
 
-build_dir="build-tidy-context"
 if [ "$ARG_BUILDDIR" != "" ]
 then
 	build_dir="$ARG_BUILDDIR"
@@ -83,10 +100,10 @@ then
 fi
 # generated code hack
 # https://github.com/ddnet/ddnet/issues/8152
-mkdir -p src/game/generated
+mkdir -p src/generated
 for generated_file in client_data.h client_data7.h
 do
-	cp "$build_dir/src/game/generated/$generated_file" src/game/generated/
+	cp "$build_dir/src/generated/$generated_file" src/generated/
 done
 
 if ! CLANG_CONFIG_FILE="$(mktemp /tmp/clang-tidy-XXXXX.yaml)"
@@ -118,7 +135,7 @@ list_code_files() {
 			-path './src/engine/shared/websockets.h' -o \
 			-path './src/engine/client/keynames.h' -o \
 			-path './src/rust-bridge/*' -o \
-			-path './src/game/generated/*' -o \
+			-path './src/generated/*' -o \
 			-path './src/test/*' -o \
 			-path './src/android/*' -o \
 			-path './src/base/*' -o \
@@ -136,10 +153,22 @@ total="$(list_code_files | wc -l)"
 check_file() {
 	local source_file="$1"
 	local build_dir="$2"
-	if ! clang-tidy --fix --config-file="$CLANG_CONFIG_FILE" "$source_file" -p "$build_dir" 2>/dev/null
+
+	local clang_args=()
+
+	if [[ "$ARG_BUILTIN_CONFIG" = 1 ]]
+	then
+		clang_args+=("--config-file='$CLANG_CONFIG_FILE'")
+	fi
+	if [[ "$ARG_FIX" = 1 ]]
+	then
+		clang_args=('--fix')
+	fi
+
+	if ! clang-tidy "${clang_args[@]}" "$source_file" -p "$build_dir" 2>/dev/null
 	then
 		# show stderr on error
-		clang-tidy --fix --config-file="$CLANG_CONFIG_FILE" "$source_file" -p "$build_dir" || true
+		clang-tidy "${clang_args[@]}" "$source_file" -p "$build_dir" || true
 	fi
 }
 
