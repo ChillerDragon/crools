@@ -142,12 +142,15 @@ function screenshot() {
 	return 0
 }
 function os_copy() {
-    if is_apple
-    then
-        echo "$1" | pbcopy
-    else
-        echo "$1" | xsel -ib
-    fi
+	if is_apple
+	then
+		echo "$1" | pbcopy
+	elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]
+	then
+		echo "$1" | wl-copy
+	else
+		echo "$1" | xsel -ib
+	fi
 }
 function os_say() {
     if [ -x "$(command -v say)" ]
