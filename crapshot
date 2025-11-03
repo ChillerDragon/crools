@@ -65,51 +65,51 @@ function install_tool() {
     fi
 }
 function screenshot() {
-    local file
-    file="$1"
-    if [ "$2" == "-s" ]
-    then
-        if is_apple && [ -x "$(command -v screencapture)" ]
-        then
-            screencapture -i "$file"
-            return 0
-        elif [ -x "$(command -v maim)" ]
-        then
-            if ! maim --select "$file"
-            then
-                return 1
-            fi
-            return 0
-        elif [ -x "$(command -v gnome-screenshot)" ]
-        then
-            gnome-screenshot --area --file "$file"
-            return 0
-        else
-            echo "no screenshot tool found"
-            return 1
-        fi
-    else
-        if is_apple && [ -x "$(command -v screencapture)" ]
-        then
-            screencapture "$file"
-            return 0
-        elif [ -x "$(command -v maim)" ]
-        then
-            if ! maim "$file"
-            then
-                return 1
-            fi
-            return 0
-        elif [ -x "$(command -v gnome-screenshot)" ]
-        then
-            gnome-screenshot --file "$file"
-            return 0
-        else
-            echo "no screenshot tool found"
-            return 1
-        fi
-    fi
-    return 0
+	local file
+	file="$1"
+	if [ "$2" == "-s" ]
+	then
+		if is_apple && [ -x "$(command -v screencapture)" ]
+		then
+			screencapture -i "$file"
+			return 0
+		elif [ -x "$(command -v maim)" ]
+		then
+			if ! maim --select "$file"
+			then
+				return 1
+			fi
+			return 0
+		elif [ -x "$(command -v gnome-screenshot)" ]
+		then
+			gnome-screenshot --area --file "$file"
+			return 0
+		else
+			echo "no screenshot tool found"
+			return 1
+		fi
+	else
+		if is_apple && [ -x "$(command -v screencapture)" ]
+		then
+			screencapture "$file"
+			return 0
+		elif [ -x "$(command -v maim)" ]
+		then
+			if ! maim "$file"
+			then
+				return 1
+			fi
+			return 0
+		elif [ -x "$(command -v gnome-screenshot)" ]
+		then
+			gnome-screenshot --file "$file"
+			return 0
+		else
+			echo "no screenshot tool found"
+			return 1
+		fi
+	fi
+	return 0
 }
 function os_copy() {
     if is_apple
