@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -eu
+
 # crapshot - take screenshot and scp it to your fav zzh remote
 #
 # DEPENDENCYS:
@@ -73,6 +76,11 @@ function screenshot() {
 		then
 			screencapture -i "$file"
 			return 0
+		elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]
+		then
+			hyprshot --filename __crapshot.png --mode region
+			mv ~/Pictures/__crapshot.png "$file"
+			return 0
 		elif [ -x "$(command -v maim)" ]
 		then
 			if ! maim --select "$file"
@@ -92,6 +100,11 @@ function screenshot() {
 		if is_apple && [ -x "$(command -v screencapture)" ]
 		then
 			screencapture "$file"
+			return 0
+		elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]
+		then
+			hyprshot --filename __crapshot.png --mode window
+			mv ~/Pictures/__crapshot.png "$file"
 			return 0
 		elif [ -x "$(command -v maim)" ]
 		then
@@ -389,7 +402,7 @@ if [ "$arg_no_browser" == "1" ]
 then
     exit 0
 fi
-if [ "$BROWSER" != "" ]
+if [ "${BROWSER:-}" != "" ]
 then
     $BROWSER "$url" &
 elif [ "$(uname)" == "Darwin" ]
