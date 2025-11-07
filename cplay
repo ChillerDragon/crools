@@ -180,5 +180,5 @@ then
 fi
 
 echo "opening $PWD/$filename"
-vim "$filename"
+nvim "$filename"
 
