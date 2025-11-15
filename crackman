@@ -9,7 +9,7 @@ CM_PYTHON_PACKAGES_PATH="$HOME/.config/crools/crackman/python-packages"
 CM_INSTALLED_PATH="$HOME/.config/crools/crackman/installed"
 CM_TMP_PATH="$HOME/.config/crools/crackman/tmp"
 
-clang_release_base_url='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-8f72ab3c'
+clang_release_base_url='https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-796e77c'
 
 declare -A Packages=(
 	[clang-format-10]="$clang_release_base_url/clang-format-10_linux-amd64"
@@ -20,6 +20,7 @@ declare -A Packages=(
 	[clang-format-15]="$clang_release_base_url/clang-format-15_linux-amd64"
 	[clang-format-16]="$clang_release_base_url/clang-format-16_linux-amd64"
 	[clang-format-17]="$clang_release_base_url/clang-format-17_linux-amd64"
+	[clang-format-20]="$clang_release_base_url/clang-format-20_linux-amd64"
 	[clang-tidy-14]="$clang_release_base_url/clang-tidy-14_linux-amd64"
 	[clang-tidy-17]="$clang_release_base_url/clang-tidy-17_linux-amd64"
 	[gomuks]='https://github.com/tulir/gomuks/releases/download/v0.3.0/gomuks-linux-amd64'
