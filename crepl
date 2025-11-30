@@ -18,7 +18,7 @@ ARG_AUTO_SEMICOLON="${ARG_AUTO_SEMICOLON:-1}"
 
 # insert closing parenthesis automatically if one is opend
 # also convering square brackets and curly braces
-ARG_SMART_PARENTHESIS="${ARG_SMART_PARENTHESIS:-1}"
+ARG_SMART_PARENTHESIS="${ARG_SMART_PARENTHESIS:-0}"
 
 ARG_COMPILER="${CC:-g++}"
 
