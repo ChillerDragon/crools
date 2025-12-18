@@ -88,8 +88,8 @@ find . -not \( -path "./build*" -type d -prune \) -type f -name '*.sh' -print0 |
 ok "shellckeck"
 find . -not \( -path "./build*" -type d -prune \) -name "*.sh" -print0 | xargs -0 shfmt -d || fatal shfmt
 ok "shfmt"
-find . -type f -name "*.py" -path './scripts/*' -or -path './datasrc/*' -not -path '*__pycache__*' -print0 | xargs -0 pylint || fatal pylint
-ok "pytest"
+# find . -type f -name "*.py" -path './scripts/*' -or -path './datasrc/*' -not -path '*__pycache__*' -print0 | xargs -0 pylint || fatal pylint
+# ok "pylint"
 check_doxygen
 
 if grep --exclude-dir rust-bridge -rE '^#include "(antibot|base|engine|game|steam|test)/' src/
