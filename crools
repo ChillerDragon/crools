@@ -197,7 +197,17 @@ fi
         [ ! -d /home/chiller/Pictures ] && exit 0
 
 	echo "[*] downloading bashrc-secrets ..."
-        git clone git@github.com:ChillerDragon/bashrc-secrets.git
+        if ! git clone git@github.com:ChillerDragon/bashrc-secrets.git
+        then
+            if [ "$USER" = chiller ]
+            then
+                echo "[-] failed to clone bashrc-secrets, this is a strict requirement for the chiller user"
+                exit 1
+            else
+                # for other users we might not need it
+                mkdir bashrc-secrets
+            fi
+        fi
 )
 
 # shellcheck disable=SC2016
