@@ -161,10 +161,10 @@ function cm_doctor() {
 			err "PATH error restart your shell"
 			exit 1
 		else
-			echo "export PATH=\"\$PATH:$CM_BIN_PATH\"" >> "$shellrc"
+			echo "export PATH=\"$CM_BIN_PATH:\$PATH\"" >> "$shellrc"
 		fi
 	fi
-	if ! echo "$PYTHONPATH" | grep -q "$CM_PYTHON_PACKAGES_PATH" 
+	if ! echo "$PYTHONPATH" | grep -q "$CM_PYTHON_PACKAGES_PATH"
 	then
 		shellrc=~/.bashrc
 		if is_apple
