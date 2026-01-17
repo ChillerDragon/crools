@@ -227,6 +227,21 @@ function cm_is_installed() {
 	return 1
 }
 
+function cm_is_multi_version() {
+	local pack="$1"
+	# TODO: this should go into the package file
+	#       but the api is not extensible fuck
+	local multi_packs=(lua-src)
+	for multi_pack in "${multi_packs[@]}"
+	do
+		if [ "$pack" = "$multi_pack" ]
+		then
+			return 0
+		fi
+	done
+	return 1
+}
+
 function cm_install() {
 	local pack=$1
 	cm_doctor
@@ -383,8 +398,11 @@ then
 	fi
 	if cm_is_installed "$2"
 	then
-		log "'$2' is installed already"
-		exit 0
+		if ! cm_is_multi_version "$2"
+		then
+			log "'$2' is installed already"
+			exit 0
+		fi
 	fi
 	cm_install "$2"
 elif [ "$1" == "upgrade" ]

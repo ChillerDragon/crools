@@ -16,20 +16,34 @@ elif [ "${1:-}" == "delete" ]
 then
 	rm -rf "$CM_BIN_PATH"/lua
 	rm -rf "$CM_BIN_PATH"/luac
+	cd "$CM_SRC_PATH"
+	versions="$(echo lua-* | tr ' ' '\n' | grep -v '.tar.gz$')"
+	version="$(printf '%s' "$versions" | tr ' ' '\n' | fzf)"
+	if [ "$version" = "" ]
+	then
+		echo "aborting..."
+		exit 1
+	fi
+	cd "$version"
+	sudo make uninstall
+	cd ..
+	rm -rf "$version"
+	rm "$version".tar.gz
 elif [ "${1:-}" == "is_installed?" ]
 then
-	if [ -f  "$CM_BIN_PATH"/lua ]
-	then
+	shopt -s nullglob
+	for f in "$CM_SRC_PATH"/lua-*; do
 		echo "yes"
 		exit 1
-	else
-		echo "no"
-		exit 0
-	fi
+	done
+
+	echo "no"
+	exit 0
 else
 	cd "$CM_SRC_PATH" || exit 1
 
-	version=lua-5.5.0.tar.gz
+	abi_version=5.5
+	version=lua-"$abi_version".0.tar.gz
 	if ! versions="$(curl -s https://www.lua.org/ftp/ | grep -o '"lua-[0-9].*.tar.gz"' | cut -d'"' -f2)"
 	then
 		echo "[!] failed to get versions from https://www.lua.org/ftp/ falling back to version $version"
@@ -46,11 +60,26 @@ else
 		fi
 	fi
 	version="$(basename "$version" .tar.gz)"
+	if [[ "$version" =~ [0-9]+\.[0-9]+ ]]
+	then
+		abi_version="${BASH_REMATCH[0]}"
+	else
+		echo "[-] Error: failed to parse lua abi version from version '$version'"
+		exit 1
+	fi
+
+	if [ -f "$version".tar.gz ] || [ -d "$version" ]
+	then
+		echo "[-] Error: the version $version is already installed"
+		exit 1
+	fi
+
 	curl -L -R -O https://www.lua.org/ftp/"$version".tar.gz
 	tar zxf "$version".tar.gz
 	cd "$version"
 	make all test
-	cp src/lua "$CM_BIN_PATH"
-	cp src/luac "$CM_BIN_PATH"
+	sudo make install
+	# cp src/lua "$CM_BIN_PATH"
+	# cp src/luac "$CM_BIN_PATH"
 fi
 
