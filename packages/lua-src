@@ -1,0 +1,56 @@
+#!/bin/bash
+
+set -eu
+
+CM_BIN_PATH="$HOME/.config/crools/crackman/bin"
+CM_SRC_PATH="$HOME/.config/crools/crackman/src"
+
+mkdir -p "$CM_BIN_PATH"
+mkdir -p "$CM_SRC_PATH"
+
+
+if [ "${1:-}" == "description" ]
+then
+	echo "lua programming language built from source"
+elif [ "${1:-}" == "delete" ]
+then
+	rm -rf "$CM_BIN_PATH"/lua
+	rm -rf "$CM_BIN_PATH"/luac
+elif [ "${1:-}" == "is_installed?" ]
+then
+	if [ -f  "$CM_BIN_PATH"/lua ]
+	then
+		echo "yes"
+		exit 1
+	else
+		echo "no"
+		exit 0
+	fi
+else
+	cd "$CM_SRC_PATH" || exit 1
+
+	version=lua-5.5.0.tar.gz
+	if ! versions="$(curl -s https://www.lua.org/ftp/ | grep -o '"lua-[0-9].*.tar.gz"' | cut -d'"' -f2)"
+	then
+		echo "[!] failed to get versions from https://www.lua.org/ftp/ falling back to version $version"
+	else
+		if ! version="$(printf '%s' "$versions" | tr ' ' '\n' | fzf)"
+		then
+			echo "[!] aborting"
+			exit 1
+		fi
+		if [ "$version" = "" ]
+		then
+			echo "[!] aborting"
+			exit 1
+		fi
+	fi
+	version="$(basename "$version" .tar.gz)"
+	curl -L -R -O https://www.lua.org/ftp/"$version".tar.gz
+	tar zxf "$version".tar.gz
+	cd "$version"
+	make all test
+	cp src/lua "$CM_BIN_PATH"
+	cp src/luac "$CM_BIN_PATH"
+fi
+
