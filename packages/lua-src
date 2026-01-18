@@ -32,6 +32,23 @@ then
 	fi
 	echo "[*] abi version $abi_version"
 
+	# luarocks can break if we remove lua
+	# it can hardlink to a binary called lua5.5
+	# so we need to configure it first before it breaks
+	# not sure how much sense this makes as its broken either way then :D
+	# but at least we don't throw and error on uninstall
+	# i guess crackman needs some kind of dependency system that would alert that
+	# uninstalling lua breaks luarocks
+	if [ -x "$(command -v luarocks)" ]
+	then
+		include_dir="/usr/local/include/lua${abi_version}"
+		if [ "$(luarocks config variables.LUA_INCDIR)" = "$include_dir" ]
+		then
+			echo "[*] clearing luarocks lua include directory"
+			luarocks config variables.LUA_INCDIR ""
+		fi
+	fi
+
 	sudo rm -rf /usr/local/include/lua"$abi_version"
 	sudo rm /usr/local/lib/liblua${abi_version}.a
 	sudo rm /usr/local/bin/lua${abi_version}
@@ -55,18 +72,6 @@ then
 		echo "[*] removing luac from PATH"
 		rm "$CM_BIN_PATH"/luac
 	fi
-
-	if [ -x "$(command -v luarocks)" ]
-	then
-		include_dir="/usr/local/include/lua${abi_version}"
-		if [ "$(luarocks config variables.LUA_INCDIR)" = "$include_dir" ]
-		then
-			echo "[*] clearing luarocks lua include directory"
-			luarocks config variables.LUA_INCDIR ""
-		fi
-	fi
-
-
 elif [ "${1:-}" == "is_installed?" ]
 then
 	shopt -s nullglob
