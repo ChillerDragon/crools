@@ -31,16 +31,12 @@ else
 	distro="$(grep "^ID=" /etc/os-release | cut -d'=' -f2)"
 	if [ "$distro" != "debian" ]
 	then
-		echo "Error: neovim is only supported on debian"
+		echo "Error: luarocks is only supported on debian"
 		exit 1
 	fi
 	if [ ! -x "$(command -v fzf)" ]
 	then
 		sudo apt-get install -y fzf || exit 1
-	fi
-	if [ ! -x "$(command -v libtool)" ]
-	then
-		sudo apt-get install -y libtool-bin || exit 1
 	fi
 
 	cd "$CM_SRC_PATH" || exit 1
