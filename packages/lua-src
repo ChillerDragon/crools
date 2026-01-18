@@ -123,7 +123,8 @@ else
 	make all test
 
 	# install files to a local directory
-	make install INSTALL_TOP=$PWD/install
+	# make install INSTALL_TOP=$PWD/install
+	make local
 
 	# manually copy them to the system wide location
 	# and patch in the version number to properly
