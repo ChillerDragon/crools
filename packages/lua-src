@@ -120,7 +120,7 @@ else
 	curl -L -R -O https://www.lua.org/ftp/"$version".tar.gz
 	tar zxf "$version".tar.gz
 	cd "$version"
-	make all test
+	make linux
 
 	# install files to a local directory
 	# make install INSTALL_TOP=$PWD/install
