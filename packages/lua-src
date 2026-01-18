@@ -14,8 +14,6 @@ then
 	echo "lua programming language built from source"
 elif [ "${1:-}" == "delete" ]
 then
-	rm -rf "$CM_BIN_PATH"/lua
-	rm -rf "$CM_BIN_PATH"/luac
 	cd "$CM_SRC_PATH"
 	versions="$(echo lua-* | tr ' ' '\n' | grep -v '.tar.gz$')"
 	version="$(printf '%s' "$versions" | tr ' ' '\n' | fzf)"
@@ -24,11 +22,39 @@ then
 		echo "aborting..."
 		exit 1
 	fi
-	cd "$version"
-	sudo make uninstall
-	cd ..
+
+	if [[ "$version" =~ [0-9]+\.[0-9]+ ]]
+	then
+		abi_version="${BASH_REMATCH[0]}"
+	else
+		echo "[-] Error: failed to parse lua abi version from version '$version'"
+		exit 1
+	fi
+	echo "[*] abi version $abi_version"
+
+	sudo rm -rf /usr/local/include/lua"$abi_version"
+	sudo rm /usr/local/lib/liblua${abi_version}.a
+	sudo rm /usr/local/bin/lua${abi_version}
+	sudo rm /usr/local/bin/luac${abi_version}
+
+	# cd "$version"
+	# sudo make uninstall
+	# cd ..
+
 	rm -rf "$version"
 	rm "$version".tar.gz
+
+	# delete sym link only if it was pointing to that exact lua version
+	if ls -lah "$CM_BIN_PATH"/lua | grep -q "lua${abi_version}$"
+	then
+		echo "[*] removing lua from PATH"
+		rm "$CM_BIN_PATH"/lua
+	fi
+	if ls -lah "$CM_BIN_PATH"/luac | grep -q "luac${abi_version}$"
+	then
+		echo "[*] removing luac from PATH"
+		rm "$CM_BIN_PATH"/luac
+	fi
 elif [ "${1:-}" == "is_installed?" ]
 then
 	shopt -s nullglob
@@ -78,8 +104,31 @@ else
 	tar zxf "$version".tar.gz
 	cd "$version"
 	make all test
-	sudo make install
-	# cp src/lua "$CM_BIN_PATH"
-	# cp src/luac "$CM_BIN_PATH"
-fi
 
+	# install files to a local directory
+	make install INSTALL_TOP=$PWD/install
+
+	# manually copy them to the system wide location
+	# and patch in the version number to properly
+	# support lua multi version support that is also
+	# picked up by luarocks
+	sudo mkdir -p /usr/local/include/lua"$abi_version"
+	sudo cp install/include/*.h /usr/local/include/lua"$abi_version"
+	sudo cp install/lib/liblua.a /usr/local/lib/liblua${abi_version}.a
+	sudo cp install/bin/lua /usr/local/bin/lua${abi_version}
+	sudo cp install/bin/luac /usr/local/bin/luac${abi_version}
+
+	if [ -f "$CM_BIN_PATH"/lua ]
+	then
+		echo "[!] overwriting old lua in PATH"
+		rm "$CM_BIN_PATH"/lua
+	fi
+	if [ -f "$CM_BIN_PATH"/luac ]
+	then
+		echo "[!] overwriting old luac in PATH"
+		rm "$CM_BIN_PATH"/luac
+	fi
+
+	ln -s /usr/local/bin/lua${abi_version} "$CM_BIN_PATH"/lua
+	ln -s /usr/local/bin/luac${abi_version} "$CM_BIN_PATH"/luac
+fi
