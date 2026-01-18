@@ -55,6 +55,18 @@ then
 		echo "[*] removing luac from PATH"
 		rm "$CM_BIN_PATH"/luac
 	fi
+
+	if [ -x "$(command -v luarocks)" ]
+	then
+		include_dir="/usr/local/include/lua${abi_version}"
+		if [ "$(luarocks config variables.LUA_INCDIR)" = "$include_dir" ]
+		then
+			echo "[*] clearing luarocks lua include directory"
+			luarocks config variables.LUA_INCDIR ""
+		fi
+	fi
+
+
 elif [ "${1:-}" == "is_installed?" ]
 then
 	shopt -s nullglob
