@@ -49,9 +49,13 @@ else
 		echo "Error: invalid tag"
 		exit 1
 	fi
-	git pull
+	git fetch
 	git checkout "$tag" || exit 1
-	git pull
+	if [ "$tag" = "master" ]
+	then
+		# cant pull tags
+		git pull
+	fi
 
 	make
 	sudo make install
