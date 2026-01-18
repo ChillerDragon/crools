@@ -74,5 +74,28 @@ else
 		printf '\n%s\n' "$rock_eval" >> ~/.bashrc
 	fi
 
+	# inform luarocks about the custom lua install headers
+	cd "$CM_SRC_PATH"
+	versions="$(echo lua-* | tr ' ' '\n' | grep -v '.tar.gz$')"
+	version="$(printf '%s' "$versions" | tr ' ' '\n' | fzf)"
+	if [ "$version" = "" ]
+	then
+		echo "aborting..."
+		exit 1
+	fi
+	if [[ "$version" =~ [0-9]+\.[0-9]+ ]]
+	then
+		abi_version="${BASH_REMATCH[0]}"
+	else
+		echo "[-] Error: failed to parse lua abi version from version '$version'"
+		exit 1
+	fi
+	echo "[*] lua abi version $abi_version"
+	if [ -x "$(command -v luarocks)" ]
+	then
+		include_dir="/usr/local/include/lua${abi_version}"
+		echo "[*] configure luarocks to use $include_dir"
+		luarocks config variables.LUA_INCDIR "$include_dir"
+	fi
 fi
 
