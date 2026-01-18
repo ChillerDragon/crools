@@ -131,4 +131,11 @@ else
 
 	ln -s /usr/local/bin/lua${abi_version} "$CM_BIN_PATH"/lua
 	ln -s /usr/local/bin/luac${abi_version} "$CM_BIN_PATH"/luac
+
+	if [ -x "$(command -v luarocks)" ]
+	then
+		include_dir="/usr/local/include/lua${abi_version}"
+		echo "[*] configure luarocks to use $include_dir"
+		luarocks config variables.LUA_INCDIR "$include_dir"
+	fi
 fi
