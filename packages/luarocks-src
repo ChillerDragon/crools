@@ -17,6 +17,14 @@ then
 	sudo make uninstall
 	cd ..
 	rm -rf "$CM_SRC_PATH"/luarocks
+
+	rock_eval='eval "$(luarocks path)"'
+	if ! grep -qF "$rock_eval" ~/.bashrc
+	then
+		echo "[*] removing luarocks ~/.bashrc entry"
+		grep -vF "$rock_eval" ~/.bashrc > ~/.bashrc.tmp
+		mv ~/.bashrc.tmp ~/.bashrc
+	fi
 elif [ "${1:-}" == "is_installed?" ]
 then
 	if [ -d "$CM_SRC_PATH"/luarocks ]
@@ -58,5 +66,13 @@ else
 	./configure --with-lua-include=/usr/local/include
 	make
 	sudo make install
+
+	rock_eval='eval "$(luarocks path)"'
+	if ! grep -qF "$rock_eval" ~/.bashrc
+	then
+		echo "[*] setting up ~/.bashrc for luarocks"
+		printf '\n%s\n' "$rock_eval" >> ~/.bashrc
+	fi
+
 fi
 
