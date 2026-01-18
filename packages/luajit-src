@@ -10,16 +10,16 @@ mkdir -p "$CM_SRC_PATH"
 
 if [ "${1:-}" == "description" ]
 then
-	echo "The package manager for Lua modules"
+	echo "Just-In-Time Compiler for Lua"
 elif [ "${1:-}" == "delete" ]
 then
-	cd "$CM_SRC_PATH"/luarocks
+	cd "$CM_SRC_PATH"/luajit
 	sudo make uninstall
 	cd ..
-	rm -rf "$CM_SRC_PATH"/luarocks
+	rm -rf "$CM_SRC_PATH"/luajit
 elif [ "${1:-}" == "is_installed?" ]
 then
-	if [ -d "$CM_SRC_PATH"/luarocks ]
+	if [ -d "$CM_SRC_PATH"/luajit ]
 	then
 		echo "yes"
 		exit 1
@@ -29,23 +29,21 @@ then
 	fi
 else
 	distro="$(grep "^ID=" /etc/os-release | cut -d'=' -f2)"
-	if [ "$distro" != "debian" ]
+	if [ "$distro" = "debian" ]
 	then
-		echo "Error: luarocks is only supported on debian"
-		exit 1
-	fi
-	if [ ! -x "$(command -v fzf)" ]
-	then
-		sudo apt-get install -y fzf || exit 1
+		if [ ! -x "$(command -v fzf)" ]
+		then
+			sudo apt-get install -y fzf || exit 1
+		fi
 	fi
 
 	cd "$CM_SRC_PATH" || exit 1
-	if [ ! -d "luarocks" ]
+	if [ ! -d "luajit" ]
 	then
-		git clone git@github.com:luarocks/luarocks.git
+		git clone https://luajit.org/git/luajit.git
 	fi
-	cd luarocks
-	tag="$( (git tag && printf 'main\n') | fzf)"
+	cd luajit
+	tag="$( (git tag && printf 'master\n') | fzf)"
 	if [ "$tag" == "" ]
 	then
 		echo "Error: invalid tag"
@@ -55,7 +53,6 @@ else
 	git checkout "$tag" || exit 1
 	git pull
 
-	./configure --with-lua-include=/usr/local/include
 	make
 	sudo make install
 fi
