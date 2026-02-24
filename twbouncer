@@ -5,7 +5,7 @@ then
     echo "usage: $(basename "$1") [ZZH HOSTNUM|--local]"
     echo "description: opens term-zx curses tw client on vps"
     echo "options:"
-    echo "    without options it trys the first zzh host"
+    echo "    without options it tries the first zzh host"
     echo ""
     echo "  ZZH HOSTNUM"
     echo "    providing a digit will pick corresponding zzh host"
@@ -15,7 +15,7 @@ then
     # echo "    uses irc client on current machine"
     echo ""
     echo "  --force | -f"
-    echo "    uses screen -r -d to force deattach"
+    echo "    uses screen -r -d to force detach"
     exit 0
 fi
 
@@ -35,7 +35,7 @@ do
     then
         arg_host="$arg"
     else
-        echo "error: unkown arg '$arg' try --help"
+        echo "error: unknown arg '$arg' try --help"
         exit 1
     fi
 done
