@@ -86,6 +86,8 @@ ok "header guards"
 ok "standard headers"
 ./scripts/check_config_variables.py || fatal cfg_vars
 ok "config variables"
+./scripts/check_dilate.py release data || fatal dilate
+ok "dilate"
 find . -not \( -path "./build*" -type d -prune \) -type f -name '*.sh' -print0 | xargs -0 shellcheck || fatal shellcheck
 ok "shellckeck"
 find . -not \( -path "./build*" -type d -prune \) -name "*.sh" -print0 | xargs -0 shfmt -d || fatal shfmt
