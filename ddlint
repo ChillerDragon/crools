@@ -42,6 +42,11 @@ ok() {
 	printf "%s .. %bOK%b\n" "$msg" "$GREEN" "$RESET"
 }
 
+warn() {
+	local msg="$1"
+	printf "%s .. %bWARNING%b\n" "$msg" "$YELLOW" "$RESET"
+}
+
 skip() {
 	local msg="$1"
 	local skip_reason="$2"
@@ -86,8 +91,6 @@ ok "header guards"
 ok "standard headers"
 ./scripts/check_config_variables.py || fatal cfg_vars
 ok "config variables"
-./scripts/check_dilate.py release data || fatal dilate
-ok "dilate"
 find . -not \( -path "./build*" -type d -prune \) -type f -name '*.sh' -print0 | xargs -0 shellcheck || fatal shellcheck
 ok "shellckeck"
 find . -not \( -path "./build*" -type d -prune \) -name "*.sh" -print0 | xargs -0 shfmt -d || fatal shfmt
@@ -102,6 +105,17 @@ then
 	exit 1
 fi
 ok "absolute includes"
+
+# TODO: clean this shit up
+#       https://github.com/ddnet/ddnet/issues/11970
+dilatedir="$(dirname "$(command -v dilate)")"
+if [ "$dilatedir" = "" ]
+then
+	warn "dilate not found in PATH"
+	dilatedir="$(dirname $(find . -name dilate -executable | head -n1))"
+fi
+./scripts/check_dilate.py "$dilatedir" data || fatal dilate
+ok "dilate"
 
 ctidy || fatal ctidy
 ok "clang tidy"
