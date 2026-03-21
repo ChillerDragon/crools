@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -u
+
 current_dir="$(basename "$(pwd)")"
 if [ "$current_dir" = ddnet_protocol ]
 then
@@ -109,7 +111,7 @@ ok "absolute includes"
 # TODO: clean this shit up
 #       https://github.com/ddnet/ddnet/issues/11970
 dilatedir="$(dirname "$(command -v dilate)")"
-if [ "$dilatedir" = "" ]
+if [ "$dilatedir" = "" ] || [ "$dilatedir" = "." ]
 then
 	warn "dilate not found in PATH"
 	dilatedir="$(dirname $(find . -name dilate -executable | head -n1))"
