@@ -82,6 +82,8 @@ echo "runs similiar stuff like the CI"
 ok "clang format"
 ./scripts/check_header_guards.py || fatal guards
 ok "header guards"
+./scripts/check_standard_headers.py || fatal "standard headers"
+ok "standard headers"
 ./scripts/check_config_variables.py || fatal cfg_vars
 ok "config variables"
 find . -not \( -path "./build*" -type d -prune \) -type f -name '*.sh' -print0 | xargs -0 shellcheck || fatal shellcheck
@@ -95,6 +97,7 @@ check_doxygen
 if grep --exclude-dir rust-bridge -rE '^#include "(antibot|base|engine|game|steam|test)/' src/
 then
 	err "see wrong includes above ^"
+	exit 1
 fi
 ok "absolute includes"
 
